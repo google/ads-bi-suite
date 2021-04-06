@@ -1,0 +1,87 @@
+{
+  "lego_start_hourly": {
+    "type": "knot",
+    "next": "get_reports_hourly"
+  },
+  "get_reports_hourly": {
+    "type": "multiple",
+    "source": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/active_cid_list/${mccCid}.ndjson"
+    },
+    "destination": {
+      "taskId": "download_reports_hourly",
+      "target": "gcs",
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "#OUTBOUND#/API[PB]_config[lego]_size[0.05]_${partitionDay}_hourly.ndjson"
+      }
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "next": "load_reports_hourly"
+  },
+  "download_reports_hourly": {
+    "type": "knot",
+    "embedded": {
+      "dueTime": 60,
+      "tasks": [
+        "base_campaign_ads_approval",
+        "app_disapprovals_ad_group_ad_asset_view"
+      ]
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "load_reports_hourly": {
+    "type": "knot",
+    "appendedParameters": {
+      "customerId": "${mccCid}",
+      "loginCustomerId": "${mccCid}",
+      "developerToken": "${developerToken}",
+      "datasetId": "ads_reports_data"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "load_report",
+          "appendedParameters": {
+            "targetTable": "base_campaign_ads_approval"
+          }
+        },
+        {
+          "taskId": "load_report",
+          "appendedParameters": {
+            "targetTable": "app_disapprovals_ad_group_ad_asset_view"
+          }
+        }
+      ]
+    },
+    "next": "trigger_snd_query_hourly"
+  },
+  "trigger_snd_query_hourly": {
+    "type": "knot",
+    "next": "trigger_trd_query_hourly"
+  },
+  "trigger_trd_query_hourly": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_all"
+          }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest"
+          }
+        }
+      ]
+    }
+  }
+}

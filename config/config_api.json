@@ -1,0 +1,23 @@
+{
+  "PB": {
+    "lego": {
+      "qps": 1,
+      "topic": "#PROJECT_NAMESPACE#-monitor",
+      "message": "{\"customerId\":\"${customerId}\",\"loginCustomerId\":\"${loginCustomerId}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
+      "attributes": {
+        "taskId": "${taskId}",
+        "multipleTag": "${multipleTag}"
+      }
+    },
+    "account": {
+      "qps": 20,
+      "numberOfThreads": 10,
+      "topic": "#PROJECT_NAMESPACE#-monitor",
+      "message": "{\"customerId\":\"${customerId}\",\"loginCustomerId\":\"${loginCustomerId}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
+      "attributes": {
+        "taskId": "${taskId}",
+        "multipleTag": "${multipleTag}"
+      }
+    }
+  }
+}

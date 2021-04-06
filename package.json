@@ -1,0 +1,28 @@
+{
+  "name": "apps-ads-reporting",
+  "version": "0.0.0",
+  "author": "xinxincheng@google.com, lushu@google.com, chjerry@google.com",
+  "files": [
+    "src/"
+  ],
+  "main": "index.js",
+  "dependencies": {
+    "@google-cloud/data-tasks-coordinator": "^0.3.0",
+    "@google-cloud/gmp-googleads-connector": "^1.1.5",
+    "@google-cloud/nodejs-common": "^0.5.3"
+  },
+  "scripts": {
+    "test": "node node_modules/jasmine/bin/jasmine"
+  },
+  "cloud-repo-tools": {
+    "requiresKeyFile": true,
+    "requiresProjectId": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://professional-services.googlesource.com/solutions/ads-bi-suite"
+  },
+  "keywords": [],
+  "license": "Apache-2.0",
+  "description": ""
+}

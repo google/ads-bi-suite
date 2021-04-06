@@ -1,0 +1,30 @@
+{
+  "download_reports_impl": {
+    "type": "knot",
+    "embedded": {
+      "dueTime": 180,
+      "tasks": ["base_download_reports", "nonapp_download_reports"]
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "load_reports_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": ["base_load_reports", "nonapp_load_reports"]
+    }
+  },
+  "trigger_snd_query_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": ["nonapp_snd_query"]
+    }
+  },
+  "trigger_trd_query_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": ["nonapp_trd_query"]
+    }
+  }
+}

@@ -43,7 +43,7 @@ Other      | Google account  | __Needs to be submitted before installation to be
 ### 2.2. Check out source codes
 
 1. Open the [Cloud Shell](https://cloud.google.com/shell/)
-2. Clone the repository:
+2. Fellow this [instructions](https://g3doc.corp.google.com/company/teams/gtech/ads/das/cse/faq/tools/professional-services-googlesource-com.md#working-from-gcp) to clone the repository:
 
     ```shell
     git clone https://professional-services.googlesource.com/solutions/ads-bi-suite
