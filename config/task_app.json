@@ -146,6 +146,67 @@
       ]
     }
   },
+  "app_fourth_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_all"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_asset_perf_report"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_conv_report"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_criterion"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_perf_report"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_snd_campaigns"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_geo_conv_report"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_geo_perf_report"
+          }
+        }
+      ]
+    }
+  },
   "app_ad_group": {
     "type": "report",
     "source": {

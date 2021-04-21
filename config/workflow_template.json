@@ -141,6 +141,7 @@
   },
   "trigger_snd_query_impl": {},
   "trigger_trd_query_impl": {},
+  "trigger_fourth_query_impl": {},
   "load_report": {
     "type": "load",
     "source": {
@@ -183,6 +184,20 @@
         "projectId": "#PROJECT_ID#",
         "datasetId": "${datasetId}",
         "tableId": "${queryName}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
+  },
+  "mark_label": {
+    "type": "query",
+    "source": {
+      "sql": "SELECT a.*, l.name AS Label FROM `${datasetId}.${queryName}` a LEFT JOIN `${datasetId}.app_snd_account_label` l ON a.customer_id = l.id"
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${queryName}_with_label"
       },
       "writeDisposition": "WRITE_TRUNCATE"
     }

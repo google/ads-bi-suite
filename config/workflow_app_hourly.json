@@ -82,6 +82,26 @@
           }
         }
       ]
+    },
+    "next": "trigger_fourth_query_hourly"
+  },
+  "trigger_fourth_query_hourly": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_all"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest"
+          }
+        }
+      ]
     }
   }
 }
