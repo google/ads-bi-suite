@@ -158,6 +158,7 @@ DEFAULT_INSTALL_TASKS=(
   check_permissions_native enable_apis
   confirm_region
   create_bucket confirm_folder
+  save_config
   check_firestore_existence
   create_subscriptions
   create_sink
