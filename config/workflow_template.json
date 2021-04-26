@@ -25,7 +25,19 @@
       "target": "ADS",
       "config": {
         "developerToken": "${developerToken}",
-        "rootClientIdToGetChildAcct": "${mccCid}"
+        "customerId": "${mccCid}",
+        "loginCustomerId": "${mccCid}",
+        "reportQuery": {
+          "entity": "customer_client",
+          "attributes": [
+            "customer_client.id"
+          ],
+          "constraints": [
+            {
+              "customer_client.manager": "FALSE"
+            }
+          ]
+        }
       }
     },
     "destination": {
