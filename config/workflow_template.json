@@ -73,7 +73,7 @@
       "customerId": "${mccCid}",
       "loginCustomerId": "${mccCid}",
       "developerToken": "${developerToken}",
-      "datasetId": "ads_reports_data"
+      "datasetId": "ads_reports_data_v4"
     },
     "embedded": {
       "tasks": [
@@ -144,7 +144,7 @@
       "customerId": "${mccCid}",
       "loginCustomerId": "${mccCid}",
       "developerToken": "${developerToken}",
-      "datasetId": "ads_reports_data"
+      "datasetId": "ads_reports_data_v4"
     },
     "embedded": {
       "tasks": ["load_reports_impl"]
