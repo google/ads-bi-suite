@@ -3,7 +3,7 @@
     "lego": {
       "qps": 1,
       "topic": "#PROJECT_NAMESPACE#-monitor",
-      "message": "{\"customerId\":\"${customerId}\",\"loginCustomerId\":\"${loginCustomerId}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
+      "message": "{\"customerId\":\"${customerClient.id}\",\"loginCustomerId\":\"${mccCid}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
       "attributes": {
         "taskId": "${taskId}",
         "multipleTag": "${multipleTag}"
