@@ -101,22 +101,12 @@ jobs for Google Ads reports..."
   fi
 }
 
-task_config_manager() {
+select_installed_workflow_version() {
   ((STEP += 1))
-  printf '%s\n' "Step ${STEP}: Starting to install the task configurations."
+  printf '%s\n' "Step ${STEP}: Selecting the task configurations."
 
   local versions=("App" "NonApp" "App + NonApp")
   local greeting="Please select the number of the task configurations that you want to install."
-
-  _install() {
-    update_task_config $1
-    quit_if_failed $?
-  }
-
-  _install "${SOLUTION_ROOT}/config/task_base.json"
-  _install "${SOLUTION_ROOT}/config/task_app.json"
-  _install "${SOLUTION_ROOT}/config/task_nonapp.json"
-  _install "${SOLUTION_ROOT}/config/workflow_template.json"
 
   # Install different workflow and related tasks config.
   printf "${greeting}\n"
@@ -124,20 +114,14 @@ task_config_manager() {
     case "${version}" in
     "App")
       INSTALLED_WORKFLOW_VERSION="${version}"
-      _install "${SOLUTION_ROOT}/config/workflow_app.json"
-      _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
       break
       ;;
     "NonApp")
       INSTALLED_WORKFLOW_VERSION="${version}"
-      _install "${SOLUTION_ROOT}/config/workflow_nonapp.json"
       break
       ;;
     "App + NonApp")
       INSTALLED_WORKFLOW_VERSION="${version}"
-      _install "${SOLUTION_ROOT}/config/workflow_app_nonapp.json"
-      # Install app hourly workflow to fetch app related data hourly.
-      _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
       break
       ;;
     *)
@@ -146,6 +130,47 @@ task_config_manager() {
     esac
   done
   printf "Finished; Close the interactive console.\n"
+}
+
+task_config_manager() {
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Starting to install the task configurations."
+
+  _install() {
+    update_task_config $1
+    quit_if_failed $?
+  }
+
+  if [ -z "${INSTALLED_WORKFLOW_VERSION}" ]
+  then
+    select_installed_workflow_version
+  fi
+
+  # Install the common config files.
+  _install "${SOLUTION_ROOT}/config/task_base.json"
+  _install "${SOLUTION_ROOT}/config/task_app.json"
+  _install "${SOLUTION_ROOT}/config/task_nonapp.json"
+  _install "${SOLUTION_ROOT}/config/workflow_template.json"
+
+  # Install different workflow and related tasks config.
+  case "${version}" in
+  "App")
+    _install "${SOLUTION_ROOT}/config/workflow_app.json"
+    _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
+    break
+    ;;
+  "NonApp")
+    _install "${SOLUTION_ROOT}/config/workflow_nonapp.json"
+    break
+    ;;
+  "App + NonApp")
+    _install "${SOLUTION_ROOT}/config/workflow_app_nonapp.json"
+    # Install app hourly workflow to fetch app related data hourly.
+    _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
+    break
+    ;;
+  *)
+  esac
 }
 
 # Install
@@ -157,6 +182,7 @@ DEFAULT_INSTALL_TASKS=(
   check_permissions_native enable_apis
   confirm_region
   create_bucket confirm_folder
+  select_installed_workflow_version
   save_config
   check_firestore_existence
   create_subscriptions
@@ -168,7 +194,6 @@ DEFAULT_INSTALL_TASKS=(
   set_internal_task
   "update_api_config ${SOLUTION_ROOT}/config/config_api.json"
   task_config_manager
-  save_config
   # Add MCC_CID and DEVELOPER_TOKEN as args for next function can create cronjob directly.
   # like this: "create_cron_job_for_lego_start 12345678  XXYYZZ_A_FAKE_DEV_TOKEN"
   create_cron_job_for_lego_start
