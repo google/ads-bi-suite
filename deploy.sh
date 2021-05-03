@@ -38,9 +38,14 @@ TIMEZONE="Asia/Shanghai"
 # which will be selected in task_config_manager().
 INSTALLED_WORKFLOW_VERSION=""
 
+# Parameter to record if user choose to install the experimental task,
+# third party trix data, which will be asked in
+# select_install_trdpty_trix_data().
+INSTALLED_TRDPTY_TRIX_DATA="N"
+
 # Parameter name used by functions to load and save config.
 CONFIG_FOLDER_NAME="OUTBOUND"
-CONFIG_ITEMS=("PROJECT_NAMESPACE" "GCS_BUCKET" "INSTALLED_WORKFLOW_VERSION" "${CONFIG_FOLDER_NAME}")
+CONFIG_ITEMS=("PROJECT_NAMESPACE" "GCS_BUCKET" "INSTALLED_WORKFLOW_VERSION" "INSTALLED_TRDPTY_TRIX_DATA" "${CONFIG_FOLDER_NAME}")
 # Google Ads API enabled in this solution.
 ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
@@ -66,7 +71,12 @@ jobs for Google Ads reports..."
     developer_token=${input}
     printf '\n'
   done
-
+  local message_body='{
+    "timezone":"'"${TIMEZONE}"'",
+    "partitionDay": "${today}",
+    "developerToken":"'${developer_token}'",
+    "mccCid":"'${mcc_cid}'"
+  }'
   local task_id="lego_start"
   local job_name=${PROJECT_NAMESPACE}-${task_id}
   create_or_update_cloud_scheduler_for_pubsub \
@@ -74,12 +84,7 @@ jobs for Google Ads reports..."
     "0 6 * * *" \
     "${TIMEZONE}" \
     ${PROJECT_NAMESPACE}-monitor \
-    '{
-      "timezone":"'"${TIMEZONE}"'",
-      "partitionDay": "${today}",
-      "developerToken":"'${developer_token}'",
-      "mccCid":"'${mcc_cid}'"
-    }' \
+    "${message_body}" \
     taskId=${task_id}
 
   # Currently, There is no needed hourly workflow for NonApp.
@@ -91,12 +96,20 @@ jobs for Google Ads reports..."
       "0 7-23 * * *" \
       "${TIMEZONE}" \
       ${PROJECT_NAMESPACE}-monitor \
-      '{
-        "timezone":"'"${TIMEZONE}"'",
-        "partitionDay": "${today}",
-        "developerToken":"'${developer_token}'",
-        "mccCid":"'${mcc_cid}'"
-      }' \
+      "${message_body}" \
+      taskId=${task_id}
+  fi
+
+  # Only install trdpty cronjob when project needs to collection trdprt trix data.
+  if [[ ${INSTALLED_TRDPTY_TRIX_DATA} = "Y" || ${INSTALLED_TRDPTY_TRIX_DATA} = "y" ]]; then
+    local task_id="trdpty_load_reports"
+    local job_name=${PROJECT_NAMESPACE}-${task_id}
+    create_or_update_cloud_scheduler_for_pubsub \
+      ${job_name} \
+      "0 7-23 * * *" \
+      "${TIMEZONE}" \
+      ${PROJECT_NAMESPACE}-monitor \
+      "${message_body}" \
       taskId=${task_id}
   fi
 }
@@ -132,6 +145,18 @@ select_installed_workflow_version() {
   printf "Finished; Close the interactive console.\n"
 }
 
+select_install_trdpty_trix_data() {
+  ((STEP += 1))
+
+  printf '%s\n' "Step ${STEP}: Do you want to install task\
+, 3rd-Party Trix Data? [N/y]: "
+  local confirm_install
+  read -r confirm_install
+  if [[ ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
+    INSTALLED_TRDPTY_TRIX_DATA="Y"
+  fi
+}
+
 task_config_manager() {
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Starting to install the task configurations."
@@ -147,6 +172,7 @@ task_config_manager() {
   fi
 
   # Install the common config files.
+  _install "${SOLUTION_ROOT}/config/task_trdpty.json"
   _install "${SOLUTION_ROOT}/config/task_base.json"
   _install "${SOLUTION_ROOT}/config/task_app.json"
   _install "${SOLUTION_ROOT}/config/task_nonapp.json"
@@ -183,6 +209,7 @@ DEFAULT_INSTALL_TASKS=(
   confirm_region
   create_bucket confirm_folder
   select_installed_workflow_version
+  select_install_trdpty_trix_data
   save_config
   check_firestore_existence
   create_subscriptions
