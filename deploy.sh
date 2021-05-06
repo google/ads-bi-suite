@@ -153,7 +153,7 @@ task_config_manager() {
   _install "${SOLUTION_ROOT}/config/workflow_template.json"
 
   # Install different workflow and related tasks config.
-  case "${version}" in
+  case "${INSTALLED_WORKFLOW_VERSION}" in
   "App")
     _install "${SOLUTION_ROOT}/config/workflow_app.json"
     _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
