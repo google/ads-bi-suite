@@ -7,7 +7,8 @@
           "taskId": "trdpty_trix_import_score",
           "appendedParameters": {
             "datasetId": "ads_reports_data_v4",
-            "sourceTable": "trdpty_scoreboard_input"
+            "destinationTable": "trdpty_scoreboard",
+            "sqlSyntax": "SELECT * FROM ads_reports_data_v4.trdpty_scoreboard_input"
           }
         }
       ]
@@ -16,14 +17,14 @@
   "trdpty_trix_import_score": {
     "type": "query",
     "source": {
-      "sql": "SELECT * FROM ${datasetId}.${sourceTable}",
+      "sql": "${sqlSyntax}",
       "external": true
     },
     "destination": {
       "table": {
         "projectId": "#PROJECT_ID#",
         "datasetId": "${datasetId}",
-        "tableId": "trdpty_scoreboard$${partitionDay}"
+        "tableId": "${destinationTable}$${partitionDay}"
       },
       "writeDisposition": "WRITE_TRUNCATE"
     }
