@@ -1,0 +1,9 @@
+/.idea
+*.iml
+node_modules/
+package-lock.json
+.*
+libs/
+config.json
+*.key.json
+*.token.json
