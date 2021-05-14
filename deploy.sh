@@ -41,7 +41,7 @@ INSTALLED_WORKFLOW_VERSION=""
 # Parameter to record if user choose to install the experimental task,
 # third party trix data, which will be asked in
 # select_install_trdpty_trix_data().
-INSTALLED_TRDPTY_TRIX_DATA="N"
+INSTALLED_TRDPTY_TRIX_DATA="Y"
 
 # Parameter name used by functions to load and save config.
 CONFIG_FOLDER_NAME="OUTBOUND"
@@ -54,6 +54,10 @@ GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
 ENABLED_INTEGRATED_APIS=("PB")
 
 create_cron_job_for_lego_start() {
+  _pause_cloud_scheduler() {
+    gcloud scheduler jobs pause $1
+  }
+
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Starting to create or update Cloud Scheduler \
 jobs for Google Ads reports..."
@@ -100,7 +104,6 @@ jobs for Google Ads reports..."
       taskId=${task_id}
   fi
 
-  # Only install trdpty cronjob when project needs to collection trdprt trix data.
   if [[ ${INSTALLED_TRDPTY_TRIX_DATA} = "Y" || ${INSTALLED_TRDPTY_TRIX_DATA} = "y" ]]; then
     local task_id="trdpty_load_reports"
     local job_name=${PROJECT_NAMESPACE}-${task_id}
@@ -111,6 +114,8 @@ jobs for Google Ads reports..."
       ${PROJECT_NAMESPACE}-monitor \
       "${message_body}" \
       taskId=${task_id}
+
+    _pause_cloud_scheduler ${job_name}
   fi
 }
 
@@ -149,11 +154,11 @@ select_install_trdpty_trix_data() {
   ((STEP += 1))
 
   printf '%s\n' "Step ${STEP}: Do you want to install task\
-, 3rd-Party Trix Data? [N/y]: "
+, 3rd-Party Trix Data? [Y/n]: "
   local confirm_install
   read -r confirm_install
-  if [[ ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
-    INSTALLED_TRDPTY_TRIX_DATA="Y"
+  if [[ ${confirm_install} = "N" || ${confirm_install} = "n" ]]; then
+    INSTALLED_TRDPTY_TRIX_DATA="N"
   fi
 }
 
@@ -166,8 +171,7 @@ task_config_manager() {
     quit_if_failed $?
   }
 
-  if [ -z "${INSTALLED_WORKFLOW_VERSION}" ]
-  then
+  if [ -z "${INSTALLED_WORKFLOW_VERSION}" ]; then
     select_installed_workflow_version
   fi
 
@@ -195,7 +199,7 @@ task_config_manager() {
     _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
     break
     ;;
-  *)
+  *) ;;
   esac
 }
 
