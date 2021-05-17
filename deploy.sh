@@ -51,7 +51,7 @@ ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
 # Enabled API for Tentacles.
 # Use this to create of topics and subscriptions.
-ENABLED_INTEGRATED_APIS=("PB")
+SELECTED_APIS_CODES=("PB")
 
 create_cron_job_for_lego_start() {
   _pause_cloud_scheduler() {
