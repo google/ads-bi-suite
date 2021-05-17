@@ -3,7 +3,12 @@
     "lego": {
       "qps": 1,
       "topic": "#PROJECT_NAMESPACE#-monitor",
-      "message": "{\"customerId\":\"${customerId}\",\"loginCustomerId\":\"${loginCustomerId}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
+      "message": {
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
+        "developerToken": "${developerToken}",
+        "partitionDay": "${partitionDay}"
+      },
       "attributes": {
         "taskId": "${taskId}",
         "multipleTag": "${multipleTag}"
@@ -13,7 +18,26 @@
       "qps": 20,
       "numberOfThreads": 10,
       "topic": "#PROJECT_NAMESPACE#-monitor",
-      "message": "{\"customerId\":\"${customerClient.id}\",\"loginCustomerId\":\"${mccCid}\",\"developerToken\":\"${developerToken}\",\"partitionDay\":\"${partitionDay}\"}",
+      "message": {
+        "customerId": "${customerClient.id}",
+        "loginCustomerId": "${mccCid}",
+        "developerToken": "${developerToken}",
+        "partitionDay": "${partitionDay}"
+      },
+      "attributes": {
+        "taskId": "${taskId}",
+        "multipleTag": "${multipleTag}"
+      }
+    },
+    "adh": {
+      "qps": 1,
+      "topic": "#PROJECT_NAMESPACE#-monitor",
+      "message": {
+        "appName": "${appName}",
+        "customerId": "${customerId}",
+        "campaignId": "${campaignId}",
+        "partitionDay": "${partitionDay}"
+      },
       "attributes": {
         "taskId": "${taskId}",
         "multipleTag": "${multipleTag}"

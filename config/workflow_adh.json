@@ -1,0 +1,142 @@
+{
+  "adh_lego_start": {
+    "type": "knot",
+    "appendedParameters": {
+      "configdatasetId": "adh_lego_data",
+      "datasetId": "adh_lego_data",
+      "taskName": "adh_user_config"
+    },
+    "next": "adh_get_user_config"
+  },
+  "adh_get_user_config": {
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM ${configdatasetId}.adh_user_config_input WHERE enable = TRUE",
+      "external": true
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${taskName}$${partitionDay}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "next": "adh_export_user_config"
+  },
+  "adh_export_user_config": {
+    "type": "export",
+    "source": {
+      "projectId": "#PROJECT_ID#",
+      "datasetId": "${datasetId}",
+      "tableId": "${taskName}$${partitionDay}"
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/user_config/${taskName}.ndjson"
+    },
+    "options": {
+      "destinationFormat": "NEWLINE_DELIMITED_JSON",
+      "printHeader": false
+    },
+    "next": "adh_get_all_cid_tasks"
+  },
+  "adh_get_all_cid_tasks": {
+    "type": "multiple",
+    "source": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/user_config/${taskName}.ndjson"
+    },
+    "destination": {
+      "taskId": "adh_trigger_fst_query_impl",
+      "target": "gcs",
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "#OUTBOUND#/API[PB]_config[adh]_size[0.05]_${partitionDay}.ndjson"
+      }
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "adh_trigger_fst_query_impl": {
+    "type": "knot",
+    "appendedParameters": {
+      "datasetId": "adh_lego_data",
+      "adsDatasetId": "ads_reports_data_v4",
+      "firebaseTableName": "adh_bi_input"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_fst_load_bi_data"
+          }
+        }
+      ]
+    },
+    "next": "adh_trigger_snd_query_impl"
+  },
+  "adh_trigger_snd_query_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_snd_affinity_with_bi"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_snd_demographic_with_bi"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_snd_video_asset_with_lego"
+          }
+        }
+      ]
+    },
+    "next": "adh_trigger_trd_query_impl"
+  },
+  "adh_trigger_trd_query_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_trd_combine_adh_and_lego"
+          }
+        }
+      ]
+    }
+  },
+  "adh_query_general": {
+    "type": "query_adh",
+    "adhConfig": {
+      "customerId": "${customerId}"
+    },
+    "source": {
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_BUCKET#",
+        "name": "sql/${queryName}.sql"
+      },
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": 30
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${queryName}_${partitionDay}"
+      }
+    }
+  }
+}

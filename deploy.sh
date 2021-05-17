@@ -45,17 +45,27 @@ INSTALLED_WORKFLOW_VERSION=""
 INSTALLED_TRDPTY_TRIX_DATA="Y"
 
 # Parameter name used by functions to load and save config. yest
+INSTALLED_APP_HOURLY_WORKFLOW="N"
+INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+
+# Parameter name used by functions to load and save config.
 CONFIG_FOLDER_NAME="OUTBOUND"
 CONFIG_ITEMS=(
   "PROJECT_NAMESPACE"
   "GCS_BUCKET"
   "INSTALLED_WORKFLOW_VERSION"
   "INSTALLED_TRDPTY_TRIX_DATA"
+  "INSTALLED_APP_HOURLY_WORKFLOW"
+  "INSTALLED_ADH_CREATIVE_WORKFLOW"
   "${CONFIG_FOLDER_NAME}"
 )
 
-# Google Ads API enabled in this solution.
-ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
+# Google Ads and ADH API enabled in this solution.
+ENABLED_OAUTH_SCOPES+=(
+  "https://www.googleapis.com/auth/adwords"
+  "https://www.googleapis.com/auth/adsdatahub"
+)
+
 GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
 # Enabled API for Tentacles.
 # Use this to create of topics and subscriptions.
@@ -78,7 +88,7 @@ jobs for Google Ads reports..."
   while [[ -z ${mcc_cid} ]]; do
     printf '%s' "Enter the MCC CID: "
     read -r input
-    mcc_cid=${input}
+    mcc_cid=$(printf '%s' "${input}" | tr -d -)
     printf '\n'
   done
   while [[ -z ${developer_token} ]]; do
@@ -114,9 +124,22 @@ jobs for Google Ads reports..."
       ${PROJECT_NAMESPACE}-monitor \
       "${message_body}" \
       taskId=${task_id}
+
+    if [[ ${INSTALLED_ADH_CREATIVE_WORKFLOW} = "Y" ]]; then
+      task_id="adh_lego_start"
+      job_name=${PROJECT_NAMESPACE}-${task_id}
+      create_or_update_cloud_scheduler_for_pubsub \
+        ${job_name} \
+        "0 9 * * 0" \
+        "${TIMEZONE}" \
+        ${PROJECT_NAMESPACE}-monitor \
+        "${message_body}" \
+        taskId=${task_id}
+      _pause_cloud_scheduler ${job_name}
+    fi
   fi
 
-  if [[ ${INSTALLED_TRDPTY_TRIX_DATA} = "Y" || ${INSTALLED_TRDPTY_TRIX_DATA} = "y" ]]; then
+  if [[ ${INSTALLED_TRDPTY_TRIX_DATA} = "Y" ]]; then
     local task_id="trdpty_load_reports"
     local job_name=${PROJECT_NAMESPACE}-${task_id}
     create_or_update_cloud_scheduler_for_pubsub \
@@ -145,6 +168,7 @@ select_installed_workflow_version() {
     case "${version}" in
     "App")
       INSTALLED_WORKFLOW_VERSION="${version}"
+      select_install_app_related_workflow
       break
       ;;
     "NonApp")
@@ -153,6 +177,7 @@ select_installed_workflow_version() {
       ;;
     "App + NonApp")
       INSTALLED_WORKFLOW_VERSION="${version}"
+      select_install_app_related_workflow
       break
       ;;
     *)
@@ -173,6 +198,22 @@ select_install_trdpty_trix_data() {
   read -r confirm_install
   if [[ ${confirm_install} = "N" || ${confirm_install} = "n" ]]; then
     INSTALLED_TRDPTY_TRIX_DATA="N"
+  fi
+}
+
+select_install_app_related_workflow() {
+  printf '%s\n' "Do you want to install APP hourly workflow? [Y/n]: "
+  local confirm_install
+  read -r confirm_install
+  if [[ -z ${confirm_install} || ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
+    INSTALLED_APP_HOURLY_WORKFLOW="Y"
+  fi
+
+  printf '%s\n' "Do you want to install ADH weekly workflow? [Y/n]: "
+  local confirm_install
+  read -r confirm_install
+  if [[ -z ${confirm_install} || ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
+    INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
   fi
 }
 
@@ -214,6 +255,11 @@ task_config_manager() {
     ;;
   *) ;;
   esac
+
+  # Only install ADH creative workflow when user explicitly choose Y.
+  if [[ ${INSTALLED_ADH_CREATIVE_WORKFLOW} = "Y" ]]; then
+    _install "${SOLUTION_ROOT}/config/workflow_adh.json"
+  fi
 }
 
 #######################################
