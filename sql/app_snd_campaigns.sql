@@ -136,7 +136,7 @@ WITH
     SELECT
       DISTINCT segments.date segments_date
     FROM
-      `${datasetId}.report_app_ad_group` adg
+      `${datasetId}.report_base_campaign_performance` perf
     INNER JOIN (
       SELECT
         DATE_ADD(DATE(MIN(_PARTITIONTIME)), INTERVAL -1 day) launch_date
@@ -145,9 +145,9 @@ WITH
     ON
       segments.date < launch_date
     WHERE
-      DATE(adg._partitionTime) = PARSE_DATE('%Y%m%d',
+      DATE(perf._partitionTime) = PARSE_DATE('%Y%m%d',
         '${partitionDay}' )
-      OR adg.segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
+      OR perf.segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
   LEFT JOIN (
     SELECT
       *
@@ -166,7 +166,20 @@ WITH
       DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date,
       *
     FROM
-      `${datasetId}.report_base_campaigns` ) )
+      `${datasetId}.report_base_campaigns` )
+  UNION ALL (
+    SELECT
+      DATE_ADD(PARSE_DATE('%Y%m%d',
+          '${partitionDay}'), INTERVAL -1 day) AS segments_date,
+      *
+    FROM
+      `${datasetId}.report_base_campaigns`
+    WHERE
+      _PARTITIONTIME IN (
+      SELECT
+        MAX(_PARTITIONTIME)
+      FROM
+        `${datasetId}.report_base_campaigns`) ) )
 SELECT
   DISTINCT customer.currencyCode customer_currency_code,
   DATE_ADD(DATE(camp.segments_date), INTERVAL (2-EXTRACT(DAYOFWEEK
