@@ -2,7 +2,10 @@
   "lego_start": {
     "type": "knot",
     "embedded": {
-      "tasks": ["download_mcc_reports", "get_child_accounts"]
+      "tasks": [
+        "download_mcc_reports",
+        "get_child_accounts"
+      ]
     },
     "errorOptions": {
       "ignoreError": true
@@ -16,7 +19,10 @@
       "loginCustomerId": "${mccCid}"
     },
     "embedded": {
-      "tasks": ["base_geo_target_constant", "base_language_constant"]
+      "tasks": [
+        "base_geo_target_constant",
+        "base_language_constant"
+      ]
     }
   },
   "get_child_accounts": {
@@ -62,6 +68,9 @@
         "bucket": "#GCS_BUCKET#",
         "name": "#OUTBOUND#/API[PB]_config[account]_size[0.3]_${partitionDay}.ndjson"
       }
+    },
+    "multiple": {
+      "dueTime": 60
     },
     "errorOptions": {
       "ignoreError": true
@@ -147,7 +156,9 @@
       "datasetId": "ads_reports_data_v4"
     },
     "embedded": {
-      "tasks": ["load_reports_impl"]
+      "tasks": [
+        "load_reports_impl"
+      ]
     },
     "next": "trigger_snd_query_impl"
   },
