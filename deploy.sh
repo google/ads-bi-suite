@@ -21,6 +21,7 @@ SOLUTION_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
   RELATIVE_PATH="node_modules/@google-cloud"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/nodejs-common/bin/install_functions.sh"
+  source "${SOLUTION_ROOT}/${RELATIVE_PATH}/nodejs-common/bin/bigquery.sh"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/gmp-googleads-connector/deploy.sh"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/data-tasks-coordinator/deploy.sh"
 fi
@@ -31,7 +32,7 @@ fi
 # Note: only lowercase letters, numbers and dashes(-) are allowed.
 PROJECT_NAMESPACE="lego"
 # Project configuration file.
-CONFIG_FILE="${SOLUTION_ROOT}/config/config.json"
+CONFIG_FILE="./config/config.json"
 TIMEZONE="Asia/Shanghai"
 
 # Parameter to record the installed workflow version,
@@ -45,14 +46,24 @@ INSTALLED_TRDPTY_TRIX_DATA="Y"
 
 # Parameter name used by functions to load and save config.
 CONFIG_FOLDER_NAME="OUTBOUND"
-CONFIG_ITEMS=("PROJECT_NAMESPACE" "GCS_BUCKET" "INSTALLED_WORKFLOW_VERSION" "INSTALLED_TRDPTY_TRIX_DATA" "${CONFIG_FOLDER_NAME}")
+CONFIG_ITEMS=(
+  "PROJECT_NAMESPACE"
+  "GCS_BUCKET"
+  "INSTALLED_WORKFLOW_VERSION"
+  "INSTALLED_TRDPTY_TRIX_DATA"
+  "${CONFIG_FOLDER_NAME}"
+)
+
 # Google Ads API enabled in this solution.
 ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
 # Enabled API for Tentacles.
 # Use this to create of topics and subscriptions.
 SELECTED_APIS_CODES=("PB")
+# Tentacles monitor folder.
+OUTBOUND=outbound/
 
+#TODO: delete
 create_cron_job_for_lego_start() {
   _pause_cloud_scheduler() {
     gcloud scheduler jobs pause $1
@@ -124,7 +135,7 @@ select_installed_workflow_version() {
   printf '%s\n' "Step ${STEP}: Selecting the task configurations."
 
   local versions=("App" "NonApp" "App + NonApp")
-  local greeting="Please select the number of the task configurations that you want to install."
+  local greeting="Enter the number of the task configurations that you want to install:"
 
   # Install different workflow and related tasks config.
   printf "${greeting}\n"
@@ -162,6 +173,7 @@ select_install_trdpty_trix_data() {
   fi
 }
 
+#TODO: delete
 task_config_manager() {
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Starting to install the task configurations."
@@ -203,6 +215,155 @@ task_config_manager() {
   esac
 }
 
+#######################################
+# Upload tasks configuration files to Cloud Firestore or Datastore.
+# Globals:
+#   None
+# Arguments:
+#   Array of task configuration files
+#######################################
+update_workflow_task() {
+  local configs=("$@")
+  for config in "${configs[@]}"; do
+    update_task_config ${config}
+    quit_if_failed $?
+  done
+}
+
+#######################################
+# Create or update a Cloud Schedular Job which target Pub/Sub.
+# Globals:
+#   PROJECT_NAMESPACE
+# Arguments:
+#   Task Id
+#   Cron time string
+#   Message body
+#######################################
+update_workflow_cronjob() {
+  local task_id=$1
+  local cron=$2
+  local message_body=$3
+  create_or_update_cloud_scheduler_for_pubsub \
+    ${PROJECT_NAMESPACE}-${task_id} \
+    "${cron}" \
+    "${TIMEZONE}" \
+    ${PROJECT_NAMESPACE}-monitor \
+    "${message_body}" \
+    taskId=${task_id}
+}
+
+#######################################
+# Let user input MCC CID and developer token for cronjob(s).
+# Globals:
+#   MCC_CID
+#   DEVELOPER_TOKEN
+# Arguments:
+#   None
+#######################################
+set_google_ads_account() {
+  while [[ -z ${MCC_CID} ]]; do
+    printf '%s' "Enter the MCC CID: "
+    read -r input
+    MCC_CID=${input}
+    printf '\n'
+  done
+  while [[ -z ${DEVELOPER_TOKEN} ]]; do
+    printf '%s' "Enter the developer token: "
+    read -r input
+    DEVELOPER_TOKEN=${input}
+    printf '\n'
+  done
+}
+
+#######################################
+# Initialize task configuration and Cloud Scheduler jobs for the selected
+# workflow.
+# Globals:
+#   INSTALLED_WORKFLOW_VERSION
+#   INSTALLED_TRDPTY_TRIX_DATA
+# Arguments:
+#   Whether update cronjob.
+#######################################
+initialize_workflow() {
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Starting to initialize the workflow..."
+
+  # Gathering information
+  local flag=$1
+  local updateCronjob=0
+  if [[ ${flag,,} =~ "updatecron" ]]; then
+    updateCronjob=1
+  fi
+  if [[ -z "${INSTALLED_WORKFLOW_VERSION}" ]]; then
+    select_installed_workflow_version
+  fi
+  if [[ ${updateCronjob} -eq 1 ]]; then
+    if [[ -z "${MCC_CID}" || -z "${DEVELOPER_TOKEN}" ]]; then
+      set_google_ads_account
+    fi
+  fi
+
+  # Preparing configuration based on workflow
+  local message_body='{
+    "timezone":"'"${TIMEZONE}"'",
+    "partitionDay": "${today}",
+    "developerToken":"'${DEVELOPER_TOKEN}'",
+    "mccCid":"'${MCC_CID}'"
+  }'
+  local taskConfigs needHourly
+  taskConfigs=(
+    "./config/task_base.json"
+    "./config/workflow_template.json"
+  )
+  case "${INSTALLED_WORKFLOW_VERSION}" in
+  "App")
+    taskConfigs+=("./config/task_app.json")
+    taskConfigs+=("./config/workflow_app.json")
+    needHourly="true"
+    ;;
+  "NonApp")
+    taskConfigs+=("./config/task_nonapp.json")
+    taskConfigs+=("./config/workflow_nonapp.json")
+    needHourly="false"
+    ;;
+  "App + NonApp")
+    taskConfigs+=("./config/task_app.json")
+    taskConfigs+=("./config/task_nonapp.json")
+    taskConfigs+=("./config/workflow_app_nonapp.json")
+    needHourly="true"
+    ;;
+  *) ;;
+  esac
+
+  # Create/upddate workflow task config and cronjob.
+  update_workflow_task "${taskConfigs[@]}"
+  if [[ ${updateCronjob} -eq 1 ]]; then
+    update_workflow_cronjob "lego_start" "0 6 * * *" "${message_body}"
+  fi
+
+  # Create/upddate hourly task config and cronjob.
+  if [[ ${needHourly} = "true" ]]; then
+    update_workflow_task "./config/workflow_app_hourly.json"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      update_workflow_cronjob "lego_start_hourly" "0 7-23 * * *" \
+        "${message_body}"
+    fi
+  fi
+
+  # Create/upddate 3rd party data task config and cronjob.
+  if [[ ${INSTALLED_TRDPTY_TRIX_DATA,,} = "y" ]]; then
+    update_workflow_task "./config/task_trdpty.json"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      # TODO: copied time setting and message body from previous version, but \
+      # they don't make too much sense here. Please consider simplifing them.
+      update_workflow_cronjob "trdpty_load_reports" "0 7-23 * * *" \
+        "${message_body}"
+      # Put it here until second case pop up and then reuse it.
+      gcloud scheduler jobs pause ${PROJECT_NAMESPACE}-trdpty_load_reports
+    fi
+  fi
+}
+
 # Install
 DEFAULT_INSTALL_TASKS=(
   "print_welcome LEGO"
@@ -230,5 +391,74 @@ DEFAULT_INSTALL_TASKS=(
   create_cron_job_for_lego_start
   "print_finished LEGO"
 )
+
+# Tasks for detailed cases (workflows)
+CUSTOMIZED_INSTALL_TASKS=(
+  "print_welcome LEGO"
+  check_in_cloud_shell
+  confirm_namespace confirm_project
+  check_permissions enable_apis
+  confirm_region
+  create_bucket
+  save_config
+  check_firestore_existence
+  create_subscriptions
+  create_sink
+  deploy_tentacles
+  do_oauth
+  deploy_cloud_functions_task_coordinator
+  copy_sql_to_gcs
+  set_internal_task
+  "update_api_config ./config/config_api.json"
+  "initialize_workflow updateCronjob"
+  "print_finished LEGO"
+)
+
+app_au() {
+  TIMEZONE="Australia/Sydney"
+  INSTALLED_TRDPTY_TRIX_DATA="N"
+  INSTALLED_WORKFLOW_VERSION="App"
+  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
+}
+
+# Tasks for minimum interaction.
+MINIMALISM_TASKS=(
+  "print_welcome LEGO"
+  confirm_project
+  confirm_region
+  create_bucket
+  save_config
+  do_oauth
+  set_google_ads_account
+  enable_apis
+  check_firestore_existence
+  create_subscriptions
+  create_sink
+  deploy_tentacles
+  deploy_cloud_functions_task_coordinator
+  copy_sql_to_gcs
+  set_internal_task
+  "update_api_config ./config/config_api.json"
+  "initialize_workflow updateCronjob"
+  "print_finished LEGO"
+)
+
+quick_app() {
+  INSTALLED_TRDPTY_TRIX_DATA="Y"
+  INSTALLED_WORKFLOW_VERSION="App"
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+quick_nonapp() {
+  INSTALLED_TRDPTY_TRIX_DATA="Y"
+  INSTALLED_WORKFLOW_VERSION="NonApp"
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+quick_all() {
+  INSTALLED_TRDPTY_TRIX_DATA="Y"
+  INSTALLED_WORKFLOW_VERSION="App + NonApp"
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
 
 run_default_function "$@"
