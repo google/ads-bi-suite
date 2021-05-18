@@ -147,7 +147,8 @@
           "attributes": [
             "customer.id",
             "customer.currency_code",
-            "customer.descriptive_name"
+            "customer.descriptive_name",
+            "customer.optimization_score"
           ],
           "date_constant": "LAST_30_DAYS"
         }
@@ -185,7 +186,8 @@
             "campaign.app_campaign_setting.app_store",
             "campaign.target_cpa.target_cpa_micros",
             "campaign.app_campaign_setting.bidding_strategy_goal_type",
-            "campaign.target_roas.target_roas"
+            "campaign.target_roas.target_roas",
+            "campaign.optimization_score"
           ],
           "constraints": [
             {
@@ -332,6 +334,13 @@
             "campaign.advertising_channel_type",
             "campaign.advertising_channel_sub_type",
             "campaign.campaign_budget"
+          ],
+          "constraints": [
+            {
+              "key": "metrics.impressions",
+              "op": ">=",
+              "val": 1
+            }
           ],
           "date_constant": "LAST_30_DAYS"
         }

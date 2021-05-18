@@ -5,6 +5,7 @@ distinct
 
   Day,
   Currency,
+  Account_optimization_score,
   Budget_approved,
   Budget_served,
   Budget_start_time,

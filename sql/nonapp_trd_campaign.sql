@@ -49,18 +49,19 @@ CREATE TEMP FUNCTION
  
 select
  distinct c.customer.id as Customer_ID,
- account.customer.descriptiveName as Account,
+ c.customer.descriptiveName as Account,
 
  c.campaign.id as Campaign_ID,
  c.campaign.name as Campaign,
  c.customer.currencyCode as Currency,
  getCampaignStatus(c.campaign.status) as Campaign_status,
+ p.campaign_optimization_score as Campaign_optimization_score,
  p.budget as Budget,
  p.spend_7d as Cost_7d,
  p.budget_utilization as Budget_utilization,
  c.segments.date as Date,
  cast(c.segments.week as DATE) as Week,
-  getAdNetwork(c.segments.adNetworkType) as Ad_network_type,
+ getAdNetwork(c.segments.adNetworkType) as Ad_network_type,
  getDeviceType(c.segments.device) as Device,
  
  w.week1_cost as Week1_cost,
@@ -105,9 +106,6 @@ left join `${datasetId}.nonapp_snd_campaign_ads_approval` a
 on a.campaign_id = c.campaign.id
 left join `${datasetId}.nonapp_snd_campaign_perf_wow` w
 on w.Campaign_id = c.campaign.id
-left join `${datasetId}.report_base_account_performance` account
-on account.customer.id = c.customer.id
-
  
 Left join (
 SELECT

@@ -1,6 +1,7 @@
 select
   p.campaign.id,
   p.campaign.name,
+  p.campaign.optimizationScore as campaign_optimization_score,
   AVG(p.campaignBudget.amountMicros)/1000000 as budget,
   spend_7d,
   safe_divide(AVG(spend_7d), AVG(p.campaignBudget.amountMicros/1000000)) as budget_utilization
@@ -31,4 +32,5 @@ and date(_partitionTime) > date_sub(PARSE_DATE('%Y%m%d', '${partitionDay}'), int
 group by
   campaign.id,
   campaign.name,
-  spend_7d
+  spend_7d,
+  campaign_optimization_score
