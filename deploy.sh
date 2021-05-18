@@ -44,7 +44,7 @@ INSTALLED_WORKFLOW_VERSION=""
 # select_install_trdpty_trix_data().
 INSTALLED_TRDPTY_TRIX_DATA="Y"
 
-# Parameter name used by functions to load and save config.
+# Parameter name used by functions to load and save config. yest
 CONFIG_FOLDER_NAME="OUTBOUND"
 CONFIG_ITEMS=(
   "PROJECT_NAMESPACE"
@@ -63,7 +63,8 @@ SELECTED_APIS_CODES=("PB")
 # Tentacles monitor folder.
 OUTBOUND=outbound/
 
-#TODO: delete
+#TODO(jerry): Check whether the function 'initialize_workflow' can replace this.
+#If yes, delete this function.
 create_cron_job_for_lego_start() {
   _pause_cloud_scheduler() {
     gcloud scheduler jobs pause $1
@@ -130,6 +131,7 @@ jobs for Google Ads reports..."
   fi
 }
 
+#TODO: add comments
 select_installed_workflow_version() {
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Selecting the task configurations."
@@ -161,6 +163,7 @@ select_installed_workflow_version() {
   printf "Finished; Close the interactive console.\n"
 }
 
+#TODO: add comments
 select_install_trdpty_trix_data() {
   ((STEP += 1))
 
@@ -173,7 +176,8 @@ select_install_trdpty_trix_data() {
   fi
 }
 
-#TODO: delete
+#TODO(jerry): Check whether the function 'initialize_workflow' can replace this.
+#If yes, delete this function.
 task_config_manager() {
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Starting to install the task configurations."
@@ -335,13 +339,13 @@ initialize_workflow() {
   *) ;;
   esac
 
-  # Create/upddate workflow task config and cronjob.
+  # Create/update workflow task config and cronjob.
   update_workflow_task "${taskConfigs[@]}"
   if [[ ${updateCronjob} -eq 1 ]]; then
     update_workflow_cronjob "lego_start" "0 6 * * *" "${message_body}"
   fi
 
-  # Create/upddate hourly task config and cronjob.
+  # Create/update hourly task config and cronjob.
   if [[ ${needHourly} = "true" ]]; then
     update_workflow_task "./config/workflow_app_hourly.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
@@ -350,12 +354,12 @@ initialize_workflow() {
     fi
   fi
 
-  # Create/upddate 3rd party data task config and cronjob.
+  # Create/update 3rd party data task config and cronjob.
   if [[ ${INSTALLED_TRDPTY_TRIX_DATA,,} = "y" ]]; then
     update_workflow_task "./config/task_trdpty.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
       # TODO: copied time setting and message body from previous version, but \
-      # they don't make too much sense here. Please consider simplifing them.
+      # they don't make too much sense here. Please consider simplifying them.
       update_workflow_cronjob "trdpty_load_reports" "0 7-23 * * *" \
         "${message_body}"
       # Put it here until second case pop up and then reuse it.
@@ -365,6 +369,7 @@ initialize_workflow() {
 }
 
 # Install
+#TODO(jerry): If 'initialize_workflow' is adopted, change the tasks here.
 DEFAULT_INSTALL_TASKS=(
   "print_welcome LEGO"
   check_in_cloud_shell
@@ -393,6 +398,8 @@ DEFAULT_INSTALL_TASKS=(
 )
 
 # Tasks for detailed cases (workflows)
+# There are some repeated tasks across different lists.
+# TODO(lushu): Assess whether or not to reduce this dupalication.
 CUSTOMIZED_INSTALL_TASKS=(
   "print_welcome LEGO"
   check_in_cloud_shell
@@ -429,9 +436,9 @@ MINIMALISM_TASKS=(
   create_bucket
   save_config
   do_oauth
+  check_firestore_existence
   set_google_ads_account
   enable_apis
-  check_firestore_existence
   create_subscriptions
   create_sink
   deploy_tentacles
