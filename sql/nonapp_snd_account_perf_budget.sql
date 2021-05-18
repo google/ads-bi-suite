@@ -33,7 +33,7 @@ group by
   Customer_ID,
   Day,
   Currency,
-  Account_optimization_score
+  Account_optimization_score,
   Budget_approved,
   Budget_served,
   Budget_start_time,
