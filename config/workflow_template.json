@@ -70,7 +70,7 @@
       }
     },
     "multiple": {
-      "dueTime": 60
+      "dueTime": 90
     },
     "errorOptions": {
       "ignoreError": true

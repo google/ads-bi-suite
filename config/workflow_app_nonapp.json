@@ -2,7 +2,7 @@
   "download_reports_impl": {
     "type": "knot",
     "embedded": {
-      "dueTime": 180,
+      "dueTime": 40,
       "tasks": [
         "base_account_budget",
         "base_campaign_conversion",

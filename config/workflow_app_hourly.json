@@ -25,7 +25,7 @@
   "download_reports_hourly": {
     "type": "knot",
     "embedded": {
-      "dueTime": 60,
+      "dueTime": 40,
       "tasks": [
         "base_campaign_ads_approval",
         "app_disapprovals_ad_group_ad_asset_view"
