@@ -148,6 +148,9 @@
   },
   "app_fourth_query": {
     "type": "knot",
+    "appendedParameters": {
+      "labelSourceTable": "app_snd_account_label"
+    },
     "embedded": {
       "tasks": [
         {

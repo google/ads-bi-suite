@@ -217,7 +217,7 @@
   "mark_label": {
     "type": "query",
     "source": {
-      "sql": "SELECT a.*, l.name AS Label FROM `${datasetId}.${queryName}` a LEFT JOIN `${datasetId}.app_snd_account_label` l ON a.customer_id = l.id"
+      "sql": "SELECT a.*, l.name AS Label FROM `${datasetId}.${queryName}` a LEFT JOIN `${datasetId}.${labelSourceTable}` l ON a.customer_id = l.id"
     },
     "destination": {
       "table": {

@@ -255,6 +255,9 @@
   },
   "nonapp_fourth_query": {
     "type": "knot",
+    "appendedParameters": {
+      "labelSourceTable": "nonapp_snd_account_label"
+    },
     "embedded": {
       "tasks": [
         {
