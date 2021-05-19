@@ -21,7 +21,10 @@
     "embedded": {
       "tasks": [
         "base_geo_target_constant",
-        "base_language_constant"
+        "base_language_constant",
+        "base_labels",
+        "nonapp_user_interest",
+        "nonapp_user_lists"
       ]
     }
   },

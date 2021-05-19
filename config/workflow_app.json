@@ -11,7 +11,6 @@
         "base_detail_placement_view",
         "base_geographic_view",
         "base_campaign_ads_approval",
-        "base_labels",
         "base_customer_label",
         "app_conversion_action",
         "app_asset_performance",

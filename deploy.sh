@@ -203,17 +203,14 @@ task_config_manager() {
   "App")
     _install "${SOLUTION_ROOT}/config/workflow_app.json"
     _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
-    break
     ;;
   "NonApp")
     _install "${SOLUTION_ROOT}/config/workflow_nonapp.json"
-    break
     ;;
   "App + NonApp")
     _install "${SOLUTION_ROOT}/config/workflow_app_nonapp.json"
     # Install app hourly workflow to fetch app related data hourly.
     _install "${SOLUTION_ROOT}/config/workflow_app_hourly.json"
-    break
     ;;
   *) ;;
   esac
