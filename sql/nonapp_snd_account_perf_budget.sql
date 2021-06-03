@@ -1,50 +1,57 @@
-select
-  a.customer.descriptiveName as Account,
-  a.customer.id as Customer_ID,
-  cast(a.segments.date as DATE) as Day,
-  a.customer.currencyCode as Currency,
-  a.customer.optimizationScore as Account_optimization_score,
-  b.accountBudget.adjustedSpendingLimitMicros/1000000 as Budget_approved,
-  b.accountBudget.amountServedMicros/1000000 as Budget_served,
-  b.accountBudget.approvedStartDateTime as Budget_start_time,
-  b.accountBudget.approvedEndDateTime as Budget_end_time,
-  (ifnull(cast(b.accountBudget.adjustedSpendingLimitMicros as INT64),0) - b.accountBudget.amountServedMicros)/1000000 as Budget_remain,
-  avg((ifnull(cast(b.accountBudget.adjustedSpendingLimitMicros as INT64),0) - b.accountBudget.amountServedMicros)) / avg(nullif(a.metrics.costMicros,0)) as Budget_last,
-  a.metrics.clicks as clicks,
-  a.metrics.impressions as impressions,
-  #a.metrics.ctr as CTR,
-  #a.metrics_average_cpc as CPC,
-  a.metrics.costMicros/1000000 as cost,
-  a.metrics.conversions as conversions,
-  a.metrics.costMicros/1000000/nullif(a.metrics.conversions,0) as CPA,
-  a.metrics.conversionsValue as Conv_value,
-  a.metrics.conversionsValue/nullif((a.metrics.costMicros/1000000),0) as ROI,
-  a.metrics.allConversions as All_conversions,
-  a.metrics.allConversionsValue as All_conv_value
-from `${datasetId}.report_base_account_performance` a left join `${datasetId}.report_base_account_budget` b on a.customer.id = b.customer.id
+-- Copyright 2021 Google LLC.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
 
-where DATE(a._partitionTime) =  PARSE_DATE('%Y%m%d', '${partitionDay}')
-and DATE(b._partitionTime) =  PARSE_DATE('%Y%m%d', '${partitionDay}')
-and b.accountBudget.approvedStartDateTime is not null
-
-and (b.accountBudget.approvedEndDateTime is null or cast(b.accountBudget.approvedEndDateTime as datetime) >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
-group by
-  Account,
-  Customer_ID,
-  Day,
-  Currency,
-  Account_optimization_score,
-  Budget_approved,
-  Budget_served,
-  Budget_start_time,
-  Budget_end_time,
-  Budget_remain,
-  clicks,
-  impressions,
-  cost,
-  conversions,
-  CPA,
-  Conv_value,
-  ROI,
-  All_conversions,
-  All_conv_value
+SELECT
+  a.customer.descriptive_name AS Account,
+  a.customer.id AS Customer_ID,
+  CAST(a.segments.date AS DATE) AS Day,
+  a.customer.currency_code AS Currency,
+  a.customer.optimization_score AS Account_optimization_score,
+  b.account_budget.adjusted_spending_limit_micros / 1000000 AS Budget_approved,
+  b.account_budget.amount_served_micros / 1000000 AS Budget_served,
+  b.account_budget.approved_start_date_time AS Budget_start_time,
+  b.account_budget.approved_end_date_time AS Budget_end_time,
+  (
+    ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
+    - b.account_budget.amount_served_micros)
+    / 1000000 AS Budget_remain,
+  avg(
+    (
+      ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
+      - b.account_budget.amount_served_micros))
+    / avg(nullif(a.metrics.cost_micros, 0)) AS Budget_last,
+  a.metrics.clicks AS clicks,
+  a.metrics.impressions AS impressions,
+  a.metrics.cost_micros / 1000000 AS cost,
+  a.metrics.conversions AS conversions,
+  a.metrics.cost_micros / 1000000 / nullif(a.metrics.conversions, 0) AS CPA,
+  a.metrics.conversions_value AS Conv_value,
+  a.metrics.conversions_value / nullif((a.metrics.cost_micros / 1000000), 0) AS ROI,
+  a.metrics.all_conversions AS All_conversions,
+  a.metrics.all_conversions_value AS All_conv_value
+FROM `${datasetId}.report_base_account_performance` a
+LEFT JOIN `${datasetId}.report_base_account_budget` b
+  ON a.customer.id = b.customer.id
+WHERE
+  DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  AND b.account_budget.approved_start_date_time IS NOT NULL
+  AND (
+    b.account_budget.approved_end_date_time IS NULL
+    OR CAST(b.account_budget.approved_end_date_time AS datetime)
+      >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
+GROUP BY
+  Account, Customer_ID, Day, Currency, Account_optimization_score, Budget_approved, Budget_served,
+  Budget_start_time, Budget_end_time, Budget_remain, clicks, impressions, cost, conversions, CPA,
+  Conv_value, ROI, All_conversions, All_conv_value

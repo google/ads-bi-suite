@@ -1,36 +1,36 @@
-CREATE TEMP FUNCTION getCampaignStatus(status INT64)
-  AS (['UNSPECIFIED','UNKNOWN','ENABLED','PAUSED','REMOVED'][OFFSET(status)]);
+-- Copyright 2021 Google LLC.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
 
-CREATE TEMP FUNCTION getCampaignType(status INT64)
-  AS (['UNSPECIFIED','UNKNOWN','SEARCH','DISPLAY','SHOPPING','HOTEL','VIDEO','MULTI_CHANNEL','LOCAL','SMART'][OFFSET(status)]);
-
-CREATE TEMP FUNCTION getCampaignSubType(status INT64)
-  AS (['UNSPECIFIED','UNKNOWN','SEARCH_MOBILE_APP','DISPLAY_MOBILE_APP','SEARCH_EXPRESS','DISPLAY_EXPRESS','SHOPPING_SMART_ADS','DISPLAY_GMAIL_AD','DISPLAY_SMART_CAMPAIGN','VIDEO_OUTSTREAM','VIDEO_ACTION','VIDEO_NON_SKIPPABLE','APP_CAMPAIGN','APP_CAMPAIGN_FOR_ENGAGEMENT','LOCAL_CAMPAIGN','SHOPPING_COMPARISON_LISTING_ADS','SMART_CAMPAIGN','VIDEO_SEQUENCE'][OFFSET(status)]);
-
-select
-distinct
-a.extensionFeedItem.sitelinkFeedItem.line2 as Sitelink2,
-a.extensionFeedItem.sitelinkFeedItem.line1 as Sitelink1,
-getCampaignType(a.campaign.advertisingChannelType) as Campaign_type,
-getCampaignSubType(a.campaign.advertisingChannelSubType) as Campaign_sub_type,
-a.metrics.conversions as Conversions,
-a.customer.currencyCode as Currency,
-a.campaign.id as Campaign_id,
-a.metrics.clicks as Clicks,
-#a.metrics_ctr as CTR,
-a.metrics.conversionsValue as Conv_value,
-a.metrics.impressions as Impressions,
-a.extensionFeedItem.sitelinkFeedItem.linkText as Link_text,
-a.campaign.name as Campaign_name,
-a.customer.descriptiveName as Account,
-getCampaignStatus(a.campaign.status) as Campaign_status,
-a.customer.id as Customer_ID,
-cast(a.segments.week as DATE) as Week,
-a.metrics.costMicros/1000000 as Cost,
-a.metrics.allConversions as All_converdsions,
-a.metrics.allConversionsValue as All_conv_value
-from
-`${datasetId}.report_nonapp_campaign_perf_search_extensions` a
-where
-
-date(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+SELECT DISTINCT
+  a.extension_feed_item.sitelink_feed_item.line2 AS Sitelink2,
+  a.extension_feed_item.sitelink_feed_item.line1 AS Sitelink1,
+  a.campaign.advertising_channel_type AS Campaign_type,
+  a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
+  a.metrics.conversions AS Conversions,
+  a.customer.currency_code AS Currency,
+  a.campaign.id AS Campaign_id,
+  a.metrics.clicks AS Clicks,
+  a.metrics.conversions_value AS Conv_value,
+  a.metrics.impressions AS Impressions,
+  a.extension_feed_item.sitelink_feed_item.link_text AS Link_text,
+  a.campaign.name AS Campaign_name,
+  a.customer.descriptive_name AS Account,
+  a.campaign.status AS Campaign_status,
+  a.customer.id AS Customer_ID,
+  CAST(a.segments.week AS DATE) AS Week,
+  a.metrics.cost_micros / 1000000 AS Cost,
+  a.metrics.all_conversions AS All_converdsions,
+  a.metrics.all_conversions_value AS All_conv_value
+FROM `${datasetId}.report_nonapp_campaign_perf_search_extensions` a
+WHERE date(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')

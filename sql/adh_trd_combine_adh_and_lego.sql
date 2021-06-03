@@ -1,3 +1,17 @@
+-- Copyright 2021 Google LLC.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 SELECT
   l.*,
   c.cpi,
@@ -29,43 +43,24 @@ FROM
       SUM(metrics_conversions) conversions,
       SUM(metrics_conversions_value) conversion_value,
       SUM(metrics_cost) metrics_cost
-    FROM
-      `${adsDatasetId}.app_trd_asset_perf_report`
-    WHERE
-      asset_youtube_video_asset_youtube_video_id IS NOT NULL
-    GROUP BY
-      1,
-      2,
-      3,
-      4
+    FROM `${adsDatasetId}.app_trd_asset_perf_report`
+    WHERE asset_youtube_video_asset_youtube_video_id IS NOT NULL
+    GROUP BY 1, 2, 3, 4
   ) l
-  LEFT JOIN (
+LEFT JOIN
+  (
     SELECT
       campaign_id,
       segments_ad_network_type,
-      IF(
-        SUM(installs) > 0,
-        SUM(metrics_cost)/ SUM(installs),
-        0
-      ) cpi
-    FROM
-      `${adsDatasetId}.app_trd_campaign_perf_report`
-    GROUP BY
-      1,
-      2
-  ) c USING (
-    campaign_id, segments_ad_network_type
-  )
-  LEFT JOIN (
-    SELECT
-      *,
-      IF (
-        inventory = "YOUTUBE", "YOUTUBE_WATCH",
-        "CONTENT"
-      ) segments_ad_network_type
-    FROM
-      `${datasetId}.adh_snd_video_asset_with_lego_*`
-      WHERE  _TABLE_SUFFIX='${partitionDay}'
-  ) a USING (
-    campaign_id, video_id, segments_ad_network_type
-  )
+      IF(SUM(installs) > 0, SUM(metrics_cost) / SUM(installs), 0) cpi
+    FROM `${adsDatasetId}.app_trd_campaign_perf_report`
+    GROUP BY 1, 2
+  ) c
+  USING (campaign_id, segments_ad_network_type)
+LEFT JOIN
+  (
+    SELECT *, IF(inventory = "YOUTUBE", "YOUTUBE_WATCH", "CONTENT") segments_ad_network_type
+    FROM `${datasetId}.adh_snd_video_asset_with_lego_*`
+    WHERE _TABLE_SUFFIX = '${partitionDay}'
+  ) a
+  USING (campaign_id, video_id, segments_ad_network_type)
