@@ -19,7 +19,7 @@
       "numberOfThreads": 10,
       "topic": "#PROJECT_NAMESPACE#-monitor",
       "message": {
-        "customerId": "${customerClient.id}",
+        "customerId": "${customer_client.id}",
         "loginCustomerId": "${mccCid}",
         "developerToken": "${developerToken}",
         "partitionDay": "${partitionDay}"

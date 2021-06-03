@@ -143,7 +143,9 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.date"],
+          "segments": [
+            "segments.date"
+          ],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -193,7 +195,10 @@
             {
               "key": "campaign.status",
               "op": "IN",
-              "val": ["PAUSED", "ENABLED"]
+              "val": [
+                "PAUSED",
+                "ENABLED"
+              ]
             }
           ]
         }
@@ -232,18 +237,26 @@
             "ad_group_ad.ad.id",
             "ad_group_ad.ad.name",
             "ad_group_ad.ad.type",
-            "ad_group_ad.policy_summary"
+            "ad_group_ad.policy_summary.approval_status",
+            "ad_group_ad.policy_summary.policy_topic_entries",
+            "ad_group_ad.policy_summary.review_status"
           ],
           "constraints": [
             {
               "key": "ad_group_ad.status",
               "op": "NOT IN",
-              "val": ["PAUSED", "REMOVED"]
+              "val": [
+                "PAUSED",
+                "REMOVED"
+              ]
             },
             {
               "key": "ad_group.status",
               "op": "NOT IN",
-              "val": ["PAUSED", "REMOVED"]
+              "val": [
+                "PAUSED",
+                "REMOVED"
+              ]
             }
           ]
         }
@@ -374,7 +387,9 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
+          "segments": [
+            "segments.week"
+          ],
           "attributes": [
             "customer.id",
             "customer.currency_code",
