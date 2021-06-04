@@ -102,7 +102,7 @@
   "query_active_account": {
     "type": "query",
     "source": {
-      "sql": "SELECT DISTINCT customer.id AS customerId, '${loginCustomerId}' AS loginCustomerId FROM ${datasetId}.report_base_account_performance WHERE metrics.costMicros > 0 AND DATE(_partitionTime) =  PARSE_DATE('%Y%m%d', '${partitionDay}')"
+      "sql": "SELECT DISTINCT customer.id AS customerId, '${loginCustomerId}' AS loginCustomerId FROM ${datasetId}.report_base_account_performance WHERE metrics.cost_micros > 0 AND DATE(_partitionTime) =  PARSE_DATE('%Y%m%d', '${partitionDay}')"
     },
     "destination": {
       "table": {
