@@ -4,7 +4,7 @@
     "embedded": {
       "tasks": [
         {
-          "taskId": "trdpty_trix_import_score",
+          "taskId": "trdpty_sql_template",
           "appendedParameters": {
             "datasetId": "ads_reports_data_v4",
             "destinationTable": "trdpty_scoreboard",
@@ -14,7 +14,7 @@
       ]
     }
   },
-  "trdpty_trix_import_score": {
+  "trdpty_sql_template": {
     "type": "query",
     "source": {
       "sql": "${sqlSyntax}",
