@@ -1,32 +1,17 @@
 {
   "lego_start": {
     "type": "knot",
-    "embedded": {
-      "tasks": [
-        "download_mcc_reports",
-        "get_child_accounts"
-      ]
-    },
-    "errorOptions": {
-      "ignoreError": true
-    },
-    "next": "load_account_performance"
-  },
-  "download_mcc_reports": {
-    "type": "knot",
     "appendedParameters": {
       "customerId": "${mccCid}",
       "loginCustomerId": "${mccCid}"
     },
     "embedded": {
-      "tasks": [
-        "base_geo_target_constant",
-        "base_language_constant",
-        "base_labels",
-        "nonapp_user_interest",
-        "nonapp_user_lists"
-      ]
-    }
+      "tasks": ["download_mcc_reports_impl", "get_child_accounts"]
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "next": "load_account_performance"
   },
   "get_child_accounts": {
     "type": "report",
@@ -34,13 +19,11 @@
       "target": "ADS",
       "config": {
         "developerToken": "${developerToken}",
-        "customerId": "${mccCid}",
-        "loginCustomerId": "${mccCid}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer_client",
-          "attributes": [
-            "customer_client.id"
-          ],
+          "attributes": ["customer_client.id"],
           "constraints": [
             {
               "customer_client.manager": "FALSE"
@@ -159,9 +142,7 @@
       "datasetId": "ads_reports_data_v4"
     },
     "embedded": {
-      "tasks": [
-        "load_reports_impl"
-      ]
+      "tasks": ["load_reports_impl"]
     },
     "next": "trigger_snd_query_impl"
   },

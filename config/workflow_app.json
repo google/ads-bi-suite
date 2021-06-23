@@ -1,4 +1,14 @@
 {
+  "download_mcc_reports_impl": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        "base_geo_target_constant",
+        "base_language_constant",
+        "base_labels"
+      ]
+    }
+  },
   "download_reports_impl": {
     "type": "knot",
     "embedded": {
