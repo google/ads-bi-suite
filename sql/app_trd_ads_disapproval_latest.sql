@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-SELECT
+SELECT DISTINCT
   cur.*,
   pre.adgroup_approval_status l_adgroup_approval_status,
   pre.asset_approval_status l_asset_approval_status,
@@ -22,134 +22,158 @@ SELECT
 FROM
   (
     SELECT
-      customer_id,
       campaign_id,
-      customer_descriptive_name,
       campaign_name,
+      campaign_stauts,
+      customer_id,
+      customer_name,
       ad_group_id,
+      ad_group_name,
       ad.ad_group_ad_ad_id,
       type,
       topic,
       adgroup_approval_status,
       adgroup_review_status,
-      ad_group_name,
       partition_time,
       asset_approval_status,
       asset_review_status,
-      ad_group_ad_asset_view_field_type,
-      asset_id
+      asset_id,
+      camp.campaign.app_campaign_setting.app_id campaign_app_campaign_setting_app_id,
+      ad_group_ad_asset_view_field_type
     FROM
       (
         SELECT
-          g.customer.id customer_id,
-          g.customer.descriptive_name customer_descriptive_name,
-          g.campaign.id campaign_id,
-          g.campaign.name campaign_name,
+          campaign.id campaign_id,
+          campaign.name campaign_name,
+          campaign.status campaign_stauts,
+          customer.id customer_id,
+          customer.descriptive_name customer_name,
+          g.ad_group.name ad_group_name,
           g.ad_group.id ad_group_id,
           g.ad_group_ad.ad.id ad_group_ad_ad_id,
           v.type type,
           v.topic,
           CASE
-            WHEN g.ad_group_ad.policy_summary.approval_status IS NULL
-              THEN 'N/A'
-            ELSE g.ad_group_ad.policy_summary.approval_status
-            END adgroup_approval_status,
-          g.ad_group_ad.policy_summary.review_status adgroup_review_status,
+            WHEN g.ad_group_ad.policy_summary.approval_status IS NULL THEN 'N/A'
+            ELSE
+              g.ad_group_ad.policy_summary.approval_status
+            END
+              adgroup_approval_status,
+          CASE
+            WHEN g.ad_group_ad.policy_summary.review_status IS NULL THEN 'N/A'
+            ELSE
+              g.ad_group_ad.policy_summary.review_status
+            END
+              adgroup_review_status,
           g.ad_group_ad.ad.type ad_group_ad_ad_type,
-          g.ad_group.name ad_group_name,
-          DATE(g._partitionTime) AS partition_time
-        FROM `${datasetId}.report_base_campaign_ads_approval` g
-        LEFT JOIN UNNEST(g.ad_group_ad.policy_summary.policy_topic_entries) AS v
-        WHERE DATE(g._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+          DATETIME(g._partitionTime) partition_time,
+        FROM
+          `${datasetId}.report_base_campaign_ads_approval` g
+        LEFT JOIN
+          UNNEST(g.ad_group_ad.policy_summary.policy_topic_entries) AS v
+        WHERE
+          DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+          AND g.ad_group_ad.ad.type IN (
+            'APP_AD',
+            'APP_ENGAGEMENT_AD')
       ) ad
+    JOIN
+      `${datasetId}.report_base_campaigns` camp
+      ON
+        camp.campaign.id = ad.campaign_id
     JOIN
       (
         SELECT
+          ad_group_ad_asset_view.field_type ad_group_ad_asset_view_field_type,
           CASE
-            WHEN
+            WHEN s.ad_group_ad_asset_view.policy_summary.approval_status IS NULL THEN 'N/A'
+            ELSE
               s.ad_group_ad_asset_view.policy_summary.approval_status
-              IS NULL
-              THEN 'N/A'
-            ELSE s.ad_group_ad_asset_view.policy_summary.approval_status
-            END asset_approval_status,
-          s.ad_group_ad_asset_view.policy_summary.review_status
-            asset_review_status,
-          s.ad_group_ad_asset_view.field_type
-            ad_group_ad_asset_view_field_type,
+            END
+              asset_approval_status,
+          CASE
+            WHEN s.ad_group_ad_asset_view.policy_summary.review_status IS NULL THEN 'N/A'
+            ELSE
+              s.ad_group_ad_asset_view.policy_summary.review_status
+            END
+              asset_review_status,
           s.asset.id asset_id,
           s.ad_group_ad.ad.id ad_group_ad_ad_id,
-        FROM `${datasetId}.report_app_disapprovals_ad_group_ad_asset_view` s
-        WHERE DATE(s._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+        FROM
+          `${datasetId}.report_app_disapprovals_ad_group_ad_asset_view` s
+        WHERE
+          DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
       ) asset
-      ON asset.ad_group_ad_ad_id = ad.ad_group_ad_ad_id
+      USING (ad_group_ad_ad_id)
+    WHERE
+      DATE(camp._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   ) cur
 LEFT JOIN
   (
     SELECT
-      customer_id,
-      campaign_id,
       ad_group_id,
       ad.ad_group_ad_ad_id,
-      type,
-      topic,
+      asset_id,
       adgroup_approval_status,
       adgroup_review_status,
-      ad_group_name,
-      partition_time,
       asset_approval_status,
       asset_review_status,
-      ad_group_ad_asset_view_field_type,
-      asset_id,
-      asset_type
+      partition_time,
     FROM
       (
         SELECT
-          g.customer.id customer_id,
-          g.campaign.id campaign_id,
           g.ad_group.id ad_group_id,
           g.ad_group_ad.ad.id ad_group_ad_ad_id,
           v.type type,
           v.topic,
           CASE
-            WHEN g.ad_group_ad.policy_summary.approval_status IS NULL
-              THEN 'N/A'
-            ELSE g.ad_group_ad.policy_summary.approval_status
-            END adgroup_approval_status,
-          g.ad_group_ad.policy_summary.review_status adgroup_review_status,
-          g.ad_group_ad.ad.type ad_group_ad_ad_type,
-          g.ad_group.name ad_group_name,
-          DATE(g._partitionTime) partition_time,
-        FROM `${datasetId}.report_base_campaign_ads_approval` g
-        LEFT JOIN UNNEST(g.ad_group_ad.policy_summary.policy_topic_entries) AS v
+            WHEN g.ad_group_ad.policy_summary.approval_status IS NULL THEN 'N/A'
+            ELSE
+              g.ad_group_ad.policy_summary.approval_status
+            END
+              adgroup_approval_status,
+          CASE
+            WHEN g.ad_group_ad.policy_summary.review_status IS NULL THEN 'N/A'
+            ELSE
+              g.ad_group_ad.policy_summary.review_status
+            END
+              adgroup_review_status,
+          DATETIME(g._partitionTime) partition_time,
+        FROM
+          `${datasetId}.report_base_campaign_ads_approval` g
+        LEFT JOIN
+          UNNEST(g.ad_group_ad.policy_summary.policy_topic_entries) AS v
         WHERE
-          DATE(g._partitionTime)
-            = DATE_ADD(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL -1 DAY)
-          AND g.ad_group_ad.ad.type IN ('APP_AD', 'APP_ENGAGEMENT_AD')
+          DATE(_partitionTime) = DATE_ADD(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL -1 DAY)
+          AND g.ad_group_ad.ad.type IN (
+            'APP_AD',
+            'APP_ENGAGEMENT_AD')
       ) ad
     JOIN
       (
         SELECT
           CASE
-            WHEN
+            WHEN s.ad_group_ad_asset_view.policy_summary.approval_status IS NULL THEN 'N/A'
+            ELSE
               s.ad_group_ad_asset_view.policy_summary.approval_status
-              IS NULL
-              THEN 'N/A'
-            ELSE s.ad_group_ad_asset_view.policy_summary.approval_status
-            END asset_approval_status,
-          s.ad_group_ad_asset_view.policy_summary.review_status
-            asset_review_status,
-          s.ad_group_ad_asset_view.field_type ad_group_ad_asset_view_field_type,
+            END
+              asset_approval_status,
+          CASE
+            WHEN s.ad_group_ad_asset_view.policy_summary.review_status IS NULL THEN 'N/A'
+            ELSE
+              s.ad_group_ad_asset_view.policy_summary.review_status
+            END
+              asset_review_status,
           s.asset.id asset_id,
-          s.asset.type asset_type,
           s.ad_group_ad.ad.id ad_group_ad_ad_id,
-        FROM `${datasetId}.report_app_disapprovals_ad_group_ad_asset_view` s
+        FROM
+          `${datasetId}.report_app_disapprovals_ad_group_ad_asset_view` s
         WHERE
-          DATE(_partitionTime)
-          = DATE_ADD(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL -1 DAY)
+          DATE(_partitionTime) = DATE_ADD(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL -1 DAY)
       ) asset
-      ON asset.ad_group_ad_ad_id = ad.ad_group_ad_ad_id
+      USING (ad_group_ad_ad_id)
   ) pre
-  ON (
-    pre.ad_group_id = cur.ad_group_id
-    AND pre.ad_group_ad_ad_id = cur.ad_group_ad_ad_id
-    AND pre.asset_id = cur.asset_id);
+  USING (
+    ad_group_id,
+    ad_group_ad_ad_id,
+    asset_id)

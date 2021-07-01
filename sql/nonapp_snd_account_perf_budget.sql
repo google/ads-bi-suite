@@ -17,7 +17,7 @@ SELECT
   a.customer.id AS Customer_ID,
   CAST(a.segments.date AS DATE) AS Day,
   a.customer.currency_code AS Currency,
-  a.customer.optimization_score AS Account_optimization_score,
+  avg(a.customer.optimization_score) AS Account_optimization_score,
   b.account_budget.adjusted_spending_limit_micros / 1000000 AS Budget_approved,
   b.account_budget.amount_served_micros / 1000000 AS Budget_served,
   b.account_budget.approved_start_date_time AS Budget_start_time,
@@ -35,9 +35,7 @@ SELECT
   a.metrics.impressions AS impressions,
   a.metrics.cost_micros / 1000000 AS cost,
   a.metrics.conversions AS conversions,
-  a.metrics.cost_micros / 1000000 / nullif(a.metrics.conversions, 0) AS CPA,
   a.metrics.conversions_value AS Conv_value,
-  a.metrics.conversions_value / nullif((a.metrics.cost_micros / 1000000), 0) AS ROI,
   a.metrics.all_conversions AS All_conversions,
   a.metrics.all_conversions_value AS All_conv_value
 FROM `${datasetId}.report_base_account_performance` a
@@ -52,6 +50,6 @@ WHERE
     OR CAST(b.account_budget.approved_end_date_time AS datetime)
       >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
 GROUP BY
-  Account, Customer_ID, Day, Currency, Account_optimization_score, Budget_approved, Budget_served,
-  Budget_start_time, Budget_end_time, Budget_remain, clicks, impressions, cost, conversions, CPA,
-  Conv_value, ROI, All_conversions, All_conv_value
+  Account, Customer_ID, Day, Currency, Budget_approved, Budget_served, Budget_start_time,
+  Budget_end_time, Budget_remain, clicks, impressions, cost, conversions, Conv_value,
+  All_conversions, All_conv_value

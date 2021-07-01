@@ -20,7 +20,6 @@ SELECT DISTINCT
   a.campaign.status AS Campaign_status,
   a.campaign.advertising_channel_type AS Campaign_type,
   a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
-  CAST(a.segments.week AS DATE) AS Week,
   a.search_term_view.search_term AS Search_term,
   a.segments.search_term_match_type AS Search_term_match_type,
   a.search_term_view.status AS Search_term_status,

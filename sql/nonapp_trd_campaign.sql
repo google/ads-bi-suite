@@ -19,12 +19,16 @@ SELECT DISTINCT
   c.campaign.name AS Campaign,
   c.customer.currency_code AS Currency,
   c.campaign.status AS Campaign_status,
-  p.campaign_optimization_score AS Campaign_optimization_score,
+  m.campaign.bidding_strategy,
+  m.campaign.bidding_strategy_type AS Bidding_type,
+  m.campaign.optimization_score AS Campaign_optimization_score,
+  m.campaign.target_cpa.target_cpa_micros / 1000000 AS tCPA,
+  m.campaign.target_roas.target_roas AS tROAS,
+  p.avg_campaign_optimization_score AS Avg_campaign_optimization_score,
   p.budget AS Budget,
   p.spend_7d AS Cost_7d,
   p.budget_utilization AS Budget_utilization,
   c.segments.date AS Date,
-  CAST(c.segments.week AS DATE) AS Week,
   c.segments.ad_network_type AS Ad_network_type,
   c.segments.device AS Device,
   w.week1_cost AS Week1_cost,
@@ -111,4 +115,8 @@ LEFT JOIN
     c.campaign.id = conv.id
     AND c.segments.date = conv.segments_date
     AND c.segments.ad_network_type = conv.segments_ad_network_type
+LEFT JOIN `${datasetId}.nonapp_snd_campaigns` m
+  ON
+    c.campaign.id = m.campaign.id
+    AND c.segments.date = m.segments_date
 WHERE date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')

@@ -11,7 +11,8 @@
         "base_geographic_view",
         "base_campaign_ads_approval",
         "base_labels",
-        "base_customer_label"
+        "base_customer_label",
+        "base_videos"
       ]
     },
     "errorOptions": {
@@ -87,6 +88,12 @@
           "appendedParameters": {
             "targetTable": "base_customer_label"
           }
+        },
+        {
+          "taskId": "load_report",
+          "appendedParameters": {
+            "targetTable": "base_videos"
+          }
         }
       ]
     }
@@ -143,9 +150,7 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": [
-            "segments.date"
-          ],
+          "segments": ["segments.date"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -188,17 +193,16 @@
             "campaign.app_campaign_setting.app_store",
             "campaign.target_cpa.target_cpa_micros",
             "campaign.app_campaign_setting.bidding_strategy_goal_type",
-            "campaign.target_roas.target_roas",
-            "campaign.optimization_score"
+            "campaign.optimization_score",
+            "campaign.bidding_strategy",
+            "campaign.bidding_strategy_type",
+            "campaign.target_roas.target_roas"
           ],
           "constraints": [
             {
               "key": "campaign.status",
               "op": "IN",
-              "val": [
-                "PAUSED",
-                "ENABLED"
-              ]
+              "val": ["PAUSED", "ENABLED"]
             }
           ]
         }
@@ -245,18 +249,12 @@
             {
               "key": "ad_group_ad.status",
               "op": "NOT IN",
-              "val": [
-                "PAUSED",
-                "REMOVED"
-              ]
+              "val": ["PAUSED", "REMOVED"]
             },
             {
               "key": "ad_group.status",
               "op": "NOT IN",
-              "val": [
-                "PAUSED",
-                "REMOVED"
-              ]
+              "val": ["PAUSED", "REMOVED"]
             }
           ]
         }
@@ -332,7 +330,6 @@
             "metrics.video_views"
           ],
           "segments": [
-            "segments.week",
             "segments.date",
             "segments.ad_network_type",
             "segments.device"
@@ -387,9 +384,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": [
-            "segments.week"
-          ],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -419,9 +413,17 @@
               "key": "metrics.impressions",
               "op": ">=",
               "val": 100
+            },
+            {
+              "key": " campaign.advertising_channel_type",
+              "op": "NOT IN",
+              "val": ["SEARCH", "SHOPPING"]
             }
           ],
-          "date_constant": "LAST_30_DAYS"
+          "date_constant": "LAST_30_DAYS",
+          "order_by": "metrics.impressions",
+          "sort_order": "DESC",
+          "limit": 1000
         }
       }
     },
@@ -597,6 +599,65 @@
     "destination": {
       "bucket": "#GCS_BUCKET#",
       "name": "reports/${partitionDay}/reports_base_customer_label/${customerId}.ndjson"
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "base_videos": {
+    "type": "report",
+    "source": {
+      "target": "ADS",
+      "config": {
+        "developerToken": "${developerToken}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
+        "reportQuery": {
+          "entity": "video",
+          "metrics": [
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.view_through_conversions",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.video_views",
+            "metrics.engagements",
+            "metrics.video_quartile_p25_rate",
+            "metrics.video_quartile_p50_rate",
+            "metrics.video_quartile_p75_rate",
+            "metrics.video_quartile_p100_rate",
+            "metrics.cost_micros"
+          ],
+          "segments": ["segments.date"],
+          "attributes": [
+            "customer.id",
+            "video.id",
+            "video.title",
+            "video.duration_millis",
+            "video.channel_id",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign.name",
+            "campaign.status",
+            "ad_group.id",
+            "ad_group.name"
+          ],
+          "constraints": [
+            {
+              "key": "metrics.impressions",
+              "op": ">",
+              "val": 1
+            }
+          ],
+          "date_constant": "LAST_30_DAYS"
+        }
+      }
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/reports_base_videos/${customerId}.ndjson"
     },
     "errorOptions": {
       "ignoreError": true

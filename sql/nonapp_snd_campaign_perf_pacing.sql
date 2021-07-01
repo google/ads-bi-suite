@@ -15,7 +15,7 @@
 SELECT
   p.campaign.id,
   p.campaign.name,
-  p.campaign.optimization_score AS campaign_optimization_score,
+  AVG(p.campaign.optimization_score) AS avg_campaign_optimization_score,
   AVG(p.campaign_budget.amount_micros) / 1000000 AS budget,
   spend_7d,
   safe_divide(AVG(spend_7d), AVG(p.campaign_budget.amount_micros / 1000000)) AS budget_utilization
@@ -39,4 +39,4 @@ LEFT JOIN
 WHERE
   date(_partitionTime) <= PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND date(_partitionTime) > date_sub(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 day)
-GROUP BY campaign.id, campaign.name, spend_7d, campaign_optimization_score
+GROUP BY campaign.id, campaign.name, spend_7d

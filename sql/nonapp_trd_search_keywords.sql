@@ -25,7 +25,6 @@ SELECT DISTINCT
   a.ad_group_criterion.keyword.text AS Keyword,
   a.ad_group_criterion.keyword.match_type AS Keyword_match_type,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

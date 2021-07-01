@@ -28,7 +28,6 @@ SELECT DISTINCT
   a.customer.descriptive_name AS Account,
   a.campaign.status AS Campaign_status,
   a.customer.id AS Customer_ID,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.cost_micros / 1000000 AS Cost,
   a.metrics.all_conversions AS All_converdsions,
   a.metrics.all_conversions_value AS All_conv_value

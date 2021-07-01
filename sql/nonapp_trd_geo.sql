@@ -21,7 +21,6 @@ SELECT DISTINCT
   a.campaign.advertising_channel_type AS Campaign_type,
   a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   t.name AS Country_Territory,
   segments.ad_network_type AS Ad_network_type,
   a.segments.device AS Device,

@@ -12,59 +12,71 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-WITH
-  cc AS (
-    SELECT segments_date, c.*
-    FROM
-      (
-        SELECT DISTINCT segments.date segments_date
-        FROM `${datasetId}.report_app_ad_group` adg
-        INNER JOIN
-          (
-            SELECT DATE_ADD(DATE(MIN(_PARTITIONTIME)), INTERVAL -1 day) launch_date
-            FROM `${datasetId}.report_app_campaign_criterion`
-          )
-          ON segments.date < launch_date
-        WHERE
-          DATE(adg._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-          OR adg.segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
-      )
-    LEFT JOIN
-      (
-        SELECT DISTINCT
-          campaign.id campaign_id,
-          campaign_criterion.LANGUAGE.language_constant language_constant,
-          campaign_criterion.location.geo_target_constant geo_target_constant
-        FROM `${datasetId}.report_app_campaign_criterion` c
-        WHERE
-          campaign_criterion.negative = FALSE
-          AND _PARTITIONTIME IN (
-            SELECT MIN(_PARTITIONTIME) FROM `${datasetId}.report_app_campaign_criterion`
-          )
-      ) c
-      ON 1 = 1
-    UNION ALL
-    (
-      SELECT DISTINCT
-        DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date,
-        campaign.id campaign_id,
-        campaign_criterion.LANGUAGE.language_constant language_constant,
-        campaign_criterion.location.geo_target_constant geo_target_constant
-      FROM `${datasetId}.report_app_campaign_criterion`
-      WHERE campaign_criterion.negative = FALSE
-    )
-  )
-SELECT
+SELECT DISTINCT
   camp.*,
-  l.language_constant.name language_name,
-  l.language_constant.code language_code,
-  g.geo_target_constant.canonical_name geo_target_constant_canonical_name,
-  g.geo_target_constant.country_code geo_target_constant_country_code
-FROM `${datasetId}.app_snd_campaigns` camp
-LEFT JOIN (SELECT campaign_id, language_constant, geo_target_constant, segments_date FROM cc) c
-  USING (campaign_id, segments_date)
-LEFT JOIN `${datasetId}.report_base_language_constant` l
-  ON l.language_constant.resource_name = c.language_constant
-LEFT JOIN `${datasetId}.report_base_geo_target_constant` g
-  ON g.geo_target_constant.resource_name = c.geo_target_constant
-WHERE campaign_status = "ENABLED"
+  geo_target_constant_canonical_name,
+  ifnull(conv.installs, 0) installs,
+  ifnull(conv.in_app_actions, 0) in_app_actions,
+  segments_ad_network_type segments_ad_network_type,
+  metrics_clicks,
+  metrics_conversions_value,
+  metrics_impressions,
+  metrics_conversions,
+  metrics_cost
+FROM
+  (
+    SELECT
+      campaign.id campaign_id,
+      segments.week segments_week,
+      segments.ad_network_type segments_ad_network_type,
+      geographic_view.country_criterion_id geographic_view_country_criterion_id,
+      SUM(metrics.clicks) metrics_clicks,
+      SUM(metrics.conversions_value) metrics_conversions_value,
+      SUM(metrics.impressions) metrics_impressions,
+      ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
+      SUM(metrics.conversions) metrics_conversions
+    FROM `${datasetId}.report_base_geographic_view`
+    WHERE
+      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      OR segments.week < DATE_ADD(
+        DATE(_PARTITIONTIME), INTERVAL -(EXTRACT(DAYOFWEEK FROM segments.week) + 30) day)
+    GROUP BY 1, 2, 3, 4
+  ) geo
+INNER JOIN
+  (
+    SELECT DISTINCT
+      geo_target_constant.id geographic_view_country_criterion_id,
+      geo_target_constant.canonical_name geo_target_constant_canonical_name
+    FROM `${datasetId}.report_base_geo_target_constant`
+  ) c
+  USING (geographic_view_country_criterion_id)
+LEFT JOIN
+  (
+    SELECT
+      campaign.id campaign_id,
+      segments.week segments_week,
+      segments.ad_network_type segments_ad_network_type,
+      geographic_view.country_criterion_id geographic_view_country_criterion_id,
+      SUM(
+        IF(
+          segments.conversion_action_category = "DOWNLOAD",
+          metrics.conversions,
+          0))
+        installs,
+      SUM(
+        IF(
+          segments.conversion_action_category != "DOWNLOAD",
+          metrics.conversions,
+          0))
+        in_app_actions
+    FROM `${datasetId}.report_app_geo_conversion`
+    WHERE
+      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      OR segments.week < DATE_ADD(
+        DATE(_PARTITIONTIME), INTERVAL -(EXTRACT(DAYOFWEEK FROM segments.week) + 30) day)
+    GROUP BY 1, 2, 3, 4
+  ) conv
+  USING (campaign_id, segments_week, geographic_view_country_criterion_id, segments_ad_network_type)
+INNER JOIN `${datasetId}.app_snd_campaigns` camp
+  USING (campaign_id, segments_week)
+WHERE camp.segments_date = camp.segments_week

@@ -22,7 +22,6 @@ SELECT DISTINCT
   a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
   a.ad_group_criterion.gender.type AS Gender,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

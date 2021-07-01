@@ -23,7 +23,6 @@ SELECT DISTINCT
   b.user_interest_name AS User_interest,
   b.user_interest_taxonomy_type AS User_interest_taxonomy,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

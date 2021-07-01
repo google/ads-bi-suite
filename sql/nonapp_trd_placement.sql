@@ -24,7 +24,6 @@ SELECT DISTINCT
   a.detail_placement_view.display_name AS Placement_name,
   a.detail_placement_view.target_url AS Target_URL,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

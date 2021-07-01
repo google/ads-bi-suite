@@ -13,19 +13,7 @@
 -- limitations under the License.
 
 SELECT DISTINCT
-  customer_currency_code,
-  campaign_name,
-  customer_descriptive_name,
-  campaign_status,
-  customer_id,
-  campaign_app_campaign_setting_app_id,
-  campaign_app_campaign_setting_app_store,
-  campaign_app_campaign_setting_bidding_strategy_goal_type,
-  advertising_channel_sub_type,
-  geo.campaign_id,
-  geo.segments_week,
-  firebase_bid,
-  ad_groups,
+  camp.*,
   geo_target_constant_canonical_name,
   ifnull(conv.installs, 0) installs,
   ifnull(conv.in_app_actions, 0) in_app_actions,

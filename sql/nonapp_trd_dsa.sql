@@ -23,7 +23,6 @@ SELECT DISTINCT
   a.dynamic_search_ads_search_term_view.search_term AS Search_term,
   a.dynamic_search_ads_search_term_view.landing_page AS Landing_page,
   a.customer.currency_code AS Currency,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

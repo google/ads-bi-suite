@@ -13,18 +13,35 @@
 -- limitations under the License.
 
 SELECT DISTINCT
-  customer_currency_code,
-  campaign_name,
-  customer_descriptive_name,
-  campaign_status,
-  customer_id,
-  campaign_app_campaign_setting_app_id,
-  campaign_app_campaign_setting_app_store,
-  campaign_app_campaign_setting_bidding_strategy_goal_type,
-  v.video_title,
+  camp.*,
+  IF(
+    asset.video_title IS NULL
+      OR asset.video_title = "",
+    v.video_title,
+    asset.video_title)
+    video_title,
   v.video_duration_millis,
-  network.*,
-  ad_groups,
+  adgroup_id,
+  adgroup_name,
+  adgroup_status,
+  segments_ad_network_type,
+  asset_youtube_video_asset_youtube_video_id,
+  ad_group_ad_asset_view_performance_label,
+  asset_image_asset_full_size_width_pixels,
+  asset_image_asset_full_size_height_pixels,
+  asset_image_asset_full_size_url,
+  asset_name,
+  asset_id,
+  ad_group_ad_asset_view_field_type,
+  asset_link,
+  asset_thumbnail,
+  network.metrics_clicks,
+  network.metrics_conversions_value,
+  network.metrics_impressions,
+  network.metrics_cost,
+  network.metrics_conversions,
+  network.metrics_all_conversions,
+  network.metrics_all_conversions_value,
   headline,
   image,
   description,
@@ -33,7 +50,8 @@ SELECT DISTINCT
   adg.metrics_impressions adg_impressions,
   adg.metrics_clicks adg_clicks,
   adg.metrics_cost adg_cost,
-  adg.metrics_conversions adg_conversions,
+  adg.installs adg_installs,
+  adg.in_app_actions adg_in_app_actions,
   adg.metrics_conversions_value adg_conversions_value,
   adg.metrics_all_conversions adg_all_conversions,
   adg.metrics_all_conversions_value adg_all_conversions_value
@@ -47,18 +65,17 @@ FROM
       ad_group.status adgroup_status,
       segments.ad_network_type segments_ad_network_type,
       asset.youtube_video_asset.youtube_video_id asset_youtube_video_asset_youtube_video_id,
-      ad_group_ad_asset_view.performance_label
-        ad_group_ad_asset_view_performance_label,
+      ad_group_ad_asset_view.performance_label ad_group_ad_asset_view_performance_label,
       asset.image_asset.full_size.width_pixels asset_image_asset_full_size_width_pixels,
       asset.image_asset.full_size.height_pixels asset_image_asset_full_size_height_pixels,
       asset.image_asset.full_size.url asset_image_asset_full_size_url,
       CASE
-        WHEN
-          ad_group_ad_asset_view.field_type
-          IN ("HEADLINE", "DESCRIPTION", "MANDATORY_AD_TEXT")
+        WHEN ad_group_ad_asset_view.field_type IN ("HEADLINE", "DESCRIPTION", "MANDATORY_AD_TEXT")
           THEN asset.text_asset.text
-        ELSE asset.name
-        END AS asset_name,
+        ELSE
+          asset.name
+        END
+        AS asset_name,
       asset.id asset_id,
       ad_group_ad_asset_view.field_type ad_group_ad_asset_view_field_type,
       CASE
@@ -67,8 +84,10 @@ FROM
             CONCAT("https://www.youtube.com/watch?v=", asset.youtube_video_asset.youtube_video_id)
         WHEN ad_group_ad_asset_view.field_type = "MARKETING_IMAGE"
           THEN asset.image_asset.full_size.url
-        ELSE NULL
-        END AS asset_link,
+        ELSE
+          NULL
+        END
+        AS asset_link,
       CASE
         WHEN ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO"
           THEN
@@ -78,8 +97,10 @@ FROM
               "/hqdefault.jpg")
         WHEN ad_group_ad_asset_view.field_type = "MARKETING_IMAGE"
           THEN asset.image_asset.full_size.url
-        ELSE NULL
-        END AS asset_thumbnail,
+        ELSE
+          NULL
+        END
+        AS asset_thumbnail,
       SUM(metrics.clicks) metrics_clicks,
       SUM(metrics.conversions_value) metrics_conversions_value,
       SUM(metrics.impressions) metrics_impressions,
@@ -87,20 +108,71 @@ FROM
       SUM(metrics.conversions) metrics_conversions,
       SUM(metrics.all_conversions) metrics_all_conversions,
       SUM(metrics.all_conversions_value) metrics_all_conversions_value
-    FROM `${datasetId}.report_app_asset_performance`
+    FROM
+      `${datasetId}.report_app_asset_performance`
     WHERE
       DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
       OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
-    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+    GROUP BY
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
   ) network
 LEFT JOIN
   (
-    SELECT DISTINCT
-      video.id asset_youtube_video_asset_youtube_video_id,
-      video.title video_title,
-      video.duration_millis video_duration_millis
-    FROM `${datasetId}.report_app_videos`
+    SELECT
+      *
+    FROM
+      (
+        SELECT DISTINCT
+          video.id asset_youtube_video_asset_youtube_video_id,
+          video.title video_title,
+          video.duration_millis video_duration_millis,
+          ROW_NUMBER() OVER (PARTITION BY video.id ORDER BY DATETIME(_partitionTime) DESC) row_num
+        FROM
+          `${datasetId}.report_base_videos`
+        WHERE
+          DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      )
+    WHERE
+      row_num = 1
   ) v
+  USING (asset_youtube_video_asset_youtube_video_id)
+LEFT JOIN
+  (
+    SELECT
+      *
+    FROM
+      (
+        SELECT DISTINCT
+          asset.youtube_video_asset.youtube_video_id asset_youtube_video_asset_youtube_video_id,
+          asset.youtube_video_asset.youtube_video_title video_title,
+          ROW_NUMBER()
+            OVER (
+              PARTITION BY asset.youtube_video_asset.youtube_video_id
+              ORDER BY DATETIME(_partitionTime) DESC
+            ) row_num
+        FROM
+          `${datasetId}.report_app_asset_metadata`
+        WHERE
+          DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      )
+    WHERE
+      row_num = 1
+  ) asset
   USING (asset_youtube_video_asset_youtube_video_id)
 LEFT JOIN
   (
@@ -118,11 +190,7 @@ LEFT JOIN
           ad_group.id adgroup_id,
           segments.date segments_date,
           COUNT(*) adg_records,
-          IF(
-            ad_group_ad_asset_view.field_type = "HEADLINE",
-            COUNT(DISTINCT asset.id),
-            0)
-            headline,
+          IF(ad_group_ad_asset_view.field_type = "HEADLINE", COUNT(DISTINCT asset.id), 0) headline,
           IF(
             ad_group_ad_asset_view.field_type = "DESCRIPTION",
             COUNT(DISTINCT asset.id),
@@ -133,55 +201,98 @@ LEFT JOIN
             COUNT(DISTINCT asset.id),
             0)
             image,
-          IF(
-            ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO",
-            COUNT(DISTINCT asset.id),
-            0)
-            video
-        FROM `${datasetId}.report_app_asset_performance`
+          IF(ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO", COUNT(DISTINCT asset.id), 0) video
+        FROM
+          `${datasetId}.report_app_asset_performance`
         WHERE
           (
             DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
             OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
-          AND ad_group.status = "ENABLED"
-        GROUP BY ad_group.id, segments.date, ad_group_ad_asset_view.field_type
+          AND metrics.cost_micros > 0
+        GROUP BY
+          ad_group.id,
+          segments.date,
+          ad_group_ad_asset_view.field_type
       )
-    GROUP BY 1, 2
+    GROUP BY
+      1,
+      2
   ) g
-  USING (adgroup_id, segments_date)
+  USING (
+    adgroup_id,
+    segments_date)
 LEFT JOIN
   (
     SELECT
       adgroup_id,
       segments_date,
-      SUM(metrics_conversions) metrics_conversions,
-      SUM(metrics_conversions_value) metrics_conversions_value,
-      SUM(metrics_all_conversions) metrics_all_conversions,
-      SUM(metrics_all_conversions_value) metrics_all_conversions_value,
-      ROUND(SUM(metrics_cost) / 1e6, 2) metrics_cost,
-      SUM(metrics_impressions) metrics_impressions,
-      SUM(metrics_clicks) metrics_clicks
+      metrics_cost,
+      metrics_impressions,
+      metrics_clicks,
+      metrics_conversions_value,
+      metrics_all_conversions,
+      metrics_all_conversions_value,
+      installs,
+      in_app_actions
     FROM
       (
         SELECT DISTINCT
           ad_group.id adgroup_id,
           segments.date segments_date,
-          metrics.conversions metrics_conversions,
-          metrics.conversions_value metrics_conversions_value,
-          metrics.all_conversions metrics_all_conversions,
-          metrics.all_conversions_value metrics_all_conversions_value,
-          metrics.cost_micros metrics_cost,
-          metrics.impressions metrics_impressions,
-          metrics.clicks metrics_clicks
-        FROM `${datasetId}.report_app_ad_group_perf`
+          ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
+          SUM(metrics.impressions) metrics_impressions,
+          SUM(metrics.clicks) metrics_clicks,
+          SUM(metrics.conversions_value) metrics_conversions_value,
+          SUM(metrics.all_conversions) metrics_all_conversions,
+          SUM(metrics.all_conversions_value) metrics_all_conversions_value,
+        FROM
+          `${datasetId}.report_app_ad_group_perf`
         WHERE
           (
             DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
             OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
-          AND ad_group.status = "ENABLED"
+          AND metrics.cost_micros > 0
+        GROUP BY
+          1,
+          2
       )
-    GROUP BY adgroup_id, segments_date
+    LEFT JOIN
+      (
+        SELECT
+          ad_group.id adgroup_id,
+          segments.date segments_date,
+          SUM(
+            IF(
+              segments.conversion_action_category = "DOWNLOAD",
+              metrics.conversions,
+              0))
+            installs,
+          SUM(
+            IF(
+              segments.conversion_action_category != "DOWNLOAD",
+              metrics.conversions,
+              0))
+            in_app_actions
+        FROM
+          `${datasetId}.report_app_ad_group`
+        WHERE
+          (
+            DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+            OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
+          AND metrics.conversions > 0
+        GROUP BY
+          1,
+          2
+      )
+      USING (
+        adgroup_id,
+        segments_date)
   ) adg
-  USING (adgroup_id, segments_date)
-INNER JOIN `${datasetId}.app_snd_campaigns` camp
-  USING (campaign_id, segments_date)
+  USING (
+    adgroup_id,
+    segments_date)
+INNER JOIN
+  `${datasetId}.app_snd_campaigns` camp
+  USING (
+    campaign_id,
+    segments_date)

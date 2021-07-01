@@ -20,7 +20,6 @@ SELECT DISTINCT
   a.campaign.status AS Campaign_status,
   a.campaign.advertising_channel_type AS Campaign_type,
   a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
-  CAST(a.segments.week AS DATE) AS Week,
   a.segments.hour AS Hour_of_day,
   a.segments.day_of_week AS Day_of_week,
   a.customer.currency_code AS Currency,

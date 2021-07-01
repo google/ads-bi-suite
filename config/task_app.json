@@ -10,7 +10,7 @@
         "app_campaign_criterion",
         "app_ad_group",
         "app_ad_group_perf",
-        "app_videos"
+        "app_asset_metadata"
       ]
     },
     "errorOptions": {
@@ -66,7 +66,7 @@
         {
           "taskId": "load_report",
           "appendedParameters": {
-            "targetTable": "app_videos"
+            "targetTable": "app_asset_metadata"
           }
         }
       ]
@@ -142,6 +142,12 @@
           "appendedParameters": {
             "queryName": "app_trd_campaign_criterion"
           }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_trd_placement_report"
+          }
         }
       ]
     }
@@ -206,6 +212,12 @@
           "appendedParameters": {
             "queryName": "app_trd_geo_perf_report"
           }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_placement_report"
+          }
         }
       ]
     }
@@ -228,15 +240,13 @@
           ],
           "segments": [
             "segments.date",
-            "segments.ad_network_type",
+            "segments.week",
             "segments.conversion_action_category",
             "segments.conversion_action_name",
             "segments.conversion_action",
             "segments.external_conversion_source"
           ],
           "attributes": [
-            "customer.id",
-            "campaign.id",
             "campaign.advertising_channel_type",
             "ad_group.id",
             "ad_group.name",
@@ -278,7 +288,8 @@
             "metrics.conversions",
             "metrics.conversions_value",
             "metrics.all_conversions",
-            "metrics.all_conversions_value"
+            "metrics.all_conversions_value",
+            "metrics.interactions"
           ],
           "segments": ["segments.date", "segments.ad_network_type"],
           "attributes": [
@@ -395,6 +406,7 @@
             "asset.text_asset.text",
             "asset.type",
             "asset.youtube_video_asset.youtube_video_id",
+            "asset.youtube_video_asset.youtube_video_title",
             "campaign.advertising_channel_type",
             "campaign.id",
             "customer.id"
@@ -513,6 +525,7 @@
           "attributes": [
             "customer.id",
             "campaign.advertising_channel_type",
+            "campaign.app_campaign_setting.app_id",
             "campaign.status",
             "ad_group.id",
             "ad_group_ad.status",
@@ -531,8 +544,8 @@
             },
             {
               "key": "ad_group_ad.status",
-              "op": "!=",
-              "val": "REMOVED"
+              "op": "NOT IN",
+              "val": ["PAUSED", "REMOVED"]
             }
           ]
         }
@@ -546,7 +559,7 @@
       "ignoreError": true
     }
   },
-  "app_videos": {
+  "app_asset_metadata": {
     "type": "report",
     "source": {
       "target": "ADS",
@@ -555,18 +568,17 @@
         "customerId": "${customerId}",
         "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
-          "entity": "video",
+          "entity": "ad_group_ad_asset_view",
           "attributes": [
-            "video.id",
-            "video.title",
-            "video.duration_millis",
-            "campaign.advertising_channel_type"
+            "asset.type",
+            "asset.youtube_video_asset.youtube_video_id",
+            "asset.youtube_video_asset.youtube_video_title"
           ],
           "constraints": [
             {
-              "key": "campaign.advertising_channel_type",
+              "key": "asset.type",
               "op": "=",
-              "val": "MULTI_CHANNEL"
+              "val": "YOUTUBE_VIDEO"
             }
           ]
         }
@@ -574,7 +586,7 @@
     },
     "destination": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_app_videos/${customerId}.ndjson"
+      "name": "reports/${partitionDay}/reports_app_asset_metadata/${customerId}.ndjson"
     },
     "errorOptions": {
       "ignoreError": true

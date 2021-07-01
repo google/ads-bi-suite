@@ -32,7 +32,6 @@ SELECT DISTINCT
   a.ad_group_ad.ad.responsive_search_ad.path1 AS Responsive_search_ad_path1,
   a.ad_group_ad.ad.responsive_display_ad.long_headline.text AS Responsive_display_ad_long_headline,
   a.ad_group_ad.ad.text_ad.headline AS Text_ad_headline,
-  CAST(a.segments.week AS DATE) AS Week,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
   a.metrics.cost_micros / 1000000 AS Cost,

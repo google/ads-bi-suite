@@ -146,6 +146,12 @@
           "appendedParameters": {
             "queryName": "nonapp_snd_campaign_perf_wow"
           }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "nonapp_snd_campaigns"
+          }
         }
       ]
     }
@@ -248,6 +254,12 @@
           "taskId": "query_general",
           "appendedParameters": {
             "queryName": "nonapp_trd_user_interest"
+          }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "nonapp_trd_video"
           }
         }
       ]
@@ -355,6 +367,12 @@
           "appendedParameters": {
             "queryName": "nonapp_trd_user_interest"
           }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "nonapp_trd_video"
+          }
         }
       ]
     }
@@ -409,7 +427,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -459,11 +476,7 @@
             "metrics.all_conversions",
             "metrics.all_conversions_value"
           ],
-          "segments": [
-            "segments.week",
-            "segments.product_item_id",
-            "segments.product_title"
-          ],
+          "segments": ["segments.product_item_id", "segments.product_title"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -518,7 +531,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -569,7 +581,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -619,7 +630,7 @@
             "metrics.all_conversions",
             "metrics.all_conversions_value"
           ],
-          "segments": ["segments.week", "segments.search_term_match_type"],
+          "segments": ["segments.search_term_match_type"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -681,7 +692,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -705,7 +715,7 @@
             {
               "key": "metrics.impressions",
               "op": ">=",
-              "val": 1
+              "val": 100
             },
             {
               "key": "ad_group_criterion.status",
@@ -742,10 +752,8 @@
             "metrics.conversions",
             "metrics.conversions_value",
             "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
+            "metrics.all_conversions_value"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -806,7 +814,6 @@
             "metrics.all_conversions",
             "metrics.all_conversions_value"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -857,11 +864,7 @@
             "metrics.conversions_value",
             "metrics.video_views"
           ],
-          "segments": [
-            "segments.week",
-            "segments.day_of_week",
-            "segments.hour"
-          ],
+          "segments": ["segments.day_of_week", "segments.hour"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -911,7 +914,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
@@ -1004,7 +1006,6 @@
             "metrics.all_conversions_value",
             "metrics.video_views"
           ],
-          "segments": ["segments.week"],
           "attributes": [
             "customer.id",
             "customer.currency_code",
