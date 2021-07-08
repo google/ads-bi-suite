@@ -73,3 +73,28 @@ create a database before continue.
 
 Press any key to continue after you create the database...
 ```
+
+## 3. Release
+
+Follow [go/lego-release](go/lego-release) process, we release the system
+bi-weekly. The detail features/bugs between each release version are documented
+in [go/lego-release-note](go/lego-release-note).
+
+### 3.1 Command
+
+Command to fetch the codebase for a specific release version.
+
+```shell
+git clone --recursive  https://professional-services.googlesource.com/solutions/ads-bi-suite && cd ads-bi-suite && git checkout $VERSION_TAG
+```
+
+_Due to [b/192634659](b/192634659), use git commit id (237934f) to fetch this version instead of version tag._
+
+### 3.2 Versions
+
+Follow preparation doc to create authentication credentials and Google Ads
+developer token.
+
+| Version    | Release Date | Worklog    | Demo Dashboard  | Big Query Schema Change | Note |
+| ---------- | ------------ | -----------| ----------------| ------------------------| -----|
+| v.20210705 | 2021-07-05   | [b/192903846](b/192903846) | Advertiser: [go/lego4advertiser-demo-apple](go/lego4advertiser-demo-apple) Agency: [go/lego4agency-demo-apple](go/lego4agency-demo-apple) | Yes | Advertiser: Add Video Campaign asset report. Agency: Add auto-bidding UI. |
