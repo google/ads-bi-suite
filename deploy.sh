@@ -35,6 +35,10 @@ PROJECT_NAMESPACE="lego"
 CONFIG_FILE="./config/config.json"
 TIMEZONE="Asia/Shanghai"
 
+# The dataset name.
+DATASET_ID="ads_reports_data_v4"
+DATASET_LOCATION="US"
+
 # Parameter to record the installed workflow,
 # which will be selected in select_workflow().
 INSTALLED_WORKFLOW=""
@@ -54,6 +58,7 @@ CONFIG_FOLDER_NAME="OUTBOUND"
 CONFIG_ITEMS=(
   "PROJECT_NAMESPACE"
   "GCS_BUCKET"
+  "DATASET_ID"
   "INSTALLED_WORKFLOW"
   "INSTALLED_TRDPTY_TRIX_DATA"
   "INSTALLED_APP_HOURLY_WORKFLOW"
@@ -263,7 +268,8 @@ initialize_workflow() {
     "timezone":"'"${TIMEZONE}"'",
     "partitionDay": "${today}",
     "developerToken":"'${DEVELOPER_TOKEN}'",
-    "mccCid":"'${MCC_CID}'"
+    "mccCid":"'${MCC_CID}'",
+    "datasetId": "'${DATASET_ID}'"
   }'
   local taskConfigs
   taskConfigs=(
@@ -337,6 +343,7 @@ DEFAULT_INSTALL_TASKS=(
   confirm_region
   create_bucket
   confirm_folder
+  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
   select_workflow
   select_install_trdpty_trix_data
   save_config
@@ -363,6 +370,7 @@ CUSTOMIZED_INSTALL_TASKS=(
   check_permissions enable_apis
   confirm_region
   create_bucket
+  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
   save_config
   check_firestore_existence
   create_subscriptions
@@ -390,6 +398,7 @@ MINIMALISM_TASKS=(
   confirm_project
   confirm_region
   create_bucket
+  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
   save_config
   do_oauth
   check_firestore_existence

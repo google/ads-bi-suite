@@ -63,7 +63,7 @@
     "type": "knot",
     "appendedParameters": {
       "datasetId": "adh_lego_data",
-      "adsDatasetId": "ads_reports_data_v4",
+      "adsDatasetId": "${datasetId}",
       "firebaseTableName": "adh_bi_input"
     },
     "embedded": {
