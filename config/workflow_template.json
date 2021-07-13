@@ -190,7 +190,7 @@
       "table": {
         "projectId": "#PROJECT_ID#",
         "datasetId": "${datasetId}",
-        "tableId": "${queryName}"
+        "tableId": "${tableId}"
       },
       "writeDisposition": "WRITE_TRUNCATE"
     }

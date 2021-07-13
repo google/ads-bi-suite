@@ -79,13 +79,15 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_snd_campaigns"
+            "queryName": "app_snd_campaigns",
+            "tableId": "app_snd_campaigns"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_snd_account_label"
+            "queryName": "app_snd_account_label",
+            "tableId": "app_snd_account_label"
           }
         }
       ]
@@ -98,55 +100,64 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_campaign_perf_report"
+            "queryName": "app_trd_campaign_perf_report",
+            "tableId": "app_trd_campaign_perf_report"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_campaign_conv_report"
+            "queryName": "app_trd_campaign_conv_report",
+            "tableId": "app_trd_campaign_conv_report"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_asset_perf_report"
+            "queryName": "app_trd_asset_perf_report",
+            "tableId": "app_trd_asset_perf_report"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_ads_disapproval_all"
+            "queryName": "app_trd_ads_disapproval_all",
+            "tableId": "app_trd_ads_disapproval_all"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_ads_disapproval_latest"
+            "queryName": "app_trd_ads_disapproval_latest",
+            "tableId": "app_trd_ads_disapproval_latest"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_geo_conv_report"
+            "queryName": "app_trd_geo_conv_report",
+            "tableId": "app_trd_geo_conv_report"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_geo_perf_report"
+            "queryName": "app_trd_geo_perf_report",
+            "tableId": "app_trd_geo_perf_report"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_campaign_criterion"
+            "queryName": "app_trd_campaign_criterion",
+            "tableId": "app_trd_campaign_criterion"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_placement_report"
+            "queryName": "app_trd_placement_report",
+            "tableId": "app_trd_placement_report"
           }
         }
       ]

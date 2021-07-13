@@ -114,43 +114,50 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_account_label"
+            "queryName": "nonapp_snd_account_label",
+            "tableId": "nonapp_snd_account_label"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_account_perf_budget"
+            "queryName": "nonapp_snd_account_perf_budget",
+            "tableId": "nonapp_snd_account_perf_budget"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_account_perf_cost_wow"
+            "queryName": "nonapp_snd_account_perf_cost_wow",
+            "tableId": "nonapp_snd_account_perf_cost_wow"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaign_ads_approval"
+            "queryName": "nonapp_snd_campaign_ads_approval",
+            "tableId": "nonapp_snd_campaign_ads_approval"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaign_perf_pacing"
+            "queryName": "nonapp_snd_campaign_perf_pacing",
+            "tableId": "nonapp_snd_campaign_perf_pacing"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaign_perf_wow"
+            "queryName": "nonapp_snd_campaign_perf_wow",
+            "tableId": "nonapp_snd_campaign_perf_wow"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaigns"
+            "queryName": "nonapp_snd_campaigns",
+            "tableId": "nonapp_snd_campaigns"
           }
         }
       ]
@@ -163,103 +170,120 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_account"
+            "queryName": "nonapp_trd_account",
+            "tableId": "nonapp_trd_account"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_ads_approval"
+            "queryName": "nonapp_trd_ads_approval",
+            "tableId": "nonapp_trd_ads_approval"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_ads_perf"
+            "queryName": "nonapp_trd_ads_perf",
+            "tableId": "nonapp_trd_ads_perf"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_age"
+            "queryName": "nonapp_trd_age",
+            "tableId": "nonapp_trd_age"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_audience"
+            "queryName": "nonapp_trd_audience",
+            "tableId": "nonapp_trd_audience"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_campaign"
+            "queryName": "nonapp_trd_campaign",
+            "tableId": "nonapp_trd_campaign"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_dsa"
+            "queryName": "nonapp_trd_dsa",
+            "tableId": "nonapp_trd_dsa"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_feed_item_perf"
+            "queryName": "nonapp_trd_feed_item_perf",
+            "tableId": "nonapp_trd_feed_item_perf"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_gender"
+            "queryName": "nonapp_trd_gender",
+            "tableId": "nonapp_trd_gender"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_geo"
+            "queryName": "nonapp_trd_geo",
+            "tableId": "nonapp_trd_geo"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_placement"
+            "queryName": "nonapp_trd_placement",
+            "tableId": "nonapp_trd_placement"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_search_keywords"
+            "queryName": "nonapp_trd_search_keywords",
+            "tableId": "nonapp_trd_search_keywords"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_search_term"
+            "queryName": "nonapp_trd_search_term",
+            "tableId": "nonapp_trd_search_term"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_sitelink"
+            "queryName": "nonapp_trd_sitelink",
+            "tableId": "nonapp_trd_sitelink"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_time"
+            "queryName": "nonapp_trd_time",
+            "tableId": "nonapp_trd_time"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_user_interest"
+            "queryName": "nonapp_trd_user_interest",
+            "tableId": "nonapp_trd_user_interest"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_video"
+            "queryName": "nonapp_trd_video",
+            "tableId": "nonapp_trd_video"
           }
         }
       ]
