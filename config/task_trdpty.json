@@ -6,9 +6,8 @@
         {
           "taskId": "trdpty_sql_template",
           "appendedParameters": {
-            "datasetId": "ads_reports_data_v4",
             "destinationTable": "trdpty_scoreboard",
-            "sqlSyntax": "SELECT * FROM ads_reports_data_v4.trdpty_scoreboard_input"
+            "sqlSyntax": "SELECT * FROM ${datasetId}.trdpty_scoreboard_input"
           }
         }
       ]
