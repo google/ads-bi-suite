@@ -163,7 +163,7 @@
     },
     "destination": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_account_performance/${customerId}.ndjson"
+      "name": "reports/${partitionDay}/reports_base_account_performance/${loginCustomerId}/${customerId}.ndjson"
     },
     "errorOptions": {
       "ignoreError": true
@@ -441,8 +441,8 @@
       "target": "ADS",
       "config": {
         "developerToken": "${developerToken}",
-        "customerId": "${mccCid}",
-        "loginCustomerId": "${mccCid}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "geo_target_constant",
           "attributes": [
@@ -525,8 +525,8 @@
       "target": "ADS",
       "config": {
         "developerToken": "${developerToken}",
-        "customerId": "${mccCid}",
-        "loginCustomerId": "${mccCid}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "language_constant",
           "attributes": [

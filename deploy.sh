@@ -38,6 +38,7 @@ TIMEZONE="Asia/Shanghai"
 # The dataset name.
 DATASET_ID="ads_reports_data_v4"
 DATASET_LOCATION="US"
+MCC_CID_TABLE_NAME="mcc_cids"
 
 # Parameter to record the installed workflow,
 # which will be selected in select_workflow().
@@ -215,18 +216,31 @@ pause_cloud_scheduler() {
 #######################################
 # Let user input MCC CID and developer token for cronjob(s).
 # Globals:
-#   MCC_CID
+#   MCC_CIDS
 #   DEVELOPER_TOKEN
 # Arguments:
 #   None
 #######################################
 set_google_ads_account() {
-  while [[ -z ${MCC_CID} ]]; do
+  local mcc_cid_cont="Y"
+  while [[ ${mcc_cid_cont,,} = "y" ]]; do
     printf '%s' "Enter the MCC CID: "
     read -r input
-    MCC_CID=${input}
-    printf '\n'
+    if [[ -z ${input} ]]; then
+      continue
+    fi
+    MCC_CIDS+=",${input}"
+    printf '\n%s' "Do you want to add more MCC CID? [Y/n]: "
+    read -r input
+    if [[ ! -z ${input} ]]; then
+      mcc_cid_cont=${input}
+    fi
   done
+
+  # Left Shift one position to remove the first comma.
+  # After shifting, MCC_CIDS would like "11111,22222".
+  MCC_CIDS=${MCC_CIDS:1}
+
   while [[ -z ${DEVELOPER_TOKEN} ]]; do
     printf '%s' "Enter the developer token: "
     read -r input
@@ -258,8 +272,9 @@ initialize_workflow() {
     select_workflow
   fi
   if [[ ${updateCronjob} -eq 1 ]]; then
-    if [[ -z "${MCC_CID}" || -z "${DEVELOPER_TOKEN}" ]]; then
+    if [[ -z "${MCC_CIDS}" || -z "${DEVELOPER_TOKEN}" ]]; then
       set_google_ads_account
+      create_mcc_cid_table
     fi
   fi
 
@@ -268,7 +283,7 @@ initialize_workflow() {
     "timezone":"'"${TIMEZONE}"'",
     "partitionDay": "${today}",
     "developerToken":"'${DEVELOPER_TOKEN}'",
-    "mccCid":"'${MCC_CID}'",
+    "mccCidTableName": "'${MCC_CID_TABLE_NAME}'",
     "datasetId": "'${DATASET_ID}'"
   }'
   local taskConfigs
@@ -330,6 +345,32 @@ initialize_workflow() {
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_lego_start
     fi
   fi
+}
+
+#######################################
+# Create MCC CID table which stores MCC CIDs.
+# Globals:
+#   DEVELOPER_TOKEN
+#   MCC_CIDS
+#   DATASET_ID
+#   MCC_CID_TABLE_NAME
+#######################################
+create_mcc_cid_table() {
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Starting to create MCC CID table..."
+
+  query="SELECT DISTINCT mccCid FROM UNNEST(SPLIT('%s')) AS mccCid "
+  query+="WHERE mccCid != ''"
+  printf -v query "${query}" "${MCC_CIDS}"
+
+  bq query \
+    --destination_table ${DATASET_ID}.${MCC_CID_TABLE_NAME} \
+    --replace \
+    --nouse_legacy_sql \
+    ${query}
+
+  quit_if_failed $?
+  printf '%s\n' "Succeess to create MCC CID table."
 }
 
 # Tasks for the default installation.
@@ -404,6 +445,7 @@ MINIMALISM_TASKS=(
   check_firestore_existence
   set_google_ads_account
   enable_apis
+  create_mcc_cid_table
   create_subscriptions
   create_sink
   deploy_tentacles
