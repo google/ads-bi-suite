@@ -327,7 +327,11 @@
             "metrics.conversions_value",
             "metrics.all_conversions",
             "metrics.all_conversions_value",
-            "metrics.video_views"
+            "metrics.video_views",
+            "metrics.search_budget_lost_impression_share",
+            "metrics.search_rank_lost_impression_share",
+            "metrics.content_budget_lost_impression_share",
+            "metrics.content_rank_lost_impression_share"
           ],
           "segments": [
             "segments.date",
