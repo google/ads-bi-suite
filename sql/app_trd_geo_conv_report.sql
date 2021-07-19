@@ -38,11 +38,23 @@ FROM
       SUM(metrics.conversions) metrics_conversions,
       SUM(metrics.all_conversions_value) metrics_all_conversions_value,
       SUM(metrics.all_conversions) metrics_all_conversions
-    FROM `${datasetId}.report_app_geo_conversion`
-    WHERE
-      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      OR segments.week < DATE_ADD(
-        DATE(_PARTITIONTIME), INTERVAL -(EXTRACT(DAYOFWEEK FROM segments.week) + 30) day)
+    FROM `${datasetId}.report_app_geo_conversion` r
+    INNER JOIN
+      (
+        SELECT
+          campaign.id campaign_id,
+          segments.week segments_week,
+          MAX(DATE(_partitionTime)) partitionTime
+        FROM
+          `${datasetId}.report_app_geo_conversion`
+        GROUP BY
+          1,
+          2
+      ) t
+      ON
+        t.partitionTime = DATE(r._partitionTime)
+        AND t.campaign_id = r.campaign.id
+        AND t.segments_week = r.segments.week
     GROUP BY 1, 2, 3, 4
   ) conv
 INNER JOIN

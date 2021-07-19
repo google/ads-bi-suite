@@ -15,128 +15,100 @@
 WITH
   camp AS (
     SELECT
-      segments_date,
-      camp.*
+      DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date,
+      *
     FROM
-      (
-        SELECT DISTINCT segments.date segments_date
-        FROM
-          `${datasetId}.report_base_campaign_performance` perf
-        INNER JOIN
-          (
-            SELECT
-              DATE_ADD(DATE(MIN(_PARTITIONTIME)), INTERVAL -1 day) launch_date
-            FROM
-              `${datasetId}.report_base_campaigns`
-          )
-          ON
-            segments.date < launch_date
-        WHERE
-          DATE(perf._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-          OR perf.segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
-      )
-    LEFT JOIN
-      (
-        SELECT
-          *
-        FROM
-          `${datasetId}.report_base_campaigns`
-        WHERE
-          _PARTITIONTIME IN (
-            SELECT
-              MIN(_PARTITIONTIME)
-            FROM
-              `${datasetId}.report_base_campaigns`
-          )
-      ) camp
-      ON
-        1 = 1
+      `${datasetId}.report_base_campaigns`
     UNION ALL
     (
       SELECT
-        DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date,
-        *
+        perf_date segments_date,
+        camp.*
       FROM
-        `${datasetId}.report_base_campaigns`
-    )
-    UNION ALL
-    (
-      SELECT
-        DATE_ADD(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL -1 day) AS segments_date,
-        *
-      FROM
-        `${datasetId}.report_base_campaigns`
-      WHERE
-        _PARTITIONTIME IN (
-          SELECT
-            MAX(_PARTITIONTIME)
-          FROM
-            `${datasetId}.report_base_campaigns`
-        )
-    )
-  ),
-  cc AS (
-    SELECT
-      segments_date,
-      c.*
-    FROM
-      (
-        SELECT DISTINCT segments.date segments_date
-        FROM
-          `${datasetId}.report_base_campaign_performance` perf
-        INNER JOIN
-          (
-            SELECT
-              DATE_ADD(DATE(MIN(_PARTITIONTIME)), INTERVAL -1 day) launch_date
-            FROM
-              `${datasetId}.report_app_campaign_criterion`
-          )
-          ON
-            segments.date < launch_date
-        WHERE
-          DATE(perf._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-          OR perf.segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
-      )
-    LEFT JOIN
-      (
-        SELECT DISTINCT
-          campaign.id campaign_id,
-          campaign_criterion.LANGUAGE.language_constant language_constant,
-          campaign_criterion.location.geo_target_constant geo_target_constant
-        FROM
-          `${datasetId}.report_app_campaign_criterion`
-        WHERE
-          (
-            campaign_criterion.LANGUAGE.language_constant IS NOT NULL
-            OR campaign_criterion.location.geo_target_constant IS NOT NULL)
-          AND _PARTITIONTIME IN (
-            SELECT
-              MIN(_PARTITIONTIME)
-            FROM
-              `${datasetId}.report_app_campaign_criterion`
-            WHERE
-              (
-                campaign_criterion.LANGUAGE.language_constant IS NOT NULL
-                OR campaign_criterion.location.geo_target_constant IS NOT NULL)
-              AND campaign_criterion.negative IS NOT TRUE
-          )
-      ) c
-      ON
-        1 = 1
-    UNION ALL
-    (
-      SELECT DISTINCT
-        DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date,
-        campaign.id campaign_id,
-        campaign_criterion.LANGUAGE.language_constant language_constant,
-        campaign_criterion.location.geo_target_constant geo_target_constant
-      FROM
-        `${datasetId}.report_app_campaign_criterion`
-      WHERE
+        `${datasetId}.report_base_campaigns` camp
+      INNER JOIN
         (
-          campaign_criterion.LANGUAGE.language_constant IS NOT NULL
-          OR campaign_criterion.location.geo_target_constant IS NOT NULL)
-        AND campaign_criterion.negative IS NOT TRUE
+          SELECT
+            f.campaign_id,
+            perf_date,
+            MIN(camp.segments_date) fix
+          FROM
+            (
+              SELECT
+                perf.segments_date AS perf_date,
+                perf.campaign_id,
+                camp.segments_date camp_segments_date
+              FROM
+                (
+                  SELECT DISTINCT
+                    campaign_id,
+                    segments_date
+                  FROM
+                    (
+                      SELECT DISTINCT
+                        campaign.id campaign_id,
+                        segments.date segments_date,
+                        DATE(_partitionTime) partitionTime
+                      FROM
+                        `${datasetId}.report_base_campaign_performance`
+                    )
+                  INNER JOIN
+                    (
+                      SELECT
+                        campaign.id campaign_id,
+                        segments.date segments_date,
+                        MAX(DATE(_partitionTime)) partitionTime
+                      FROM
+                        `${datasetId}.report_base_campaign_performance`
+                      GROUP BY
+                        1,
+                        2
+                    )
+                    USING (
+                      partitionTime,
+                      segments_date,
+                      campaign_id)
+                  ORDER BY
+                    segments_date DESC
+                ) perf
+              LEFT JOIN
+                (
+                  SELECT DISTINCT
+                    campaign.id campaign_id,
+                    DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date
+                  FROM
+                    `${datasetId}.report_base_campaigns`
+                ) camp
+                USING (
+                  campaign_id,
+                  segments_date)
+              ORDER BY
+                perf.segments_date ASC
+            ) f
+          INNER JOIN
+            (
+              SELECT DISTINCT
+                campaign.id campaign_id,
+                DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -1 day) AS segments_date
+              FROM
+                `${datasetId}.report_base_campaigns`
+            ) camp
+            ON
+              f.perf_date < camp.segments_date
+              AND camp.campaign_id = f.campaign_id
+          WHERE
+            f.camp_segments_date IS NULL
+          GROUP BY
+            1,
+            2
+          ORDER BY
+            perf_date DESC
+        ) fix
+        ON
+          camp.campaign.id = fix.campaign_id
+          AND DATE_ADD(DATE(camp._PARTITIONTIME), INTERVAL -1 day) = fix.fix
+      ORDER BY
+        segments_date DESC
     )
   )
 SELECT DISTINCT
@@ -149,8 +121,6 @@ SELECT DISTINCT
   campaign.name campaign_name,
   customer.descriptive_name customer_descriptive_name,
   customer.id customer_id,
-  ifnull(adg.ad_groups, 0) ad_groups,
-  adg.metrics_cost_total,
   language_name,
   language_code,
   country_code,
@@ -222,35 +192,19 @@ SELECT DISTINCT
       OR ARRAY_LENGTH(SPLIT(in_app_conversions, ",")) > 1
       THEN TRUE
     WHEN
-      download_conversions = "GOOGLE_PLAY" AND in_app_conversions = "FIREBASE"
-      OR in_app_conversions = "GOOGLE_PLAY" AND download_conversions = "FIREBASE"
+      download_conversions = "GOOGLE_PLAY"
+        AND in_app_conversions = "FIREBASE"
+      OR in_app_conversions
+        = "GOOGLE_PLAY"
+        AND download_conversions = "FIREBASE"
       THEN FALSE
     WHEN in_app_conversions = download_conversions THEN FALSE
     ELSE
-      FALSE
+      TRUE
     END
     AS mix_bid
 FROM
   camp
-LEFT JOIN
-  (
-    SELECT
-      campaign.id campaign_id,
-      segments.date segments_date,
-      COUNT(DISTINCT ad_group.id) ad_groups,
-      ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost_total
-    FROM
-      `${datasetId}.report_app_ad_group_perf`
-    WHERE
-      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
-    GROUP BY
-      1,
-      2
-  ) adg
-  ON
-    campaign.id = adg.campaign_id
-    AND adg.segments_date = camp.segments_date
 LEFT JOIN
   (
     SELECT
@@ -296,32 +250,54 @@ LEFT JOIN
   (
     SELECT
       campaign_id,
-      segments_date,
-      STRING_AGG(DISTINCT l.language_constant.name ORDER BY l.language_constant.name ASC)
+      STRING_AGG(
+        DISTINCT l.language_constant.name
+        ORDER BY
+          l.language_constant.name ASC)
         language_name,
-      STRING_AGG(DISTINCT l.language_constant.code ORDER BY l.language_constant.code ASC)
+      STRING_AGG(
+        DISTINCT l.language_constant.code
+        ORDER BY
+          l.language_constant.code ASC)
         language_code,
       STRING_AGG(
-        DISTINCT g.geo_target_constant.country_code ORDER BY g.geo_target_constant.country_code ASC)
+        DISTINCT g.geo_target_constant.country_code
+        ORDER BY
+          g.geo_target_constant.country_code ASC)
         country_code,
-      STRING_AGG(DISTINCT g.geo_target_constant.name ORDER BY g.geo_target_constant.name ASC)
+      STRING_AGG(
+        DISTINCT g.geo_target_constant.name
+        ORDER BY
+          g.geo_target_constant.name ASC)
         country_name
     FROM
-      cc
+      (
+        SELECT DISTINCT
+          campaign.id campaign_id,
+          campaign_criterion.LANGUAGE.language_constant language_constant,
+          campaign_criterion.location.geo_target_constant geo_target_constant
+        FROM
+          `${datasetId}.report_app_campaign_criterion`
+        WHERE
+          (
+            campaign_criterion.LANGUAGE.language_constant IS NOT NULL
+            OR campaign_criterion.location.geo_target_constant IS NOT NULL)
+          AND campaign_criterion.negative IS NOT TRUE
+      ) raw
     LEFT JOIN
       `${datasetId}.report_base_language_constant` l
       ON
-        l.language_constant.resource_name = cc.language_constant
+        l.language_constant.resource_name = raw.language_constant
     LEFT JOIN
       `${datasetId}.report_base_geo_target_constant` g
       ON
-        g.geo_target_constant.resource_name = cc.geo_target_constant
+        g.geo_target_constant.resource_name = raw.geo_target_constant
     GROUP BY
-      1,
-      2
+      1
   ) cc
   ON
     cc.campaign_id = camp.campaign.id
-    AND cc.segments_date = camp.segments_date
 WHERE
   campaign.advertising_channel_type = "MULTI_CHANNEL"
+ORDER BY
+  segments_date DESC

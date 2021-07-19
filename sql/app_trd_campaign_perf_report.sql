@@ -34,10 +34,23 @@ FROM
       SUM(metrics.impressions) metrics_impressions,
       ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
       SUM(metrics.conversions) metrics_conversions
-    FROM `${datasetId}.report_base_campaign_performance`
-    WHERE
-      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
+    FROM `${datasetId}.report_base_campaign_performance` r
+    INNER JOIN
+      (
+        SELECT
+          campaign.id campaign_id,
+          segments.date segments_date,
+          MAX(DATE(_partitionTime)) partitionTime
+        FROM
+          `${datasetId}.report_base_campaign_performance`
+        GROUP BY
+          1,
+          2
+      ) t
+      ON
+        t.partitionTime = DATE(r._partitionTime)
+        AND t.campaign_id = r.campaign.id
+        AND t.segments_date = r.segments.date
     GROUP BY 1, 2, 3
   ) network
 LEFT JOIN
@@ -46,10 +59,23 @@ LEFT JOIN
       segments.date segments_date,
       campaign.id campaign_id,
       COUNT(DISTINCT segments.ad_network_type) segments_ad_networks
-    FROM `${datasetId}.report_base_campaign_performance`
-    WHERE
-      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day)
+    FROM `${datasetId}.report_base_campaign_performance` r
+    INNER JOIN
+      (
+        SELECT
+          campaign.id campaign_id,
+          segments.date segments_date,
+          MAX(DATE(_partitionTime)) partitionTime
+        FROM
+          `${datasetId}.report_base_campaign_performance`
+        GROUP BY
+          1,
+          2
+      ) t
+      ON
+        t.partitionTime = DATE(r._partitionTime)
+        AND t.campaign_id = r.campaign.id
+        AND t.segments_date = r.segments.date
     GROUP BY 1, 2
   )
   USING (segments_date, campaign_id)
@@ -71,14 +97,25 @@ LEFT JOIN
           metrics.conversions,
           0))
         in_app_actions
-    FROM `${datasetId}.report_base_campaign_conversion`
-    WHERE
+    FROM `${datasetId}.report_base_campaign_conversion` r
+    INNER JOIN
       (
-        DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-        OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
-      AND metrics.conversions > 0
+        SELECT
+          campaign.id campaign_id,
+          segments.date segments_date,
+          MAX(DATE(_partitionTime)) partitionTime
+        FROM
+          `${datasetId}.report_base_campaign_conversion`
+        GROUP BY
+          1,
+          2
+      ) t
+      ON
+        t.partitionTime = DATE(r._partitionTime)
+        AND t.campaign_id = r.campaign.id
+        AND t.segments_date = r.segments.date
     GROUP BY 1, 2, 3
   ) conv
   USING (campaign_id, segments_date, segments_ad_network_type)
-INNER JOIN `${datasetId}.app_snd_campaigns` camp
+LEFT JOIN `${datasetId}.app_snd_campaigns` camp
   USING (campaign_id, segments_date)
