@@ -392,6 +392,13 @@ app_au() {
   customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
 }
 
+agency_au() {
+  TIMEZONE="Australia/Sydney"
+  INSTALLED_TRDPTY_TRIX_DATA="N"
+  INSTALLED_WORKFLOW="NonApp"
+  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
+}
+
 # Tasks for minimum interaction.
 MINIMALISM_TASKS=(
   "print_welcome LEGO"
