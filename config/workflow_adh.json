@@ -8,7 +8,7 @@
       "biTableId": "firebase_bi",
       "endDate": "${partitionDay}",
       "dateRangeInDays": "7",
-      "customerId":""
+      "customerId":"${adhCustomerId}"
     },
     "next": "adh_trigger_prep_query"
   },

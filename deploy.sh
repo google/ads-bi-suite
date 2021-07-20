@@ -236,6 +236,22 @@ set_google_ads_account() {
 }
 
 #######################################
+# Let user input ADH Customer ID for cronjob(s).
+# Globals:
+#   ADH_CID
+# Arguments:
+#   None
+#######################################
+set_adh_account() {
+  while [[ -z ${ADH_CID} ]]; do
+    printf '%s' "Enter the ADH Customer ID: "
+    read -r input
+    ADH_CID=${input}
+    printf '\n'
+  done
+}
+
+#######################################
 # Initialize task configuration and Cloud Scheduler jobs for the selected
 # workflow.
 # Globals:
@@ -323,10 +339,17 @@ initialize_workflow() {
 
   # Create/update ADH creative task config and cronjob.
   if [[ ${INSTALLED_ADH_CREATIVE_WORKFLOW,,} = "y" ]]; then
+    set_adh_account
+    local adh_message_body='{
+      "timezone":"'"${TIMEZONE}"'",
+      "partitionDay": "${today}",
+      "legoDatasetId": "'${DATASET_ID}'",
+      "adhCustomerId": "'${ADH_CID}'"
+    }'
     update_workflow_task "./config/workflow_adh.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
-      update_workflow_cronjob "adh_lego_start" "0 9 * * 0" \
-        "${message_body}"
+      update_workflow_cronjob "adh_lego_start" "0 13 * * 1" \
+        "${adh_message_body}"
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_lego_start
     fi
   fi
