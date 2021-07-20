@@ -40,7 +40,7 @@ SELECT
   camp.campaign_name,
   gender_name as gender_id,
   age_group_name,
-  conv.app_id,
+  prep.app_id,
   location.country,
   creative.video_message.youtube_video_id as video_id,
   creative.video_message.video_ad_duration as video_ad_duration,
@@ -64,5 +64,6 @@ FROM adh.google_ads_impressions impr
   LEFT JOIN adh.google_ads_adgroupcreative USING (ad_group_creative_id)
   LEFT JOIN adh.google_ads_creative creative USING (creative_id)
   LEFT JOIN tmp.installed_users conv using(impression_id)
+  LEFT JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep ON prep.campaign_id = impr.campaign_id
   WHERE impr.user_id IS NOT NULL
 GROUP BY 1,2,3,4,5,6,7,8,9

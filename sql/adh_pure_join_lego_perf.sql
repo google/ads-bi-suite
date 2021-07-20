@@ -14,9 +14,6 @@
 
 SELECT
   lego.*,
-  gender_id,
-  age_group_name,
-  country,
   installs,
   cost_usd,
   targeted_users,
@@ -60,7 +57,18 @@ FROM (
     10,
     11) lego
 INNER JOIN
-    `${datasetId}.adh_pure_calc_asset_demo_${partitionDay}` adh
+  (SELECT
+    campaign_id,
+    video_id,
+    SUM(installs) AS installs,
+    SUM(cost_usd) AS cost_usd,
+    SUM(targeted_users) AS targeted_users,
+    SUM(impressions) AS impressions,
+    SUM(clicks) AS clicks
+  FROM
+    `${datasetId}.adh_pure_calc_asset_demo_${partitionDay}`
+  GROUP BY 1,2
+    ) adh
 USING
   (video_id,
     campaign_id)

@@ -37,7 +37,7 @@ SELECT
   impr.customer_id,
   impr.campaign_id,
   camp.campaign_name,
-  conv.app_id,
+  prep.app_id,
   location.country,
   aff.affinity_name,
   aff.affinity_category,
@@ -64,5 +64,6 @@ LEFT JOIN adh.affinity aff USING (affinity_id)
 LEFT JOIN adh.google_ads_adgroup adg USING(adgroup_id)
 LEFT JOIN adh.google_ads_adgroupcreative USING (ad_group_creative_id)
 LEFT JOIN adh.google_ads_creative creative USING (creative_id)
+LEFT JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep ON prep.campaign_id = impr.campaign_id
 WHERE impr.user_id IS NOT NULL
 GROUP BY 1,2,3,4,5,6,7,8,9
