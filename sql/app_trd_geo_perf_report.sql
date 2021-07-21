@@ -103,4 +103,4 @@ LEFT JOIN
   USING (campaign_id, segments_week, geographic_view_country_criterion_id, segments_ad_network_type)
 INNER JOIN `${datasetId}.app_snd_campaigns` camp
   USING (campaign_id, segments_week)
-WHERE camp.segments_date = camp.segments_weekg
+WHERE camp.segments_date = camp.segments_week

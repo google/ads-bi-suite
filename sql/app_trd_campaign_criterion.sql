@@ -44,7 +44,7 @@ FROM
           segments.week segments_week,
           MAX(DATE(_partitionTime)) partitionTime
         FROM
-          `${datasetId}.report_base_campaign_performance`
+          `${datasetId}.report_base_geographic_view`
         GROUP BY
           1,
           2
@@ -96,7 +96,7 @@ LEFT JOIN
           segments.week segments_week,
           MAX(DATE(_partitionTime)) partitionTime
         FROM
-          `${datasetId}.report_base_campaign_performance`
+          `${datasetId}.report_app_geo_conversion`
         GROUP BY
           1,
           2
