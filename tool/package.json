@@ -1,0 +1,9 @@
+{
+  "name": "tool",
+  "version": "0.0.0",
+  "author": "xinxincheng@google.com, lushu@google.com, chjerry@google.com",
+  "main": "delete.js",
+  "dependencies": {
+    "@google-cloud/firestore": "^4.13.2"
+  }
+}
