@@ -215,29 +215,58 @@ LEFT JOIN
     FROM
       (
         SELECT
-          campaign.id campaign_id,
-          segments.date segments_date,
+          raw.campaign_id,
+          raw.segments_date,
           IF(
-            segments.conversion_action_category = "DOWNLOAD",
-            STRING_AGG(DISTINCT segments.external_conversion_source),
+            conversion_action_category = "DOWNLOAD",
+            STRING_AGG(DISTINCT external_conversion_source),
             "")
             download_conversions,
           IF(
-            segments.conversion_action_category != "DOWNLOAD",
-            STRING_AGG(DISTINCT segments.external_conversion_source),
+            conversion_action_category != "DOWNLOAD",
+            STRING_AGG(DISTINCT external_conversion_source),
             "")
             in_app_conversions
         FROM
-          `${datasetId}.report_base_campaign_conversion`
-        WHERE
           (
-            DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-            OR segments.date = DATE_ADD(DATE(_PARTITIONTIME), INTERVAL -31 day))
-          AND metrics.conversions > 0
+            SELECT DISTINCT
+              campaign.id campaign_id,
+              segments.date segments_date,
+              DATE(_partitionTime) partitionTime,
+              segments.conversion_action_category conversion_action_category,
+              segments.external_conversion_source external_conversion_source,
+              segments.conversion_action conversion_action
+            FROM
+              `${datasetId}.report_base_campaign_conversion`
+            WHERE metrics.conversions IS NOT NULL
+          ) raw
+        INNER JOIN
+          (
+            SELECT
+              campaign.id campaign_id,
+              segments.date segments_date,
+              MAX(DATE(_partitionTime)) partitionTime
+            FROM
+              `${datasetId}.report_base_campaign_conversion`
+            GROUP BY
+              1,
+              2
+          )
+          USING (
+            partitionTime,
+            segments_date,
+            campaign_id)
+        LEFT JOIN
+          `${datasetId}.report_app_conversion_action` ac
+          ON
+            raw.conversion_action = ac.conversion_action.resource_name
         GROUP BY
-          campaign.id,
-          segments.date,
-          segments.conversion_action_category
+          campaign_id,
+          segments_date,
+          conversion_action_category
+        ORDER BY
+          campaign_id ASC,
+          segments_date DESC
       )
     GROUP BY
       1,
