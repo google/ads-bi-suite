@@ -7,7 +7,7 @@
     "type": "multiple",
     "source": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cid_list/${mccCid}.ndjson"
+      "name": "reports/${partitionDay}/active_cid_list/active_cids.ndjson"
     },
     "destination": {
       "taskId": "download_reports_hourly",
@@ -38,9 +38,8 @@
   "load_reports_hourly": {
     "type": "knot",
     "appendedParameters": {
-      "customerId": "${mccCid}",
-      "loginCustomerId": "${mccCid}",
-      "developerToken": "${developerToken}"
+      "customerId": "0000000000",
+      "loginCustomerId": "0000000000"
     },
     "embedded": {
       "tasks": [
@@ -71,13 +70,15 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_ads_disapproval_all"
+            "queryName": "app_trd_ads_disapproval_all",
+            "tableId": "app_trd_ads_disapproval_all"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "app_trd_ads_disapproval_latest"
+            "queryName": "app_trd_ads_disapproval_latest",
+            "tableId": "app_trd_ads_disapproval_latest"
           }
         }
       ]

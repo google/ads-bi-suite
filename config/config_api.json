@@ -14,6 +14,21 @@
         "multipleTag": "${multipleTag}"
       }
     },
+    "mcc": {
+      "qps": 5,
+      "topic": "#PROJECT_NAMESPACE#-monitor",
+      "message": {
+        "timezone": "${timezone}",
+        "partitionDay": "${partitionDay}",
+        "datasetId": "${datasetId}",
+        "mccCid": "${mccCid}",
+        "developerToken": "${developerToken}"
+      },
+      "attributes": {
+        "taskId": "${taskId}",
+        "multipleTag": "${multipleTag}"
+      }
+    },
     "account": {
       "qps": 20,
       "numberOfThreads": 10,

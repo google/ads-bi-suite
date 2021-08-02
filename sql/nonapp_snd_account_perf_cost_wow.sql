@@ -143,6 +143,6 @@ SELECT
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
       metrics.all_conversions_value,
       0)) AS week2_all_conversion_value
-FROM `${datasetId}.report_base_account_performance`
+FROM `${datasetId}.report_base_account_performance_*`
 WHERE DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
 GROUP BY Customer_id

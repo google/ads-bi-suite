@@ -1,5 +1,44 @@
 {
   "lego_start": {
+    "type": "export",
+    "source": {
+      "projectId": "#PROJECT_ID#",
+      "datasetId": "${datasetId}",
+      "tableId": "${mccCidTableName}"
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/mcc_cids.ndjson"
+    },
+    "options": {
+      "destinationFormat": "NEWLINE_DELIMITED_JSON",
+      "printHeader": false
+    },
+    "next": "get_mcc_reports_and_child_accounts"
+  },
+  "get_mcc_reports_and_child_accounts": {
+    "type": "multiple",
+    "source": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/mcc_cids.ndjson"
+    },
+    "destination": {
+      "taskId": "download_mcc_reports_and_child_accounts",
+      "target": "gcs",
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "#OUTBOUND#/API[PB]_config[mcc]_size[0.05]_${partitionDay}.ndjson"
+      }
+    },
+    "multiple": {
+      "dueTime": 240
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "next": "query_active_account"
+  },
+  "download_mcc_reports_and_child_accounts": {
     "type": "knot",
     "appendedParameters": {
       "customerId": "${mccCid}",
@@ -52,11 +91,11 @@
       "target": "gcs",
       "file": {
         "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[account]_size[0.3]_${partitionDay}.ndjson"
+        "name": "#OUTBOUND#/API[PB]_config[account]_size[0.3]_${partitionDay}_${mccCid}.ndjson"
       }
     },
     "multiple": {
-      "dueTime": 90
+      "dueTime": 180
     },
     "errorOptions": {
       "ignoreError": true
@@ -64,27 +103,25 @@
   },
   "load_account_performance": {
     "type": "knot",
-    "appendedParameters": {
-      "customerId": "${mccCid}",
-      "loginCustomerId": "${mccCid}",
-      "developerToken": "${developerToken}"
-    },
     "embedded": {
       "tasks": [
         {
-          "taskId": "load_report",
+          "taskId": "load_mcc_report",
           "appendedParameters": {
             "targetTable": "base_account_performance"
           }
         }
       ]
-    },
-    "next": "query_active_account"
+    }
   },
   "query_active_account": {
     "type": "query",
     "source": {
-      "sql": "SELECT DISTINCT customer.id AS customerId, '${loginCustomerId}' AS loginCustomerId FROM ${datasetId}.report_base_account_performance WHERE metrics.cost_micros > 0 AND DATE(_partitionTime) =  PARSE_DATE('%Y%m%d', '${partitionDay}')"
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_BUCKET#",
+        "name": "sql/workflow_active_account.sql"
+      }
     },
     "destination": {
       "table": {
@@ -105,7 +142,7 @@
     },
     "destination": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cid_list/${mccCid}.ndjson"
+      "name": "reports/${partitionDay}/active_cids.ndjson"
     },
     "options": {
       "destinationFormat": "NEWLINE_DELIMITED_JSON",
@@ -117,7 +154,7 @@
     "type": "multiple",
     "source": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cid_list/${mccCid}.ndjson"
+      "name": "reports/${partitionDay}/active_cids.ndjson"
     },
     "destination": {
       "taskId": "download_reports_impl",
@@ -135,9 +172,8 @@
   "load_reports": {
     "type": "knot",
     "appendedParameters": {
-      "customerId": "${mccCid}",
-      "loginCustomerId": "${mccCid}",
-      "developerToken": "${developerToken}"
+      "customerId": "0000000000",
+      "loginCustomerId": "0000000000"
     },
     "embedded": {
       "tasks": ["load_reports_impl"]
@@ -159,6 +195,34 @@
       "table": {
         "datasetId": "${datasetId}",
         "tableId": "report_${targetTable}$${partitionDay}"
+      },
+      "tableSchema": {
+        "timePartitioning": {
+          "type": "DAY",
+          "expirationMs": "2592000000"
+        }
+      },
+      "schemaSource": "${targetTable}"
+    },
+    "options": {
+      "sourceFormat": "NEWLINE_DELIMITED_JSON",
+      "writeDisposition": "WRITE_TRUNCATE",
+      "ignoreUnknownValues": true,
+      "autodetect": false
+    }
+  },
+  "load_mcc_report": {
+    "type": "load",
+    "source": {
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "reports/${partitionDay}/reports_${targetTable}/${mccCid}/*"
+      }
+    },
+    "destination": {
+      "table": {
+        "datasetId": "${datasetId}",
+        "tableId": "report_${targetTable}_${mccCid}$${partitionDay}"
       },
       "tableSchema": {
         "timePartitioning": {

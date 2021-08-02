@@ -38,7 +38,7 @@ SELECT
   a.metrics.conversions_value AS Conv_value,
   a.metrics.all_conversions AS All_conversions,
   a.metrics.all_conversions_value AS All_conv_value
-FROM `${datasetId}.report_base_account_performance` a
+FROM `${datasetId}.report_base_account_performance_*` a
 LEFT JOIN `${datasetId}.report_base_account_budget` b
   ON a.customer.id = b.customer.id
 WHERE
