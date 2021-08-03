@@ -7,7 +7,7 @@
     "type": "multiple",
     "source": {
       "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cid_list/active_cids.ndjson"
+      "name": "reports/${partitionDay}/active_cids.ndjson"
     },
     "destination": {
       "taskId": "download_reports_hourly",
@@ -87,6 +87,9 @@
   },
   "trigger_fourth_query_hourly": {
     "type": "knot",
+    "appendedParameters": {
+      "labelSourceTable": "app_snd_account_label"
+    },
     "embedded": {
       "tasks": [
         {
