@@ -74,6 +74,7 @@
     "type": "knot",
     "embedded": {
       "tasks": ["app_fourth_query", "nonapp_fourth_query"]
-    }
+    },
+    "next": "trigger_customized_task"
   }
 }

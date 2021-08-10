@@ -1,0 +1,22 @@
+{
+  "trigger_customized_task": {
+    "type": "knot",
+    "embedded": {
+      "tasks": ["customized_query_task1", "customized_query_task2"]
+    }
+  },
+  "customized_query_task1": {
+    "taskId": "query_general",
+    "appendedParameters": {
+      "queryName": "customized_query_1",
+      "tableId": "customized_query_1"
+    }
+  },
+  "customized_query_task2": {
+    "taskId": "query_general",
+    "appendedParameters": {
+      "queryName": "customized_query_2",
+      "tableId": "customized_query_2"
+    }
+  }
+}
