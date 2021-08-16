@@ -89,6 +89,13 @@
             "queryName": "app_snd_account_label",
             "tableId": "app_snd_account_label"
           }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_snd_account_changes",
+            "tableId": "app_snd_account_changes"
+          }
         }
       ]
     }

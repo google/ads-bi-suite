@@ -12,8 +12,10 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+
 SELECT
   camp.*,
+  ifnull(change_frequency_bp, TRUE) change_frequency_bp,
   segments_ad_networks,
   network.segments_ad_network_type segments_ad_network_type,
   ifnull(installs, 0) installs,
@@ -118,4 +120,6 @@ LEFT JOIN
   ) conv
   USING (campaign_id, segments_date, segments_ad_network_type)
 LEFT JOIN `${datasetId}.app_snd_campaigns` camp
+  USING (campaign_id, segments_date)
+LEFT JOIN `${datasetId}.app_snd_account_changes` change
   USING (campaign_id, segments_date)

@@ -132,6 +132,41 @@
       "ignoreError": true
     }
   },
+  "base_account_change_event": {
+    "type": "report",
+    "source": {
+      "target": "ADS",
+      "config": {
+        "developerToken": "${developerToken}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
+        "reportQuery": {
+          "entity": "change_event",
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "change_event.change_date_time",
+            "change_event.change_resource_type"
+          ],
+          "constraints": [
+            {
+              "key": "change_event.change_date_time",
+              "op": "DURING",
+              "val": "LAST_14_DAYS"
+            }
+          ],
+          "limit": 1000
+        }
+      }
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/reports_base_account_change_event/${customerId}.ndjson"
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
   "base_account_performance": {
     "type": "report",
     "source": {
