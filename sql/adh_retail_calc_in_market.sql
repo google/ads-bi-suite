@@ -12,6 +12,8 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+
+
 CREATE TABLE
  imp_status as (
    SELECT
@@ -25,9 +27,8 @@ CREATE TABLE
    WHERE imp.user_id != "0"
        #AND affinity_id is not null
        AND in_market_id is not null
-       AND adgroup_id IN UNNEST(
-@adgroup_ids
-         )
+       AND adgroup_id IN
+       (SELECT DISTINCT adGroupId FROM `adh_audience.adh_config_prep_${partitionDay}`)
    GROUP BY 1,2,3
  );
 
@@ -41,9 +42,8 @@ CREATE TABLE
        sum(advertiser_click_cost_usd) AS click_cost
      FROM adh.google_ads_clicks ck
      WHERE ck.user_id != "0"
-       AND impression_data.adgroup_id IN UNNEST(
-@adgroup_ids
-         )
+       AND impression_data.adgroup_id IN
+       (SELECT DISTINCT adGroupId FROM `adh_audience.adh_config_prep_${partitionDay}`)
    GROUP BY 1
  );
 
@@ -54,10 +54,10 @@ conversion AS (
     count(conversion_id. time_usec) AS convs
   FROM
     adh.google_ads_conversions
-  WHERE user_id != '0' AND conversion_type IN UNNEST(@conversion_ids)
-  AND impression_data.adgroup_id  IN UNNEST(
-@adgroup_ids
-         )
+  WHERE user_id != '0' AND conversion_type IN
+  (SELECT DISTINCT conversion_id FROM `adh_audience.adh_config_prep_${partitionDay}`)
+  AND impression_data.adgroup_id  IN
+  (SELECT DISTINCT adGroupId FROM `adh_audience.adh_config_prep_${partitionDay}`)
   GROUP BY 1
   );
 
