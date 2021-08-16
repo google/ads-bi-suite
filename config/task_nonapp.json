@@ -467,6 +467,11 @@
               "key": "metrics.impressions",
               "op": ">=",
               "val": 1
+            },
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "!=",
+              "val": "MULTI_CHANNEL"
             }
           ],
           "date_constant": "LAST_30_DAYS"
@@ -571,6 +576,11 @@
               "key": "metrics.impressions",
               "op": ">=",
               "val": 1
+            },
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "!=",
+              "val": "MULTI_CHANNEL"
             }
           ],
           "date_constant": "LAST_30_DAYS"
@@ -614,13 +624,20 @@
             "campaign.advertising_channel_type",
             "campaign.advertising_channel_sub_type",
             "campaign.status",
-            "ad_group_criterion.user_interest.user_interest_category"
+            "ad_group.id",
+            "ad_group_criterion.user_interest.user_interest_category",
+            "ad_group_criterion.status"
           ],
           "constraints": [
             {
               "key": "metrics.impressions",
               "op": ">=",
               "val": 1
+            },
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "!=",
+              "val": "MULTI_CHANNEL"
             }
           ],
           "date_constant": "LAST_30_DAYS"
@@ -856,6 +873,11 @@
               "key": "metrics.impressions",
               "op": ">=",
               "val": 1
+            },
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "=",
+              "val": "SEARCH"
             }
           ],
           "date_constant": "LAST_30_DAYS"
@@ -1046,6 +1068,11 @@
               "key": "metrics.impressions",
               "op": ">=",
               "val": 1
+            },
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "!=",
+              "val": "MULTI_CHANNEL"
             }
           ],
           "date_constant": "LAST_30_DAYS"
