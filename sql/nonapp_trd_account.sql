@@ -18,6 +18,8 @@ SELECT DISTINCT
   Day,
   Currency,
   Account_optimization_score,
+  Payment_account_id,
+  Payment_account_name,
   Budget_approved,
   Budget_served,
   Budget_start_time,

@@ -112,6 +112,8 @@
             "customer.id",
             "customer.currency_code",
             "customer.descriptive_name",
+            "billing_setup.payments_account_info.payments_account_id",
+            "billing_setup.payments_account_info.payments_account_name",
             "account_budget.status",
             "account_budget.approved_spending_limit_micros",
             "account_budget.approved_start_date_time",

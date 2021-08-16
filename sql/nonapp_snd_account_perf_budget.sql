@@ -18,6 +18,8 @@ SELECT
   CAST(a.segments.date AS DATE) AS Day,
   a.customer.currency_code AS Currency,
   avg(a.customer.optimization_score) AS Account_optimization_score,
+  b.billing_setup.payments_account_info.payments_account_id AS Payment_account_id,
+  b.billing_setup.payments_account_info.payments_account_name AS Payment_account_name,
   b.account_budget.adjusted_spending_limit_micros / 1000000 AS Budget_approved,
   b.account_budget.amount_served_micros / 1000000 AS Budget_served,
   b.account_budget.approved_start_date_time AS Budget_start_time,
@@ -50,6 +52,6 @@ WHERE
     OR CAST(b.account_budget.approved_end_date_time AS datetime)
       >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
 GROUP BY
-  Account, Customer_ID, Day, Currency, Budget_approved, Budget_served, Budget_start_time,
-  Budget_end_time, Budget_remain, clicks, impressions, cost, conversions, Conv_value,
-  All_conversions, All_conv_value
+  Account, Customer_ID, Day, Currency, Payment_account_id, Payment_account_name, Budget_approved,
+  Budget_served, Budget_start_time, Budget_end_time, Budget_remain, clicks, impressions, cost,
+  conversions, Conv_value, All_conversions, All_conv_value
