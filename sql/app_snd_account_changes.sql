@@ -19,9 +19,9 @@ WITH
       change.change_event.change_resource_type AS change_resource_type,
       camp.campaign_budget.amount_micros AS campaign_budget_amount,
     FROM
-      `{datasetId}.report_base_account_change_event` change
+      `${datasetId}.report_base_account_change_event` change
     LEFT JOIN
-      `{datasetId}.report_base_campaigns` camp
+      `${datasetId}.report_base_campaigns` camp
       ON
         change.campaign.id = camp.campaign.id
         AND DATE(change_event.change_date_time) = DATE(camp._PARTITIONTIME)
@@ -47,9 +47,9 @@ WITH
       change.change_event.change_resource_type AS change_resource_type,
       camp.campaign.target_cpa.target_cpa_micros AS campaign_target_cpa_target_cpa
     FROM
-      `{datasetId}.report_base_account_change_event` change
+      `${datasetId}.report_base_account_change_event` change
     LEFT JOIN
-      `{datasetId}.report_base_campaigns` camp
+      `${datasetId}.report_base_campaigns` camp
       ON
         change.campaign.id = camp.campaign.id
         AND DATE(change_event.change_date_time) = DATE(camp._PARTITIONTIME)
@@ -113,9 +113,9 @@ WITH
       perf.campaign.id AS campaign_id,
       MIN(perf.segments.date) AS campaign_start_date
     FROM
-      `{datasetId}.report_base_campaign_performance` perf
+      `${datasetId}.report_base_campaign_performance` perf
     LEFT JOIN
-      `{datasetId}.report_base_campaign_conversion` conv
+      `${datasetId}.report_base_campaign_conversion` conv
       ON
         conv.campaign.id = perf.campaign.id
         AND conv.segments.date = perf.segments.date
