@@ -436,7 +436,7 @@
               "val": "MULTI_CHANNEL"
             }
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
