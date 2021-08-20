@@ -88,7 +88,7 @@ Command to fetch the codebase for a specific release version.
 git clone https://professional-services.googlesource.com/solutions/ads-bi-suite && cd ads-bi-suite && git checkout $VERSION_TAG
 ```
 
-_Due to [b/192634659](b/192634659), use git commit id (9b8e740) to fetch this version instead of version tag._
+_Due to [b/192634659](b/192634659), use git commit id (f1fcf00) to fetch this version instead of version tag._
 
 ### 3.2 Versions
 
@@ -106,3 +106,4 @@ developer token.
 | v.20210705 | 2021-07-05   | [b/192903846](b/192903846) | Yes | Advertiser: Add Video Campaign asset report. Agency: Add auto-bidding UI. |
 | v.20210719 | 2021-07-19   | [b/194749564](b/194749564) | Yes | Advertiser: ADH Pure; Key BP Metrics Tracking. Agency: Bid low alert, AC cannibalization alert. |
 | v.20210802 | 2021-08-02   | [b/195254576](b/195254576) | Yes | Advertiser: ADH Pure Dashboard. Agency: Support multiple MCCs. (**Please be noted that this version requires the reinstallation.**) |
+| v.20210816 | 2021-08-16   | [b/196923807](b/196923807) | Yes | Advertiser: Change frequency alert. Agency: Search impression share lost UI. AddSupport local customization. |
