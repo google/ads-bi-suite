@@ -7,9 +7,9 @@
   ],
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/data-tasks-coordinator": "0.5.3",
-    "@google-cloud/gmp-googleads-connector": "1.2.4",
-    "@google-cloud/nodejs-common": "0.7.5"
+    "@google-cloud/data-tasks-coordinator": "0.6.3",
+    "@google-cloud/gmp-googleads-connector": "1.3.2",
+    "@google-cloud/nodejs-common": "0.8.2"
   },
   "scripts": {
     "test": "node node_modules/jasmine/bin/jasmine"

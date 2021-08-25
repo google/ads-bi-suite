@@ -298,6 +298,7 @@ initialize_workflow() {
   local message_body='{
     "timezone":"'"${TIMEZONE}"'",
     "partitionDay": "${today}",
+    "fromDate": "${today_sub_30_hyphenated}",
     "developerToken":"'${DEVELOPER_TOKEN}'",
     "mccCidTableName": "'${MCC_CID_TABLE_NAME}'",
     "datasetId": "'${DATASET_ID}'"

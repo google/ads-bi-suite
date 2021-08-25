@@ -194,7 +194,7 @@
             "customer.descriptive_name",
             "customer.optimization_score"
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
@@ -393,7 +393,7 @@
               "val": 1
             }
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
@@ -548,7 +548,7 @@
               "val": 1
             }
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
@@ -692,7 +692,7 @@
               "val": 1
             }
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
