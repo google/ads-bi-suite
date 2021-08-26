@@ -1,17 +1,15 @@
 {
   "trdpty_load_reports": {
     "type": "knot",
-    "embedded": {
-      "tasks": [
-        {
-          "taskId": "trdpty_sql_template",
-          "appendedParameters": {
-            "destinationTable": "trdpty_scoreboard",
-            "sqlSyntax": "SELECT * FROM ${datasetId}.trdpty_scoreboard_input"
-          }
+    "next": [
+      {
+        "taskId": "trdpty_sql_template",
+        "appendedParameters": {
+          "destinationTable": "trdpty_scoreboard",
+          "sqlSyntax": "SELECT * FROM ${datasetId}.trdpty_scoreboard_input"
         }
-      ]
-    }
+      }
+    ]
   },
   "trdpty_sql_template": {
     "type": "query",
