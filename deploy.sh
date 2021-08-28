@@ -21,10 +21,14 @@ SOLUTION_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
   RELATIVE_PATH="node_modules/@google-cloud"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/nodejs-common/bin/install_functions.sh"
-  source "${SOLUTION_ROOT}/${RELATIVE_PATH}/nodejs-common/bin/bigquery.sh"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/gmp-googleads-connector/deploy.sh"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/data-tasks-coordinator/deploy.sh"
 fi
+
+# Google Ads API version
+GOOGLE_ADS_API_VERSION=v7
+# ADH API version
+ADH_API_VERSION=v1
 
 # Project namespace will be used as prefix of the name of Cloud Functions,
 # Pub/Sub topics, etc.
@@ -34,137 +38,104 @@ PROJECT_NAMESPACE="lego"
 # Project configuration file.
 CONFIG_FILE="./config/config.json"
 TIMEZONE="Asia/Shanghai"
-
-# The dataset name.
-DATASET_ID="ads_reports_data_v4"
-DATASET_LOCATION="US"
-MCC_CID_TABLE_NAME="mcc_cids"
-
-# Parameter to record the installed workflow,
-# which will be selected in select_workflow().
-INSTALLED_WORKFLOW=""
-
-# Parameter to record if user choose to install the experimental task,
-# third party trix data, which will be asked in
-# select_install_trdpty_trix_data().
-INSTALLED_TRDPTY_TRIX_DATA="Y"
-
-# Parameter to record if user choose to install the APP related workflow,
-# which will be asked in select_install_app_related_workflow().
-INSTALLED_APP_HOURLY_WORKFLOW="N"
-INSTALLED_ADH_CREATIVE_WORKFLOW="N"
-
-# Parameter name used by functions to load and save config.
-CONFIG_FOLDER_NAME="OUTBOUND"
-CONFIG_ITEMS=(
-  "PROJECT_NAMESPACE"
-  "GCS_BUCKET"
-  "DATASET_ID"
-  "INSTALLED_WORKFLOW"
-  "INSTALLED_TRDPTY_TRIX_DATA"
-  "INSTALLED_APP_HOURLY_WORKFLOW"
-  "INSTALLED_ADH_CREATIVE_WORKFLOW"
-  "${CONFIG_FOLDER_NAME}"
-)
-
-# Google Ads and ADH API enabled in this solution.
-ENABLED_OAUTH_SCOPES+=(
-  "https://www.googleapis.com/auth/adwords"
-  "https://www.googleapis.com/auth/adsdatahub"
-)
-
-GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
 # Enabled API for Tentacles.
 # Use this to create of topics and subscriptions.
 SELECTED_APIS_CODES=("PB")
 # Tentacles monitor folder.
 OUTBOUND=outbound/
+# The dataset name.
+DATASET_ID="ads_reports_data_v4"
+
+# The main workflow that this instance will install. There are following
+# available workflows:
+# 1. App
+# 2. NonApp
+# 3. App + NonApp
+INSTALLED_WORKFLOW=""
+# Other functionality, e.g. ADH or Google Sheet, etc.
+INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+INSTALLED_TRDPTY_TRIX_DATA="N"
+# The task config files that will be installed by default
+DEFAULT_TASK_CONFIG=(
+  "./config/task_base.json"
+  "./config/workflow_template.json"
+)
+
+# Parameter name used by functions to load and save config.
+CONFIG_ITEMS=(
+  "PROJECT_NAMESPACE"
+  "TIMEZONE"
+  "REGION"
+  "GCS_BUCKET"
+  "OUTBOUND"
+  "DATASET_ID"
+  "DATASET_LOCATION"
+  "INSTALLED_WORKFLOW"
+  "INSTALLED_TRDPTY_TRIX_DATA"
+  "INSTALLED_ADH_CREATIVE_WORKFLOW"
+)
+
+# Description of functionality.
+INTEGRATION_APIS_DESCRIPTION=(
+  "Google Ads Reports for App"
+  "Google Ads Reports for NonApp"
+  "Ads Data Hub Queries"
+  "BigQuery query external tables based on Google Sheet"
+)
+
+# APIs need to be enabled if corresponding functionality are selected.
+INTEGRATION_APIS=(
+  "googleads.googleapis.com"
+  "googleads.googleapis.com"
+  "adsdatahub.googleapis.com"
+  "drive.googleapis.com"
+)
 
 #######################################
-# Select the workflow version. There are three major workflows now,
-# App, NonApp, and App + NonApp.
+# Extra setting up for the LEGO functionality.
 # Globals:
-#   INSTALLED_WORKFLOW
-#   INSTALLED_APP_HOURLY_WORKFLOW
-#   INSTALLED_ADH_CREATIVE_WORKFLOW
+#   None
 # Arguments:
 #   None
 #######################################
-select_workflow() {
-  ((STEP += 1))
-  printf '%s\n' "Step ${STEP}: Selecting the workflows."
-
-  local workflows=("App" "NonApp" "App + NonApp")
-  local greeting="Enter the number of the workflow that you want to install:"
-
-  # Install different workflow and related tasks config.
-  printf '%s\n' "${greeting}"
-  select workflow in "${workflows[@]}"; do
-    case "${workflow}" in
-    "App")
-      INSTALLED_WORKFLOW="${workflow}"
-      select_install_app_related_workflow
-      break
-      ;;
-    "NonApp")
-      INSTALLED_WORKFLOW="${workflow}"
-      break
-      ;;
-    "App + NonApp")
-      INSTALLED_WORKFLOW="${workflow}"
-      select_install_app_related_workflow
-      break
-      ;;
-    *)
-      printf '%s\n' "${greeting}"
-      ;;
-    esac
-  done
-}
-
-# TODO(chjerry): Rename the function name and related task configs after
-# finalizing the specific use case. Current naming is too general to understand
-# the perpose of this function.
-#######################################
-# Whether install the third party workflow to pull Google Sheet content.
-# Globals:
-#   INSTALLED_TRDPTY_TRIX_DATA
-# Arguments:
-#   None
-#######################################
-select_install_trdpty_trix_data() {
-  ((STEP += 1))
-
-  printf '%s\n' "Step ${STEP}: Do you want to install task\
-, 3rd-Party Trix Data? [Y/n]: "
-  local confirm_install
-  read -r confirm_install
-  if [[ ${confirm_install} = "N" || ${confirm_install} = "n" ]]; then
-    INSTALLED_TRDPTY_TRIX_DATA="N"
-  fi
-}
-
-#######################################
-# Whether install the APP related and extended workflows.
-# Globals:
-#   INSTALLED_APP_HOURLY_WORKFLOW
-#   INSTALLED_ADH_CREATIVE_WORKFLOW
-# Arguments:
-#   None
-#######################################
-select_install_app_related_workflow() {
-  printf '%s\n' "Do you want to install APP hourly workflow? [Y/n]: "
-  local confirm_install
-  read -r confirm_install
-  if [[ -z ${confirm_install} || ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
-    INSTALLED_APP_HOURLY_WORKFLOW="Y"
-  fi
-
-  printf '%s\n' "Do you want to install ADH weekly workflow? [Y/n]: "
-  read -r confirm_install
-  if [[ -z ${confirm_install} || ${confirm_install} = "Y" || ${confirm_install} = "y" ]]; then
+setup_functionality_for_installation() {
+  case "${1}" in
+  0)
+    if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
+      INSTALLED_WORKFLOW="App"
+    elif [[ "${INSTALLED_WORKFLOW}" == "NonApp" ]]; then
+      INSTALLED_WORKFLOW="App + NonApp"
+    fi
+    ;;
+  1)
+    if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
+      INSTALLED_WORKFLOW="NonApp"
+    elif [[ "${INSTALLED_WORKFLOW}" == "App" ]]; then
+      INSTALLED_WORKFLOW="App + NonApp"
+    fi
+    ;;
+  2)
     INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
-  fi
+    ;;
+  3)
+    INSTALLED_TRDPTY_TRIX_DATA="Y"
+    ;;
+  *) ;;
+  esac
+}
+
+#######################################
+# Confirm LEGO functionality. This will update the API list that need to be
+# enabled and the scope for OAuth authentication.
+# Globals:
+#   None
+# Arguments:
+#   None
+#######################################
+confirm_functionality() {
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Selecting LEGO functionality..."
+  confirm_apis "setup_functionality_for_installation"
 }
 
 #######################################
@@ -214,6 +185,64 @@ pause_cloud_scheduler() {
 }
 
 #######################################
+# Validate whether the current OAuth token, CID and developer token can work.
+# Globals:
+#   None
+# Arguments:
+#   MCC CID
+#   Developer token
+#######################################
+validate_googleads_account() {
+  local cid developerToken accessToken request response
+  cid=${1}
+  developerToken=${2}
+  accessToken=$(get_oauth_access_token)
+  request=(
+    -H "Accept: application/json"
+    -H "Content-Type: application/json"
+    -H "developer-token: ${developerToken}"
+    -H "Authorization: Bearer ${accessToken}"
+    -s "https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${cid}"
+  )
+  response=$(curl "${request[@]}")
+  local errorCode errorMessage
+  errorCode=$(get_value_from_json_string "${response}" "error.code")
+  if [[ -n "${errorCode}" ]]; then
+    errorMessage=$(get_value_from_json_string "${response}" "error.message")
+    printf '%s\n' "Validate failed: ${errorMessage}" >&2
+    return 1
+  fi
+  return 0
+}
+
+#######################################
+# Validate whether the current OAuth token can access ADH account.
+# Globals:
+#   None
+# Arguments:
+#   ADH CID
+#######################################
+validate_adh_account() {
+  local cid accessToken request response
+  cid=${1}
+  accessToken=$(get_oauth_access_token)
+  request=(
+    -H "Accept: application/json"
+    -H "Content-Type: application/json"
+    -H "Authorization: Bearer ${accessToken}"
+    -s "https://adsdatahub.googleapis.com/${ADH_API_VERSION}/customers/${cid}"
+  )
+  response=$(curl "${request[@]}")
+  local errorCode errorMessage
+  errorCode=$(get_value_from_json_string "${response}" "error.code")
+  if [[ -n "${errorCode}" ]]; then
+    errorMessage=$(get_value_from_json_string "${response}" "error.message")
+    printf '%s\n' "Validate failed: ${errorMessage}" >&2
+    return 1
+  fi
+  return 0
+}
+#######################################
 # Let user input MCC CID and developer token for cronjob(s).
 # Globals:
 #   MCC_CIDS
@@ -222,30 +251,58 @@ pause_cloud_scheduler() {
 #   None
 #######################################
 set_google_ads_account() {
-  local mcc_cid_cont="Y"
-  while [[ ${mcc_cid_cont,,} = "y" ]]; do
-    printf '%s' "Enter the MCC CID: "
-    read -r input
-    if [[ -z ${input} ]]; then
-      continue
-    fi
-    MCC_CIDS+=",${input}"
-    printf '\n%s' "Do you want to add more MCC CID? [Y/n]: "
-    read -r input
-    if [[ ! -z ${input} ]]; then
-      mcc_cid_cont=${input}
-    fi
-  done
-
-  # Left Shift one position to remove the first comma.
-  # After shifting, MCC_CIDS would like "11111,22222".
-  MCC_CIDS=${MCC_CIDS:1}
-
-  while [[ -z ${DEVELOPER_TOKEN} ]]; do
-    printf '%s' "Enter the developer token: "
-    read -r input
-    DEVELOPER_TOKEN=${input}
-    printf '\n'
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Setting up Google Ads account information..."
+  local developToken mccCids
+  while :; do
+    # Developer token
+    while [[ -z ${developToken} ]]; do
+      printf '%s' "  Enter the developer token[${DEVELOPER_TOKEN}]: "
+      read -r input
+      developToken="${input:-${DEVELOPER_TOKEN}}"
+    done
+    DEVELOPER_TOKEN="${developToken}"
+    mccCids=""
+    # MCC CIDs
+    while :; do
+      printf '%s' "  Enter the MCC CID: "
+      read -r input
+      if [[ -z ${input} ]]; then
+        continue
+      fi
+      input="$(printf '%s' "${input}" | sed -r 's/-//g')"
+      printf '%s' "    validating ${input}...... "
+      validate_googleads_account ${input} ${DEVELOPER_TOKEN}
+      if [[ $? -eq 1 ]]; then
+        printf '%s\n' "failed. 
+      Press 'd' to re-enter developer token or  
+            'C' to continue with this MCC CID or 
+            any other key to enter another MCC CID..."
+        local any
+        read -n1 -s any
+        if [[ "${any}" == "d" ]]; then
+          developToken=""
+          continue 2
+        elif [[ "${any}" == "C" ]]; then
+          printf '%s\n' "WARNING! Continue with FAILED MCC ${input}."
+        else
+          continue
+        fi
+      else
+        printf '%s\n' "succeeded."
+      fi
+      mccCids+=",${input}"
+      printf '%s' "  Do you want to add another MCC CID? [Y/n]: "
+      read -r input
+      if [[ ${input} == 'n' || ${input} == 'N' ]]; then
+        break
+      fi
+    done
+    # Left Shift one position to remove the first comma.
+    # After shifting, MCC_CIDS would like "11111,22222".
+    MCC_CIDS="${mccCids:1}"
+    printf '%s\n' "Using Google Ads MCC CIDs: ${MCC_CIDS}."
+    break
   done
 }
 
@@ -257,11 +314,33 @@ set_google_ads_account() {
 #   None
 #######################################
 set_adh_account() {
-  while [[ -z ${ADH_CID} ]]; do
-    printf '%s' "Enter the ADH Customer ID: "
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Setting up Ads Data Hub account information..."
+  while :; do
+    printf '%s' "  Enter the ADH Customer ID: "
     read -r input
-    ADH_CID=${input}
-    printf '\n'
+    if [[ -z ${input} ]]; then
+      continue
+    fi
+    input="$(printf '%s' "${input}" | sed -r 's/-//g')"
+    printf '%s' "    validating ${input}...... "
+    validate_adh_account ${input}
+    if [[ $? -eq 1 ]]; then
+      printf '%s\n' "failed. Press 'C' to continue with this another CID or \
+any other key to enter another CID..."
+      local any
+      read -n1 -s any
+      if [[ "${any}" == "C" ]]; then
+        printf '%s\n' "WARNING! Continue with FAILED CID ${input}."
+      else
+        continue
+      fi
+    else
+      printf '%s\n' "succeeded."
+    fi
+    ADH_CID="${input}"
+    printf '%s\n' "Using ADH Customer ID: ${ADH_CID}."
+    break
   done
 }
 
@@ -285,33 +364,19 @@ initialize_workflow() {
     updateCronjob=1
   fi
   if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
-    select_workflow
-  fi
-  if [[ ${updateCronjob} -eq 1 ]]; then
-    if [[ -z "${MCC_CIDS}" || -z "${DEVELOPER_TOKEN}" ]]; then
-      set_google_ads_account
-      create_mcc_cid_table
-    fi
+    confirm_functionality
   fi
 
+  check_firestore_existence
   # Preparing configuration based on workflow
-  local message_body='{
-    "timezone":"'"${TIMEZONE}"'",
-    "partitionDay": "${today}",
-    "fromDate": "${today_sub_30_hyphenated}",
-    "developerToken":"'${DEVELOPER_TOKEN}'",
-    "mccCidTableName": "'${MCC_CID_TABLE_NAME}'",
-    "datasetId": "'${DATASET_ID}'"
-  }'
   local taskConfigs
-  taskConfigs=(
-    "./config/task_base.json"
-    "./config/workflow_template.json"
-  )
+  taskConfigs=("${DEFAULT_TASK_CONFIG[@]}")
+
   case "${INSTALLED_WORKFLOW}" in
   "App")
     taskConfigs+=("./config/task_app.json")
     taskConfigs+=("./config/workflow_app.json")
+    taskConfigs+=("./config/workflow_app_hourly.json")
     ;;
   "NonApp")
     taskConfigs+=("./config/task_nonapp.json")
@@ -321,6 +386,7 @@ initialize_workflow() {
     taskConfigs+=("./config/task_app.json")
     taskConfigs+=("./config/task_nonapp.json")
     taskConfigs+=("./config/workflow_app_nonapp.json")
+    taskConfigs+=("./config/workflow_app_hourly.json")
     ;;
   *) ;;
   esac
@@ -328,25 +394,35 @@ initialize_workflow() {
   # Create/update workflow task config and cronjob.
   update_workflow_task "${taskConfigs[@]}"
   if [[ ${updateCronjob} -eq 1 ]]; then
-    update_workflow_cronjob "lego_start" "0 6 * * *" "${message_body}"
-  fi
-
-  # Create/update APP hourly task config and cronjob.
-  if [[ ${INSTALLED_APP_HOURLY_WORKFLOW,,} = "y" ]]; then
-    update_workflow_task "./config/workflow_app_hourly.json"
-    if [[ ${updateCronjob} -eq 1 ]]; then
-      update_workflow_cronjob "lego_start_hourly" "0 7-23 * * *" \
-        "${message_body}"
-      pause_cloud_scheduler ${PROJECT_NAMESPACE}-lego_start_hourly
+    if [[ -z "${MCC_CIDS}" || -z "${DEVELOPER_TOKEN}" ]]; then
+      set_google_ads_account
     fi
+    # Change MCC list string from comma separated into '\n' separated.
+    local mccCids
+    mccCids="$(printf '%s' "${MCC_CIDS}" | sed -r 's/,/\\\\n/g')"
+    local message_body='{
+      "timezone":"'"${TIMEZONE}"'",
+      "partitionDay": "${today}",
+      "datasetId": "'"${DATASET_ID}"'",
+      "fromDate": "${today_sub_30_hyphenated}",
+      "developerToken":"'"${DEVELOPER_TOKEN}"'",
+      "mccCids": "'"${mccCids}"'"
+    }'
+    update_workflow_cronjob "lego_start" "0 6 * * *" "${message_body}"
+    update_workflow_cronjob "lego_start_hourly" "0 7-23 * * *" \
+      "${message_body}"
+    pause_cloud_scheduler ${PROJECT_NAMESPACE}-lego_start_hourly
   fi
 
   # Create/update 3rd party data task config and cronjob.
   if [[ ${INSTALLED_TRDPTY_TRIX_DATA,,} = "y" ]]; then
     update_workflow_task "./config/task_trdpty.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
-      # TODO: copied time setting and message body from previous version, but \
-      # they don't make too much sense here. Please consider simplifying them.
+      local message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "datasetId": "'${DATASET_ID}'"
+      }'
       update_workflow_cronjob "trdpty_load_reports" "0 7-23 * * *" \
         "${message_body}"
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-trdpty_load_reports
@@ -355,155 +431,142 @@ initialize_workflow() {
 
   # Create/update ADH creative task config and cronjob.
   if [[ ${INSTALLED_ADH_CREATIVE_WORKFLOW,,} = "y" ]]; then
-    set_adh_account
-    local adh_message_body='{
-      "timezone":"'"${TIMEZONE}"'",
-      "partitionDay": "${today}",
-      "legoDatasetId": "'${DATASET_ID}'",
-      "adhCustomerId": "'${ADH_CID}'"
-    }'
     update_workflow_task "./config/workflow_adh.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
-      update_workflow_cronjob "adh_lego_start" "0 13 * * 1" \
-        "${adh_message_body}"
+      if [[ -z "${ADH_CID}" ]]; then
+        set_adh_account
+      fi
+      local message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "legoDatasetId": "'"${DATASET_ID}"'",
+        "adhCustomerId": "'"${ADH_CID}"'"
+      }'
+      update_workflow_cronjob "adh_lego_start" "0 13 * * 1" "${message_body}"
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_lego_start
     fi
   fi
 }
 
-#######################################
-# Create MCC CID table which stores MCC CIDs.
-# Globals:
-#   DEVELOPER_TOKEN
-#   MCC_CIDS
-#   DATASET_ID
-#   MCC_CID_TABLE_NAME
-#######################################
-create_mcc_cid_table() {
-  ((STEP += 1))
-  printf '%s\n' "Step ${STEP}: Starting to create MCC CID table..."
+# Same tasks group for different installations.
+COMMON_INSTALL_TASKS=(
+  confirm_region
+  enable_apis
+  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
+  save_config
+  create_subscriptions
+  create_sink
+  deploy_tentacles
+  do_oauth
+  deploy_sentinel
+  set_internal_task
+  copy_sql_to_gcs
+  "update_api_config ./config/config_api.json"
+  "initialize_workflow updateCronjob"
+  "print_finished LEGO"
+)
 
-  query="SELECT DISTINCT mccCid FROM UNNEST(SPLIT('%s')) AS mccCid "
-  query+="WHERE mccCid != ''"
-  printf -v query "${query}" "${MCC_CIDS}"
-
-  bq query \
-    --destination_table ${DATASET_ID}.${MCC_CID_TABLE_NAME} \
-    --replace \
-    --nouse_legacy_sql \
-    ${query}
-
-  quit_if_failed $?
-  printf '%s\n' "Succeess to create MCC CID table."
-}
-
-# Tasks for the default installation.
+# Installation for default solution.
 DEFAULT_INSTALL_TASKS=(
   "print_welcome LEGO"
   check_in_cloud_shell
-  confirm_namespace
   confirm_project
-  check_permissions_native
-  enable_apis
-  confirm_region
-  create_bucket
-  confirm_folder
-  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
-  select_workflow
-  select_install_trdpty_trix_data
-  save_config
-  check_firestore_existence
-  create_subscriptions
-  create_sink
-  deploy_tentacles
-  do_oauth
-  deploy_cloud_functions_task_coordinator
-  copy_sql_to_gcs
-  set_internal_task
-  "update_api_config ./config/config_api.json"
-  "initialize_workflow updateCronjob"
-  "print_finished LEGO"
+  check_permissions
+  confirm_namespace
+  confirm_functionality
+  confirm_timezone
+  "${COMMON_INSTALL_TASKS[@]}"
 )
 
-# Tasks for detailed cases (workflows)
-# There are some repeated tasks across different lists.
-# TODO(lushu): Assess whether or not to reduce this dupalication.
+# Installation for specific solutions, no 'confirm_functionality' or
+# 'confirm_timezone' step
 CUSTOMIZED_INSTALL_TASKS=(
   "print_welcome LEGO"
   check_in_cloud_shell
-  confirm_namespace confirm_project
-  check_permissions enable_apis
-  confirm_region
-  create_bucket
-  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
-  save_config
-  check_firestore_existence
-  create_subscriptions
-  create_sink
-  deploy_tentacles
-  do_oauth
-  deploy_cloud_functions_task_coordinator
-  copy_sql_to_gcs
-  set_internal_task
-  "update_api_config ./config/config_api.json"
-  "initialize_workflow updateCronjob"
-  "print_finished LEGO"
+  confirm_project
+  check_permissions
+  confirm_namespace
+  "${COMMON_INSTALL_TASKS[@]}"
 )
-
-app_au() {
-  TIMEZONE="Australia/Sydney"
-  INSTALLED_TRDPTY_TRIX_DATA="N"
-  INSTALLED_WORKFLOW="App"
-  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
-}
-
-agency_au() {
-  TIMEZONE="Australia/Sydney"
-  INSTALLED_TRDPTY_TRIX_DATA="N"
-  INSTALLED_WORKFLOW="NonApp"
-  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
-}
 
 # Tasks for minimum interaction.
 MINIMALISM_TASKS=(
   "print_welcome LEGO"
   confirm_project
   confirm_region
-  create_bucket
-  "confirm_dataset_with_location DATASET_ID ${DATASET_LOCATION}"
+  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
   save_config
   do_oauth
-  check_firestore_existence
-  set_google_ads_account
   enable_apis
-  create_mcc_cid_table
+  "initialize_workflow updateCronjob"
   create_subscriptions
   create_sink
   deploy_tentacles
-  deploy_cloud_functions_task_coordinator
-  copy_sql_to_gcs
+  deploy_sentinel
   set_internal_task
+  copy_sql_to_gcs
   "update_api_config ./config/config_api.json"
-  "initialize_workflow updateCronjob"
   "print_finished LEGO"
 )
 
-quick_app() {
+setup_cn() {
+  TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
+  INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
+}
+
+cn_app() {
+  setup_cn
   INSTALLED_WORKFLOW="App"
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
-quick_nonapp() {
-  INSTALLED_TRDPTY_TRIX_DATA="Y"
+cn_nonapp() {
+  setup_cn
   INSTALLED_WORKFLOW="NonApp"
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
-quick_all() {
-  INSTALLED_TRDPTY_TRIX_DATA="Y"
+cn_agency() {
+  setup_cn
   INSTALLED_WORKFLOW="App + NonApp"
   customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+cn_adh() {
+  setup_cn
+  INSTALLED_WORKFLOW="App + NonApp"
+  INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
+  GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+setup_au() {
+  TIMEZONE="Australia/Sydney"
+  INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_TRDPTY_TRIX_DATA="N"
+  DEFAULT_TASK_CONFIG+=("./config/task_customized_empty.json")
+  GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
+}
+
+# AU App: App, no ADH, no Sheet
+au_app() {
+  setup_au
+  INSTALLED_WORKFLOW="App"
+  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
+}
+
+# AU Agency: App + NonApp, no ADH, no Sheet
+au_agency() {
+  setup_au
+  INSTALLED_WORKFLOW="App + NonApp"
+  customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
 }
 
 run_default_function "$@"
