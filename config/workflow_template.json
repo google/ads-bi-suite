@@ -1,26 +1,11 @@
 {
   "lego_start": {
-    "type": "export",
-    "source": {
-      "projectId": "#PROJECT_ID#",
-      "datasetId": "${datasetId}",
-      "tableId": "${mccCidTableName}"
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/mcc_cids.ndjson"
-    },
-    "options": {
-      "destinationFormat": "NEWLINE_DELIMITED_JSON",
-      "printHeader": false
-    },
-    "next": "get_mcc_reports_and_child_accounts"
-  },
-  "get_mcc_reports_and_child_accounts": {
     "type": "multiple",
     "source": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/mcc_cids.ndjson"
+      "csv": {
+        "header": "mccCid",
+        "records": "${mccCids}"
+      }
     },
     "destination": {
       "taskId": "download_mcc_reports_and_child_accounts",
@@ -45,7 +30,10 @@
       "loginCustomerId": "${mccCid}"
     },
     "embedded": {
-      "tasks": ["download_mcc_reports_impl", "get_child_accounts"]
+      "tasks": [
+        "download_mcc_reports_impl",
+        "get_child_accounts"
+      ]
     },
     "errorOptions": {
       "ignoreError": true
@@ -62,7 +50,9 @@
         "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer_client",
-          "attributes": ["customer_client.id"],
+          "attributes": [
+            "customer_client.id"
+          ],
           "constraints": [
             {
               "customer_client.manager": "FALSE"
@@ -83,8 +73,10 @@
   "get_all_account_performance": {
     "type": "multiple",
     "source": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "${reportFile.name}"
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "${reportFile.name}"
+      }
     },
     "destination": {
       "taskId": "base_account_performance",
@@ -153,8 +145,10 @@
   "get_reports": {
     "type": "multiple",
     "source": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cids.ndjson"
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "reports/${partitionDay}/active_cids.ndjson"
+      }
     },
     "destination": {
       "taskId": "download_reports_impl",
@@ -176,7 +170,9 @@
       "loginCustomerId": "0000000000"
     },
     "embedded": {
-      "tasks": ["load_reports_impl"]
+      "tasks": [
+        "load_reports_impl"
+      ]
     },
     "next": "trigger_snd_query_impl"
   },

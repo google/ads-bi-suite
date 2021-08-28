@@ -6,8 +6,10 @@
   "get_reports_hourly": {
     "type": "multiple",
     "source": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/active_cids.ndjson"
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "reports/${partitionDay}/active_cids.ndjson"
+      }
     },
     "destination": {
       "taskId": "download_reports_hourly",
