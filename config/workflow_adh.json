@@ -2,13 +2,13 @@
   "adh_lego_start": {
     "type": "knot",
     "appendedParameters": {
-      "legoDatasetId": "ads_reports_data_v4",
+      "legoDatasetId": "${legoDatasetId}",
       "adhDatasetId": "adh_apps_data",
       "biDatasetId": "adh_apps_data",
       "biTableId": "firebase_bi",
       "endDate": "${partitionDay}",
       "dateRangeInDays": "7",
-      "customerId":"${adhCustomerId}"
+      "customerId": "${adhCustomerId}"
     },
     "next": "adh_trigger_prep_query"
   },
@@ -26,7 +26,10 @@
         }
       ]
     },
-    "next": ["adh_pure_trigger_calc_query", "adh_bi_trigger_load_query"]
+    "next": [
+      "adh_pure_trigger_calc_query",
+      "adh_bi_trigger_load_query"
+    ]
   },
   "adh_pure_trigger_calc_query": {
     "type": "knot",
@@ -54,18 +57,16 @@
   },
   "adh_pure_trigger_join_query": {
     "type": "knot",
-    "embedded": {
-      "tasks": [
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
-            "queryName": "adh_pure_join_lego_perf",
-            "datasetId": "${adhDatasetId}",
-            "tableId": "adh_pure_join_lego_perf_${partitionDay}"
-          }
+    "next": [
+      {
+        "taskId": "query_general",
+        "appendedParameters": {
+          "queryName": "adh_pure_join_lego_perf",
+          "datasetId": "${adhDatasetId}",
+          "tableId": "adh_pure_join_lego_perf_${partitionDay}"
         }
-      ]
-    }
+      }
+    ]
   },
   "adh_bi_trigger_load_query": {
     "type": "knot",
@@ -117,18 +118,16 @@
   },
   "adh_bi_trigger_join_query": {
     "type": "knot",
-    "embedded": {
-      "tasks": [
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
-            "queryName": "adh_bi_join_lego_perf",
-            "datasetId": "${adhDatasetId}",
-            "tableId": "adh_bi_join_lego_perf_${partitionDay}"
-          }
+    "next": [
+      {
+        "taskId": "query_general",
+        "appendedParameters": {
+          "queryName": "adh_bi_join_lego_perf",
+          "datasetId": "${adhDatasetId}",
+          "tableId": "adh_bi_join_lego_perf_${partitionDay}"
         }
-      ]
-    }
+      }
+    ]
   },
   "adh_query_general": {
     "type": "query_adh",
