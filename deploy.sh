@@ -55,6 +55,7 @@ INSTALLED_WORKFLOW=""
 # Other functionality, e.g. ADH or Google Sheet, etc.
 INSTALLED_ADH_CREATIVE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
+INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
 # The task config files that will be installed by default
 DEFAULT_TASK_CONFIG=(
   "./config/task_base.json"
@@ -72,6 +73,7 @@ CONFIG_ITEMS=(
   "DATASET_LOCATION"
   "INSTALLED_WORKFLOW"
   "INSTALLED_TRDPTY_TRIX_DATA"
+  "INSTALLED_BACKFILL_WORKFLOW_TRIGGER"
   "INSTALLED_ADH_CREATIVE_WORKFLOW"
 )
 
@@ -81,6 +83,8 @@ INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports for NonApp"
   "Ads Data Hub Queries"
   "BigQuery query external tables based on Google Sheet"
+  "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
+Reports also."
 )
 
 # APIs need to be enabled if corresponding functionality are selected.
@@ -89,6 +93,7 @@ INTEGRATION_APIS=(
   "googleads.googleapis.com"
   "adsdatahub.googleapis.com"
   "drive.googleapis.com"
+  "N/A"
 )
 
 #######################################
@@ -119,6 +124,9 @@ setup_functionality_for_installation() {
     ;;
   3)
     INSTALLED_TRDPTY_TRIX_DATA="Y"
+    ;;
+  4)
+    INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
     ;;
   *) ;;
   esac
@@ -161,13 +169,16 @@ update_workflow_task() {
 #   Task Id
 #   Cron time string
 #   Message body
+#   Cronjob name
 #######################################
 update_workflow_cronjob() {
   local task_id=$1
   local cron=$2
   local message_body=$3
+  local cronjob_name=$4
+  cronjob_name="${cronjob_name:-${PROJECT_NAMESPACE}-${task_id}}"
   create_or_update_cloud_scheduler_for_pubsub \
-    ${PROJECT_NAMESPACE}-${task_id} \
+    ${cronjob_name} \
     "${cron}" \
     "${TIMEZONE}" \
     ${PROJECT_NAMESPACE}-monitor \
@@ -350,6 +361,8 @@ any other key to enter another CID..."
 # Globals:
 #   INSTALLED_WORKFLOW
 #   INSTALLED_TRDPTY_TRIX_DATA
+#   INSTALLED_ADH_CREATIVE_WORKFLOW
+#   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
 # Arguments:
 #   Whether update cronjob.
 #######################################
@@ -412,6 +425,21 @@ initialize_workflow() {
     update_workflow_cronjob "lego_start_hourly" "0 7-23 * * *" \
       "${message_body}"
     pause_cloud_scheduler ${PROJECT_NAMESPACE}-lego_start_hourly
+
+    # Create backfill cronjob.
+    if [[ ${INSTALLED_BACKFILL_WORKFLOW_TRIGGER,,} = "y" ]]; then
+      local backfill_message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "datasetId": "'"${DATASET_ID}"'",
+        "fromDate": "${today_sub_90_hyphenated}",
+        "developerToken":"'"${DEVELOPER_TOKEN}"'",
+        "mccCids": "'"${mccCids}"'"
+      }'
+      update_workflow_cronjob "lego_start" "0 12 1 7 *" \
+        "${backfill_message_body}" "${PROJECT_NAMESPACE}-lego_start_backfill"
+      pause_cloud_scheduler ${PROJECT_NAMESPACE}-lego_start_backfill
+    fi
   fi
 
   # Create/update 3rd party data task config and cronjob.
@@ -515,6 +543,7 @@ setup_cn() {
   TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 }
@@ -550,6 +579,7 @@ setup_au() {
   TIMEZONE="Australia/Sydney"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
   INSTALLED_TRDPTY_TRIX_DATA="N"
+  INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   DEFAULT_TASK_CONFIG+=("./config/task_customized_empty.json")
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
