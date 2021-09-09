@@ -30,10 +30,7 @@
       "loginCustomerId": "${mccCid}"
     },
     "embedded": {
-      "tasks": [
-        "download_mcc_reports_impl",
-        "get_child_accounts"
-      ]
+      "tasks": ["download_mcc_reports_impl", "get_child_accounts"]
     },
     "errorOptions": {
       "ignoreError": true
@@ -50,9 +47,7 @@
         "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer_client",
-          "attributes": [
-            "customer_client.id"
-          ],
+          "attributes": ["customer_client.id"],
           "constraints": [
             {
               "customer_client.manager": "FALSE"
@@ -170,9 +165,7 @@
       "loginCustomerId": "0000000000"
     },
     "embedded": {
-      "tasks": [
-        "load_reports_impl"
-      ]
+      "tasks": ["load_reports_impl"]
     },
     "next": "trigger_snd_query_impl"
   },
@@ -256,7 +249,11 @@
   "mark_label": {
     "type": "query",
     "source": {
-      "sql": "SELECT a.*, l.name AS Label FROM `${datasetId}.${queryName}` a LEFT JOIN `${datasetId}.${labelSourceTable}` l ON a.customer_id = l.id"
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_BUCKET#",
+        "name": "sql/make_label.sql"
+      }
     },
     "destination": {
       "table": {
