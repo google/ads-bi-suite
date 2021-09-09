@@ -13,17 +13,15 @@
 -- limitations under the License.
 
 SELECT
-  a.customer.descriptive_name AS Account,
-  a.customer.id AS Customer_ID,
+  a.customer.id AS customer_id,
   CAST(a.segments.date AS DATE) AS Day,
-  a.customer.currency_code AS Currency,
-  avg(a.customer.optimization_score) AS Account_optimization_score,
   b.billing_setup.payments_account_info.payments_account_id AS Payment_account_id,
   b.billing_setup.payments_account_info.payments_account_name AS Payment_account_name,
   b.account_budget.adjusted_spending_limit_micros / 1000000 AS Budget_approved,
   b.account_budget.amount_served_micros / 1000000 AS Budget_served,
   b.account_budget.approved_start_date_time AS Budget_start_time,
   b.account_budget.approved_end_date_time AS Budget_end_time,
+  b.account_budget.proposed_spending_limit_type AS Spending_limit,
   (
     ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
     - b.account_budget.amount_served_micros)
@@ -32,14 +30,7 @@ SELECT
     (
       ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
       - b.account_budget.amount_served_micros))
-    / avg(nullif(a.metrics.cost_micros, 0)) AS Budget_last,
-  a.metrics.clicks AS clicks,
-  a.metrics.impressions AS impressions,
-  a.metrics.cost_micros / 1000000 AS cost,
-  a.metrics.conversions AS conversions,
-  a.metrics.conversions_value AS Conv_value,
-  a.metrics.all_conversions AS All_conversions,
-  a.metrics.all_conversions_value AS All_conv_value
+    / avg(nullif(a.metrics.cost_micros, 0)) AS Budget_last
 FROM `${datasetId}.report_base_account_performance_*` a
 LEFT JOIN `${datasetId}.report_base_account_budget` b
   ON a.customer.id = b.customer.id
@@ -52,6 +43,4 @@ WHERE
     OR CAST(b.account_budget.approved_end_date_time AS datetime)
       >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
 GROUP BY
-  Account, Customer_ID, Day, Currency, Payment_account_id, Payment_account_name, Budget_approved,
-  Budget_served, Budget_start_time, Budget_end_time, Budget_remain, clicks, impressions, cost,
-  conversions, Conv_value, All_conversions, All_conv_value
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10

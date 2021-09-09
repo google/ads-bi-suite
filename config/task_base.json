@@ -119,7 +119,8 @@
             "account_budget.approved_start_date_time",
             "account_budget.approved_end_date_time",
             "account_budget.adjusted_spending_limit_micros",
-            "account_budget.amount_served_micros"
+            "account_budget.amount_served_micros",
+            "account_budget.proposed_spending_limit_type"
           ]
         }
       }
@@ -368,7 +369,9 @@
             "metrics.search_budget_lost_impression_share",
             "metrics.search_rank_lost_impression_share",
             "metrics.content_budget_lost_impression_share",
-            "metrics.content_rank_lost_impression_share"
+            "metrics.content_rank_lost_impression_share",
+            "metrics.search_impression_share",
+            "metrics.view_through_conversions"
           ],
           "segments": [
             "segments.date",
@@ -414,7 +417,7 @@
         "customerId": "${customerId}",
         "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
-          "entity": "detail_placement_view",
+          "entity": "group_placement_view",
           "metrics": [
             "metrics.cost_micros",
             "metrics.impressions",
@@ -434,10 +437,10 @@
             "campaign.status",
             "campaign.advertising_channel_type",
             "campaign.advertising_channel_sub_type",
-            "detail_placement_view.display_name",
-            "detail_placement_view.placement",
-            "detail_placement_view.placement_type",
-            "detail_placement_view.target_url"
+            "group_placement_view.display_name",
+            "group_placement_view.placement",
+            "group_placement_view.placement_type",
+            "group_placement_view.target_url"
           ],
           "constraints": [
             {
@@ -674,12 +677,15 @@
           "segments": ["segments.date"],
           "attributes": [
             "customer.id",
+            "customer.descriptive_name",
+            "customer.currency_code",
             "video.id",
             "video.title",
             "video.duration_millis",
             "video.channel_id",
             "campaign.advertising_channel_type",
             "campaign.advertising_channel_sub_type",
+            "campaign.id",
             "campaign.name",
             "campaign.status",
             "ad_group.id",

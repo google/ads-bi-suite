@@ -24,6 +24,7 @@ SELECT DISTINCT
   a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
   a.ad_group_criterion.keyword.text AS Keyword,
   a.ad_group_criterion.keyword.match_type AS Keyword_match_type,
+  a.ad_group_criterion.quality_info.quality_score AS Keyword_QS,
   a.customer.currency_code AS Currency,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,

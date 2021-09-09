@@ -34,6 +34,7 @@ WITH
             MIN(camp.segments_date) fix
           FROM
             (
+              --If f.camp_segments_date is null, the campaign metadata of that day is missing
               SELECT
                 perf.segments_date AS perf_date,
                 perf.campaign_id,
@@ -41,35 +42,12 @@ WITH
               FROM
                 (
                   SELECT DISTINCT
-                    campaign_id,
-                    segments_date
+                    campaign.id campaign_id,
+                    segments.date segments_date
                   FROM
-                    (
-                      SELECT DISTINCT
-                        campaign.id campaign_id,
-                        segments.date segments_date,
-                        DATE(_partitionTime) partitionTime
-                      FROM
-                        `${datasetId}.report_base_campaign_performance`
-                    )
-                  INNER JOIN
-                    (
-                      SELECT
-                        campaign.id campaign_id,
-                        segments.date segments_date,
-                        MAX(DATE(_partitionTime)) partitionTime
-                      FROM
-                        `${datasetId}.report_base_campaign_performance`
-                      GROUP BY
-                        1,
-                        2
-                    )
-                    USING (
-                      partitionTime,
-                      segments_date,
-                      campaign_id)
+                    `${datasetId}.report_base_campaign_performance`
                   ORDER BY
-                    segments_date DESC
+                    segments.date DESC
                 ) perf
               LEFT JOIN
                 (
@@ -79,9 +57,7 @@ WITH
                   FROM
                     `${datasetId}.report_base_campaigns`
                 ) camp
-                USING (
-                  campaign_id,
-                  segments_date)
+                USING (campaign_id, segments_date)
               ORDER BY
                 perf.segments_date ASC
             ) f
@@ -94,6 +70,7 @@ WITH
                 `${datasetId}.report_base_campaigns`
             ) camp
             ON
+              -- always leverage campaign metadata with greater date
               f.perf_date < camp.segments_date
               AND camp.campaign_id = f.campaign_id
           WHERE
@@ -133,9 +110,14 @@ SELECT DISTINCT
     NULL)
     campaign_app_campaign_setting_app_store,
   IF(
-    campaign.app_campaign_setting.bidding_strategy_goal_type IS NOT NULL,
+    campaign.advertising_channel_type = "MULTI_CHANNEL",
     CASE
       WHEN campaign.advertising_channel_sub_type = "APP_CAMPAIGN_FOR_ENGAGEMENT" THEN "ACe"
+      WHEN
+        campaign.advertising_channel_sub_type = "UNKNOWN"
+        AND campaign.bidding_strategy_type = "TARGET_CPA"
+        AND campaign.advertising_channel_sub_type = "UNKNOWN"
+        THEN "ACp"
       WHEN
         campaign.app_campaign_setting.bidding_strategy_goal_type
         = "OPTIMIZE_INSTALLS_TARGET_INSTALL_COST"
@@ -179,7 +161,9 @@ SELECT DISTINCT
     END
     AS budget_excellence_reason,
   CASE
-    WHEN download_conversions = "FIREBASE" AND in_app_conversions IN ("", "GOOGLE_PLAY", "FIREBASE")
+    WHEN
+      download_conversions = "FIREBASE"
+      AND (in_app_conversions IN ("", "GOOGLE_PLAY", "FIREBASE") OR in_app_conversions IS NULL)
       THEN TRUE
     WHEN download_conversions = "GOOGLE_PLAY" AND in_app_conversions = "FIREBASE" THEN TRUE
     ELSE
@@ -187,20 +171,15 @@ SELECT DISTINCT
     END
     AS firebase_bid,
   CASE
+    WHEN download_conversions = "GOOGLE_PLAY" AND in_app_conversions IN ("FIREBASE", "GOOGLE_PLAY")
+      THEN FALSE
+    WHEN in_app_conversions = download_conversions THEN FALSE
     WHEN
       ARRAY_LENGTH(SPLIT(download_conversions, ",")) > 1
       OR ARRAY_LENGTH(SPLIT(in_app_conversions, ",")) > 1
       THEN TRUE
-    WHEN
-      download_conversions = "GOOGLE_PLAY"
-        AND in_app_conversions = "FIREBASE"
-      OR in_app_conversions
-        = "GOOGLE_PLAY"
-        AND download_conversions = "FIREBASE"
-      THEN FALSE
-    WHEN in_app_conversions = download_conversions THEN FALSE
     ELSE
-      TRUE
+      FALSE
     END
     AS mix_bid
 FROM
@@ -210,22 +189,26 @@ LEFT JOIN
     SELECT
       campaign_id,
       segments_date,
-      STRING_AGG(download_conversions, "") download_conversions,
-      STRING_AGG(in_app_conversions, "") in_app_conversions
+      ifnull(download_conversions, in_app_conversions) download_conversions,
+      ifnull(in_app_conversions, "") in_app_conversions
     FROM
       (
         SELECT
-          raw.campaign_id,
-          raw.segments_date,
-          IF(
-            conversion_action_category = "DOWNLOAD",
-            STRING_AGG(DISTINCT external_conversion_source),
-            "")
+          campaign_id,
+          segments_date,
+          STRING_AGG(
+            DISTINCT
+              IF(
+                conversion_action_category = "download_conversions",
+                external_conversion_source,
+                NULL))
             download_conversions,
-          IF(
-            conversion_action_category != "DOWNLOAD",
-            STRING_AGG(DISTINCT external_conversion_source),
-            "")
+          STRING_AGG(
+            DISTINCT
+              IF(
+                conversion_action_category = "in_app_conversions",
+                external_conversion_source,
+                NULL))
             in_app_conversions
         FROM
           (
@@ -233,12 +216,18 @@ LEFT JOIN
               campaign.id campaign_id,
               segments.date segments_date,
               DATE(_partitionTime) partitionTime,
-              segments.conversion_action_category conversion_action_category,
+              IF(
+                segments.conversion_action_category = "DOWNLOAD",
+                "download_conversions",
+                "in_app_conversions")
+                conversion_action_category,
               segments.external_conversion_source external_conversion_source,
               segments.conversion_action conversion_action
             FROM
               `${datasetId}.report_base_campaign_conversion`
-            WHERE metrics.conversions IS NOT NULL
+            WHERE
+              metrics.conversions IS NOT NULL
+            ORDER BY segments.external_conversion_source ASC
           ) raw
         INNER JOIN
           (
@@ -256,21 +245,17 @@ LEFT JOIN
             partitionTime,
             segments_date,
             campaign_id)
-        LEFT JOIN
+        INNER JOIN
           `${datasetId}.report_app_conversion_action` ac
           ON
             raw.conversion_action = ac.conversion_action.resource_name
+        WHERE
+          ac.conversion_action.status = "ENABLED"
+          AND ac.conversion_action.app_id IS NOT NULL
         GROUP BY
           campaign_id,
-          segments_date,
-          conversion_action_category
-        ORDER BY
-          campaign_id ASC,
-          segments_date DESC
+          segments_date
       )
-    GROUP BY
-      1,
-      2
   ) check
   ON
     campaign.id = check.campaign_id

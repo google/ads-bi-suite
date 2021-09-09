@@ -21,7 +21,7 @@ WITH
 SELECT DISTINCT
   a.*,
   b.billing_setup.payments_account_info.payments_account_id AS Billing_profile, 
-  b.billing_setup.payments_account_info.payments_account_name AS Billing profile_id,
+  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile_id,
   l.name AS Label
 FROM `${datasetId}.${queryName}` a
 LEFT JOIN `${datasetId}.report_base_account_budget` b

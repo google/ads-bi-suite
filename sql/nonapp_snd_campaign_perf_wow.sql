@@ -36,6 +36,22 @@ SELECT
       CAST(segments.date AS string)
         BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
+      metrics.impressions,
+      0)
+    / 1000000) AS week1_impressions,
+  sum(
+    IF(
+      CAST(segments.date AS string)
+        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
+        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
+      metrics.impressions,
+      0)
+    / 1000000) AS week2_impressions,
+  sum(
+    IF(
+      CAST(segments.date AS string)
+        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
+        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
       metrics.cost_micros,
       0))
       / nullif(
