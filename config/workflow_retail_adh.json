@@ -1,0 +1,124 @@
+{
+  "adh_audience_start": {
+    "type": "knot",
+    "appendedParameters": {
+      "legoDatasetId": "ads_reports_data_v4",
+      "adhDatasetId": "adh_audience",
+      "configDatasetId": "adh_audience",
+      "configTableId": "adh_user_config_input",
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": "7",
+      "customerId":"${adhCustomerId}"
+    },
+    "next": "adh_audience_prep_user_config"
+  },
+  "adh_audience_prep_user_config": {
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM ${configDatasetId}.${configTableId}",
+      "external": true
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${adhDatasetId}",
+        "tableId": "adh_config_prep_${partitionDay}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "next": "adh_audience_trigger_prep_query"
+  },
+  "adh_audience_trigger_prep_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_prep",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_prep_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_audience_trigger_calc_query"
+  },
+  "adh_audience_trigger_calc_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_calc_affinity",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_calc_affinity_${partitionDay}"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_calc_in_market",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_calc_in_market_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_pure_trigger_init_join_query"
+  },
+  "adh_pure_trigger_init_join_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_join_lego_init",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_join_lego_init_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_pure_trigger_final_join_query"
+  },
+  "adh_pure_trigger_final_join_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_join_lego_final",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_join_lego_final_${partitionDay}"
+          }
+        }
+      ]
+    }
+  },
+  "adh_query_general": {
+    "type": "query_adh",
+    "adhConfig": {
+      "customerId": "${customerId}"
+    },
+    "source": {
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_BUCKET#",
+        "name": "sql/${queryName}.sql"
+      },
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": "${dateRangeInDays}"
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${tableId}"
+      }
+    }
+  }
+}
