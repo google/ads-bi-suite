@@ -58,7 +58,6 @@ SELECT DISTINCT
   c.metrics.conversions_value AS Conv_value,
   c.metrics.all_conversions_value AS All_conv_value,
   c.metrics.video_views AS Video_view,
-  c.metrics.bounce_rate AS Bounce_rate,
   c.metrics.search_impression_share AS Search_impression_share,
   c.metrics.view_through_conversions AS View_through_conv,
   c.metrics.search_budget_lost_impression_share AS Search_budget_lost_impression_share,
