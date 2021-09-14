@@ -7,7 +7,7 @@
       "configDatasetId": "adh_audience",
       "configTableId": "adh_user_config_input",
       "endDate": "${partitionDay}",
-      "dateRangeInDays": "7",
+      "dateRangeInDays": "30",
       "customerId":"${adhCustomerId}"
     },
     "next": "adh_audience_prep_user_config"

@@ -54,6 +54,7 @@ DATASET_ID="ads_reports_data_v4"
 INSTALLED_WORKFLOW=""
 # Other functionality, e.g. ADH or Google Sheet, etc.
 INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
 INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
 # The task config files that will be installed by default
@@ -75,13 +76,15 @@ CONFIG_ITEMS=(
   "INSTALLED_TRDPTY_TRIX_DATA"
   "INSTALLED_BACKFILL_WORKFLOW_TRIGGER"
   "INSTALLED_ADH_CREATIVE_WORKFLOW"
+  "INSTALLED_ADH_AUDIENCE_WORKFLOW"
 )
 
 # Description of functionality.
 INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports for App"
   "Google Ads Reports for NonApp"
-  "Ads Data Hub Queries"
+  "Ads Data Hub for App Creative"
+  "Ads Data Hub for Audience+"
   "BigQuery query external tables based on Google Sheet"
   "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
 Reports also."
@@ -91,6 +94,7 @@ Reports also."
 INTEGRATION_APIS=(
   "googleads.googleapis.com"
   "googleads.googleapis.com"
+  "adsdatahub.googleapis.com"
   "adsdatahub.googleapis.com"
   "drive.googleapis.com"
   "N/A"
@@ -121,11 +125,20 @@ setup_functionality_for_installation() {
     ;;
   2)
     INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
+    if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
+      INSTALLED_WORKFLOW="App"
+    fi
     ;;
   3)
-    INSTALLED_TRDPTY_TRIX_DATA="Y"
+    INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
+    if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
+      INSTALLED_WORKFLOW="NonApp"
+    fi
     ;;
   4)
+    INSTALLED_TRDPTY_TRIX_DATA="Y"
+    ;;
+  5)
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
     ;;
   *) ;;
@@ -362,6 +375,7 @@ any other key to enter another CID..."
 #   INSTALLED_WORKFLOW
 #   INSTALLED_TRDPTY_TRIX_DATA
 #   INSTALLED_ADH_CREATIVE_WORKFLOW
+#   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
 # Arguments:
 #   Whether update cronjob.
@@ -474,7 +488,27 @@ initialize_workflow() {
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_lego_start
     fi
   fi
+
+    # Create/update ADH audience task config and cronjob.
+  if [[ ${INSTALLED_ADH_AUDIENCE_WORKFLOW,,} = "y" ]]; then
+    update_workflow_task "./config/workflow_retail_adh.json"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      if [[ -z "${ADH_CID}" ]]; then
+        set_adh_account
+      fi
+      local message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "legoDatasetId": "'"${DATASET_ID}"'",
+        "adhCustomerId": "'"${ADH_CID}"'"
+      }'
+      update_workflow_cronjob "adh_audience_start" "0 15 * * 1" "${message_body}"
+      pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_audience_start
+    fi
+  fi
 }
+
+
 
 # Same tasks group for different installations.
 COMMON_INSTALL_TASKS=(
@@ -543,6 +577,7 @@ setup_cn() {
   TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
@@ -566,10 +601,19 @@ cn_agency() {
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
-cn_adh() {
+cn_adh_creative() {
   setup_cn
-  INSTALLED_WORKFLOW="App + NonApp"
+  INSTALLED_WORKFLOW="App"
   INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
+  GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+cn_adh_audience() {
+  setup_cn
+  INSTALLED_WORKFLOW="NonApp"
+  INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
   GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
   customized_install "${MINIMALISM_TASKS[@]}"
@@ -578,6 +622,7 @@ cn_adh() {
 setup_au() {
   TIMEZONE="Australia/Sydney"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_TRDPTY_TRIX_DATA="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   DEFAULT_TASK_CONFIG+=("./config/task_customized_empty.json")
