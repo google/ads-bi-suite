@@ -15,53 +15,15 @@
 SELECT DISTINCT
   camp.*,
   geo_target_constant_canonical_name,
-  ifnull(conv.installs, 0) installs,
-  ifnull(conv.in_app_actions, 0) in_app_actions,
+  IFNULL(conv.installs, 0) installs,
+  IFNULL(conv.in_app_actions, 0) in_app_actions,
   segments_ad_network_type segments_ad_network_type,
   metrics_clicks,
   metrics_conversions_value,
   metrics_impressions,
   metrics_conversions,
   metrics_cost
-FROM
-  (
-    SELECT
-      campaign.id campaign_id,
-      segments.week segments_week,
-      segments.ad_network_type segments_ad_network_type,
-      geographic_view.country_criterion_id geographic_view_country_criterion_id,
-      SUM(metrics.clicks) metrics_clicks,
-      SUM(metrics.conversions_value) metrics_conversions_value,
-      SUM(metrics.impressions) metrics_impressions,
-      ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
-      SUM(metrics.conversions) metrics_conversions
-    FROM `${datasetId}.report_base_geographic_view` r
-    INNER JOIN
-      (
-        SELECT
-          campaign.id campaign_id,
-          segments.week segments_week,
-          MAX(DATE(_partitionTime)) partitionTime
-        FROM
-          `${datasetId}.report_base_geographic_view`
-        GROUP BY
-          1,
-          2
-      ) t
-      ON
-        t.partitionTime = DATE(r._partitionTime)
-        AND t.campaign_id = r.campaign.id
-        AND t.segments_week = r.segments.week
-    GROUP BY 1, 2, 3, 4
-  ) geo
-INNER JOIN
-  (
-    SELECT DISTINCT
-      geo_target_constant.id geographic_view_country_criterion_id,
-      geo_target_constant.canonical_name geo_target_constant_canonical_name
-    FROM `${datasetId}.report_base_geo_target_constant`
-  ) c
-  USING (geographic_view_country_criterion_id)
+FROM `${datasetId}.base_snd_geo_perf_report`
 LEFT JOIN
   (
     SELECT
@@ -101,6 +63,6 @@ LEFT JOIN
     GROUP BY 1, 2, 3, 4
   ) conv
   USING (campaign_id, segments_week, geographic_view_country_criterion_id, segments_ad_network_type)
-INNER JOIN `${datasetId}.app_snd_campaigns` camp
+INNER JOIN `${datasetId}.base_snd_campaigns` camp
   USING (campaign_id, segments_week)
 WHERE camp.segments_date = camp.segments_week

@@ -13,8 +13,7 @@
 -- limitations under the License.
 
 SELECT
-  customer.id AS Customer_id,
-  campaign.id AS Campaign_id,
+  customer.id AS customer_id,
   sum(
     IF(
       CAST(segments.date AS string)
@@ -36,41 +35,6 @@ SELECT
       CAST(segments.date AS string)
         BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
-      metrics.impressions,
-      0)
-    / 1000000) AS week1_impressions,
-  sum(
-    IF(
-      CAST(segments.date AS string)
-        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
-        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
-      metrics.impressions,
-      0)
-    / 1000000) AS week2_impressions,
-  sum(
-    IF(
-      CAST(segments.date AS string)
-        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
-        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
-      metrics.cost_micros,
-      0))
-      / nullif(
-        sum(
-          IF(
-            CAST(segments.date AS string)
-              BETWEEN CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
-              AND CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
-            metrics.cost_micros,
-            0)),
-        0)
-    - 1 AS cost_wow,
-  sum(
-    IF(
-      CAST(segments.date AS string)
-        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
-        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
       metrics.clicks,
       0)) AS week1_clicks,
   sum(
@@ -80,25 +44,6 @@ SELECT
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
       metrics.clicks,
       0)) AS week2_clicks,
-  sum(
-    IF(
-      CAST(segments.date AS string)
-        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
-        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
-      metrics.clicks,
-      0))
-      / nullif(
-        sum(
-          IF(
-            CAST(segments.date AS string)
-              BETWEEN CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
-              AND CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
-            metrics.clicks,
-            0)),
-        0)
-    - 1 AS clicks_wow,
   sum(
     IF(
       CAST(segments.date AS string)
@@ -118,20 +63,17 @@ SELECT
       CAST(segments.date AS string)
         BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 DAY) AS string)
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 1 DAY) AS string),
-      metrics.conversions,
-      0))
-      / nullif(
-        sum(
-          IF(
-            CAST(segments.date AS string)
-              BETWEEN CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
-              AND CAST(
-                DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
-            metrics.conversions,
-            0)),
-        0)
-    - 1 AS conversions_wow,
+      metrics.impressions,
+      0)
+    / 1000000) AS week1_impressions,
+  sum(
+    IF(
+      CAST(segments.date AS string)
+        BETWEEN CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 14 DAY) AS string)
+        AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
+      metrics.impressions,
+      0)
+    / 1000000) AS week2_impressions,
   sum(
     IF(
       CAST(segments.date AS string)
@@ -160,6 +102,6 @@ SELECT
         AND CAST(DATE_SUB(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 8 DAY) AS string),
       metrics.all_conversions_value,
       0)) AS week2_all_conversion_value
-FROM `${datasetId}.report_base_campaign_performance`
-WHERE Date(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-GROUP BY Customer_id, Campaign_id
+FROM `${datasetId}.report_base_account_performance_*`
+WHERE DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+GROUP BY 1

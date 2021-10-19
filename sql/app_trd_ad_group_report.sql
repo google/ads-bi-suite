@@ -12,10 +12,29 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-SELECT DISTINCT a.customer.id, b.label.name
-FROM `${datasetId}.report_base_customer_label` a
-LEFT JOIN `${datasetId}.report_base_labels` b
-  ON a.customer_label.label = b.label.resource_name
-WHERE
-  DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-  AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+SELECT DISTINCT
+  camp.*,
+  adgroup_id,
+  adgroup_name,
+  adg.adgroup_status,
+  segments_ad_network_type,
+  adg_impressions,
+  adg_clicks,
+  adg_cost,
+  adg_installs,
+  adg_in_app_actions,
+  adg_conversions_value,
+  headline,
+  description,
+  image,
+  video,
+  headline_l,
+  description_l,
+  image_l,
+  video_l
+FROM `${datasetId}.app_snd_ad_group_perf_report` adg
+INNER JOIN
+  `${datasetId}.base_snd_campaigns` camp
+  USING (
+    campaign_id,
+    segments_date)

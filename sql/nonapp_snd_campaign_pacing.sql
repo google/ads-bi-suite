@@ -15,14 +15,13 @@
 SELECT
   p.campaign.id,
   p.campaign.name,
-  AVG(p.campaign.optimization_score) AS avg_campaign_optimization_score,
-  AVG(p.campaign_budget.amount_micros) / 1000000 AS budget,
+  AVG(p.campaign_budget.amount_micros) / 1e6 AS budget,
   spend_7d,
-  safe_divide(AVG(spend_7d), AVG(p.campaign_budget.amount_micros / 1000000)) AS budget_utilization
+  safe_divide(AVG(spend_7d), AVG(p.campaign_budget.amount_micros / 1e6)) AS budget_utilization
 FROM `${datasetId}.report_base_campaigns` p
 LEFT JOIN
   (
-    SELECT c.id, c.name, AVG(cost_micros) / 1000000 AS spend_7d,
+    SELECT c.id, c.name, AVG(cost_micros) / 1e6 AS spend_7d,
     FROM
       (
         SELECT campaign.id, campaign.name, segments.date, SUM(metrics.cost_micros) AS cost_micros

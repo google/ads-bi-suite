@@ -13,32 +13,19 @@
 -- limitations under the License.
 
 SELECT DISTINCT
-  a.customer.descriptive_name AS Account,
-  a.customer.id AS Customer_ID,
-  a.campaign.name AS Campaign,
-  a.campaign.id AS Campaign_ID,
-  a.campaign.status AS Campaign_status,
-  a.campaign.advertising_channel_type AS Campaign_type,
-  a.campaign.advertising_channel_sub_type AS Campaign_sub_type,
-  a.customer.currency_code AS Currency,
-  t.name AS Country_Territory,
-  segments.ad_network_type AS Ad_network_type,
-  a.segments.device AS Device,
-  a.metrics.clicks AS Clicks,
-  a.metrics.impressions AS Impressions,
-  a.metrics.cost_micros / 1000000 AS Cost,
-  a.metrics.conversions AS Conversions,
-  a.metrics.conversions_value AS Conv_value,
-  a.metrics.all_conversions AS All_conversions,
-  a.metrics.all_conversions_value AS All_conv_value
-FROM `${datasetId}.report_base_geographic_view` a
-LEFT JOIN
-  (
-    SELECT geo_target_constant.id, geo_target_constant.name
-    FROM `${datasetId}.report_base_geo_target_constant`
-    GROUP BY 1, 2
-  ) t
-  ON a.geographic_view.country_criterion_id = t.id
-WHERE
-  DATE(a._partitionTime)
-  = PARSE_DATE('%Y%m%d', '${partitionDay}')  #group by 1,2,3,4,5,6,7,8,9,10,11
+  campaign_id Campaign_ID,
+  customer_id Customer_ID,
+  customer_currency_code Currency,
+  customer_descriptive_name Account,
+  campaign_name Campaign,
+  campaign_status Campaign_status,
+  segments_week Week,
+  geo_target_constant_canonical_name Country_Territory,
+  geographic_view_country_criterion_id,
+  segments_ad_network_type Ad_network_type,
+  metrics_clicks Clicks,
+  metrics_conversions_value Conv_value,
+  metrics_impressions Impressions,
+  metrics_conversions Conversions,
+  metrics_cost Cost
+FROM `${datasetId}.base_snd_geo_perf_report`

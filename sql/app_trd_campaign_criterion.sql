@@ -117,7 +117,7 @@ LEFT JOIN
     geographic_view_country_criterion_id,
     segments_ad_network_type)
 INNER JOIN
-  `${datasetId}.app_snd_campaigns` camp
+  `${datasetId}.base_snd_campaigns` camp
   USING (
     campaign_id,
     segments_week)

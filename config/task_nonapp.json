@@ -1,27 +1,4 @@
 {
-  "nonapp_download_reports": {
-    "type": "knot",
-    "embedded": {
-      "tasks": [
-        "nonapp_campaign_perf_age_range",
-        "nonapp_campaign_perf_all_ad",
-        "nonapp_campaign_perf_all_audience",
-        "nonapp_campaign_perf_all_feed_item",
-        "nonapp_campaign_perf_all_time",
-        "nonapp_campaign_perf_dsa",
-        "nonapp_campaign_perf_gender",
-        "nonapp_campaign_perf_search_extensions",
-        "nonapp_campaign_perf_search_keywords",
-        "nonapp_campaign_perf_search_search_term",
-        "nonapp_campaign_perf_user_interest",
-        "nonapp_user_interest",
-        "nonapp_user_lists"
-      ]
-    },
-    "errorOptions": {
-      "ignoreError": true
-    }
-  },
   "nonapp_load_reports": {
     "type": "knot",
     "embedded": {
@@ -114,22 +91,15 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_account_label",
-            "tableId": "nonapp_snd_account_label"
+            "queryName": "nonapp_snd_account_budget",
+            "tableId": "nonapp_snd_account_budget"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_account_perf_budget",
-            "tableId": "nonapp_snd_account_perf_budget"
-          }
-        },
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
-            "queryName": "nonapp_snd_account_perf_cost_wow",
-            "tableId": "nonapp_snd_account_perf_cost_wow"
+            "queryName": "nonapp_snd_account_wow",
+            "tableId": "nonapp_snd_account_wow"
           }
         },
         {
@@ -142,22 +112,15 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaign_perf_pacing",
-            "tableId": "nonapp_snd_campaign_perf_pacing"
+            "queryName": "nonapp_snd_campaign_pacing",
+            "tableId": "nonapp_snd_campaign_pacing"
           }
         },
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_snd_campaign_perf_wow",
-            "tableId": "nonapp_snd_campaign_perf_wow"
-          }
-        },
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
-            "queryName": "nonapp_snd_campaigns",
-            "tableId": "nonapp_snd_campaigns"
+            "queryName": "nonapp_snd_campaign_wow",
+            "tableId": "nonapp_snd_campaign_wow"
           }
         }
       ]

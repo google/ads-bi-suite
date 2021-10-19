@@ -12,7 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-SELECT
+SELECT DISTINCT
   camp.campaign_app_campaign_setting_bidding_strategy_goal_type,
   camp.campaign_app_campaign_setting_app_id,
   camp.country_code,
@@ -47,6 +47,6 @@ FROM
       AND DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   ) p
 INNER JOIN
-  `${datasetId}.app_snd_campaigns` camp
+  `${datasetId}.base_snd_campaigns` camp
   USING (campaign_id)
 WHERE rank < 100

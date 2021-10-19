@@ -16,19 +16,20 @@
       "dueTime": 40,
       "tasks": [
         "base_account_budget",
+        "base_account_change_event",
+        "base_campaign_ads_approval",
         "base_campaign_conversion",
+        "base_campaign_criterion",
         "base_campaign_performance",
         "base_campaigns",
+        "base_customer_label",
         "base_detail_placement_view",
         "base_geographic_view",
-        "base_campaign_ads_approval",
-        "base_customer_label",
         "base_videos",
         "app_conversion_action",
         "app_asset_performance",
         "app_geo_conversion",
         "app_disapprovals_ad_group_ad_asset_view",
-        "app_campaign_criterion",
         "app_ad_group",
         "app_ad_group_perf",
         "app_asset_metadata",
@@ -59,7 +60,7 @@
   "trigger_snd_query_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["app_snd_query", "nonapp_snd_query"]
+      "tasks": ["base_snd_query", "app_snd_query", "nonapp_snd_query"]
     },
     "next": "trigger_trd_query_impl"
   },

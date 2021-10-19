@@ -12,53 +12,59 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-SELECT
+SELECT DISTINCT
   campaign_id,
+  customer_id,
+  customer_currency_code,
+  customer_descriptive_name,
   campaign_name,
   campaign_status,
-  campaign_app_campaign_setting_app_id,
-  campaign_app_campaign_setting_bidding_strategy_goal_type,
-  customer_id,
-  customer_descriptive_name,
-  conv.segments_week,
-  segments_conversion_action_name,
-  conv.geographic_view_country_criterion_id,
+  segments_week,
   geo_target_constant_canonical_name,
-  metrics_conversions_value,
-  metrics_conversions,
-  metrics_all_conversions_value,
-  metrics_all_conversions
+  geographic_view_country_criterion_id,
+  segments_ad_network_type segments_ad_network_type,
+  IFNULL(metrics_clicks, 0) metrics_clicks,
+  IFNULL(metrics_conversions_value, 0) metrics_conversions_value,
+  IFNULL(metrics_impressions, 0) metrics_impressions,
+  IFNULL(metrics_conversions, 0) metrics_conversions,
+  IFNULL(metrics_cost, 0) metrics_cost
 FROM
   (
     SELECT
       campaign.id campaign_id,
+      customer.id customer_id,
+      customer.currency_code customer_currency_code,
+      customer.descriptive_name customer_descriptive_name,
+      campaign.name campaign_name,
+      campaign.status campaign_status,
       segments.week segments_week,
-      segments.conversion_action_name segments_conversion_action_name,
+      segments.ad_network_type segments_ad_network_type,
       geographic_view.country_criterion_id geographic_view_country_criterion_id,
-      IFNULL(SUM(metrics.conversions_value), 0) metrics_conversions_value,
-      IFNULL(SUM(metrics.conversions), 0) metrics_conversions,
-      IFNULL(SUM(metrics.all_conversions_value), 0) metrics_all_conversions_value,
-      IFNULL(SUM(metrics.all_conversions), 0) metrics_all_conversions
-    FROM `${datasetId}.report_app_geo_conversion` r
+      SUM(metrics.clicks) metrics_clicks,
+      SUM(metrics.conversions_value) metrics_conversions_value,
+      SUM(metrics.impressions) metrics_impressions,
+      ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
+      SUM(metrics.conversions) metrics_conversions
+    FROM `${datasetId}.report_base_geographic_view` r
     INNER JOIN
       (
         SELECT
           campaign.id campaign_id,
           segments.week segments_week,
-          MAX(DATE(_partitionTime)) partitionTime
+          MAX(_partitionTime) partitionTime
         FROM
-          `${datasetId}.report_app_geo_conversion`
+          `${datasetId}.report_base_geographic_view`
         GROUP BY
           1,
           2
       ) t
       ON
-        t.partitionTime = DATE(r._partitionTime)
+        t.partitionTime = r._partitionTime
         AND t.campaign_id = r.campaign.id
         AND t.segments_week = r.segments.week
-    GROUP BY 1, 2, 3, 4
-  ) conv
-INNER JOIN
+    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
+  ) geo
+LEFT JOIN
   (
     SELECT DISTINCT
       geo_target_constant.id geographic_view_country_criterion_id,
@@ -66,5 +72,3 @@ INNER JOIN
     FROM `${datasetId}.report_base_geo_target_constant`
   ) c
   USING (geographic_view_country_criterion_id)
-INNER JOIN `${datasetId}.base_snd_campaigns` camp
-  USING (campaign_id, segments_week)

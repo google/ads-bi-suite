@@ -82,19 +82,6 @@ WITH
       1
     HAVING MIN(perf.segments.date) > DATE_SUB(MIN(perf._PARTITIONDATE), INTERVAL 30 DAY)
   )
--- SELECT * FROM (
--- SELECT
--- campaign_id,
--- new_campaigns.campaign_start_date,
--- COUNTIF(ABS(budget_diff) > 0.01) as budget_changes,
--- COUNTIF(ABS(tcpa_diff) > 0.01) as tcpa_changes,
--- FROM change_diffs
--- LEFT JOIN
--- new_campaigns
--- USING
--- (campaign_id)
--- GROUP BY campaign_id, new_campaigns.campaign_start_date)
--- WHERE budget_changes + tcpa_changes > 0
 SELECT
   *,
   (four_less_changes AND no_large_changes AND new_campaign_no_changes) AS change_frequency_bp

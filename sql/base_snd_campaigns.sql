@@ -12,6 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- Backfill missing campaign metadata based on performance data
 WITH
   camp AS (
     SELECT
@@ -70,7 +71,6 @@ WITH
                 `${datasetId}.report_base_campaigns`
             ) camp
             ON
-              -- always leverage campaign metadata with greater date
               f.perf_date < camp.segments_date
               AND camp.campaign_id = f.campaign_id
           WHERE
@@ -88,36 +88,33 @@ WITH
         segments_date DESC
     )
   )
+
+-- Generate campaign metadata
 SELECT DISTINCT
-  customer.currency_code customer_currency_code,
   DATE_ADD(DATE(camp.segments_date), INTERVAL(2 - EXTRACT(DAYOFWEEK FROM camp.segments_date)) day)
     AS segments_week,
+  customer.descriptive_name customer_descriptive_name,
+  customer.id customer_id,
+  customer.currency_code customer_currency_code,
   camp.segments_date segments_date,
   campaign.id campaign_id,
   campaign.advertising_channel_sub_type advertising_channel_sub_type,
+  campaign.advertising_channel_type advertising_channel_type,
   campaign.name campaign_name,
-  customer.descriptive_name customer_descriptive_name,
-  customer.id customer_id,
-  language_name,
-  language_code,
-  country_code,
-  country_name,
+  campaign.status campaign_status,
+  campaign.bidding_strategy_type campaign_bidding_strategy_type,
   campaign.app_campaign_setting.app_id campaign_app_campaign_setting_app_id,
-  ROUND(campaign_budget.amount_micros / 1e6, 2) campaign_budget_amount,
-  IF(
-    campaign.app_campaign_setting.app_store IS NOT NULL,
-    campaign.app_campaign_setting.app_store,
-    NULL)
-    campaign_app_campaign_setting_app_store,
+  IFNULL(campaign.app_campaign_setting.app_store, NULL) campaign_app_campaign_setting_app_store,
   IF(
     campaign.advertising_channel_type = "MULTI_CHANNEL",
     CASE
-      WHEN campaign.advertising_channel_sub_type = "APP_CAMPAIGN_FOR_ENGAGEMENT" THEN "ACe"
+      WHEN campaign.advertising_channel_sub_type = "APP_CAMPAIGN_FOR_ENGAGEMENT"
+        THEN "AC For Engagement"
       WHEN
         campaign.advertising_channel_sub_type = "UNKNOWN"
         AND campaign.bidding_strategy_type = "TARGET_CPA"
         AND campaign.advertising_channel_sub_type = "UNKNOWN"
-        THEN "ACp"
+        THEN "AC for Pre-registration"
       WHEN
         campaign.app_campaign_setting.bidding_strategy_goal_type
         = "OPTIMIZE_INSTALLS_TARGET_INSTALL_COST"
@@ -134,134 +131,27 @@ SELECT DISTINCT
         campaign.app_campaign_setting.bidding_strategy_goal_type
         = "OPTIMIZE_RETURN_ON_ADVERTISING_SPEND"
         THEN "AC for Value"
+      WHEN
+        campaign.advertising_channel_sub_type = "UNKNOWN"
+        AND campaign.bidding_strategy_type = "MAXIMIZE_CONVERSIONS"
+        THEN "Max Conversion"
       ELSE
-        "Max Conversion"
+        "UNKNOWN"
       END,
     NULL) AS campaign_app_campaign_setting_bidding_strategy_goal_type,
-  campaign.status campaign_status,
+  IFNULL(language_name, "") language_name,
+  IFNULL(language_code, "") language_code,
+  IFNULL(country_code, "") country_code,
+  IFNULL(country_name, "") country_name,
+  ROUND(campaign_budget.amount_micros / 1e6, 2) campaign_budget_amount,
   IFNULL(campaign.target_roas.target_roas, 0) campaign_target_roas_target_roas,
-  IF(
-    campaign.target_cpa.target_cpa_micros IS NOT NULL,
-    ROUND(campaign.target_cpa.target_cpa_micros / 1e6, 2),
-    0)
-    campaign_target_cpa_target_cpa,
-  CASE
-    WHEN
-      campaign.app_campaign_setting.bidding_strategy_goal_type
-        = "OPTIMIZE_INSTALLS_TARGET_INSTALL_COST"
-      AND campaign_budget.amount_micros / campaign.target_cpa.target_cpa_micros < 50
-      THEN "Budget < 50x CPI"
-    WHEN
-      campaign.app_campaign_setting.bidding_strategy_goal_type
-        = "OPTIMIZE_IN_APP_CONVERSIONS_TARGET_CONVERSION_COST"
-      AND campaign_budget.amount_micros / campaign.target_cpa.target_cpa_micros < 10
-      THEN "Budget < 10x CPA"
-    ELSE
-      "PASS"
-    END
-    AS budget_excellence_reason,
-  CASE
-    WHEN
-      download_conversions = "FIREBASE"
-      AND (in_app_conversions IN ("", "GOOGLE_PLAY", "FIREBASE") OR in_app_conversions IS NULL)
-      THEN TRUE
-    WHEN download_conversions = "GOOGLE_PLAY" AND in_app_conversions = "FIREBASE" THEN TRUE
-    ELSE
-      FALSE
-    END
-    AS firebase_bid,
-  CASE
-    WHEN download_conversions = "GOOGLE_PLAY" AND in_app_conversions IN ("FIREBASE", "GOOGLE_PLAY")
-      THEN FALSE
-    WHEN in_app_conversions = download_conversions THEN FALSE
-    WHEN
-      ARRAY_LENGTH(SPLIT(download_conversions, ",")) > 1
-      OR ARRAY_LENGTH(SPLIT(in_app_conversions, ",")) > 1
-      THEN TRUE
-    ELSE
-      FALSE
-    END
-    AS mix_bid
+  ROUND(IFNULL(campaign.target_cpa.target_cpa_micros, 0) / 1e6, 2) campaign_target_cpa_target_cpa,
+  ROUND(campaign.optimization_score, 2) campaign_optimization_score
 FROM
   camp
 LEFT JOIN
   (
-    SELECT
-      campaign_id,
-      segments_date,
-      ifnull(download_conversions, in_app_conversions) download_conversions,
-      ifnull(in_app_conversions, "") in_app_conversions
-    FROM
-      (
-        SELECT
-          campaign_id,
-          segments_date,
-          STRING_AGG(
-            DISTINCT
-              IF(
-                conversion_action_category = "download_conversions",
-                external_conversion_source,
-                NULL))
-            download_conversions,
-          STRING_AGG(
-            DISTINCT
-              IF(
-                conversion_action_category = "in_app_conversions",
-                external_conversion_source,
-                NULL))
-            in_app_conversions
-        FROM
-          (
-            SELECT DISTINCT
-              campaign.id campaign_id,
-              segments.date segments_date,
-              DATE(_partitionTime) partitionTime,
-              IF(
-                segments.conversion_action_category = "DOWNLOAD",
-                "download_conversions",
-                "in_app_conversions")
-                conversion_action_category,
-              segments.external_conversion_source external_conversion_source,
-              segments.conversion_action conversion_action
-            FROM
-              `${datasetId}.report_base_campaign_conversion`
-            WHERE
-              metrics.conversions IS NOT NULL
-            ORDER BY segments.external_conversion_source ASC
-          ) raw
-        INNER JOIN
-          (
-            SELECT
-              campaign.id campaign_id,
-              segments.date segments_date,
-              MAX(DATE(_partitionTime)) partitionTime
-            FROM
-              `${datasetId}.report_base_campaign_conversion`
-            GROUP BY
-              1,
-              2
-          )
-          USING (
-            partitionTime,
-            segments_date,
-            campaign_id)
-        INNER JOIN
-          `${datasetId}.report_app_conversion_action` ac
-          ON
-            raw.conversion_action = ac.conversion_action.resource_name
-        WHERE
-          ac.conversion_action.status = "ENABLED"
-          AND ac.conversion_action.app_id IS NOT NULL
-        GROUP BY
-          campaign_id,
-          segments_date
-      )
-  ) check
-  ON
-    campaign.id = check.campaign_id
-    AND check.segments_date = camp.segments_date
-LEFT JOIN
-  (
+    -- Aggregate target country and language codes by campaign
     SELECT
       campaign_id,
       STRING_AGG(
@@ -291,7 +181,7 @@ LEFT JOIN
           campaign_criterion.LANGUAGE.language_constant language_constant,
           campaign_criterion.location.geo_target_constant geo_target_constant
         FROM
-          `${datasetId}.report_app_campaign_criterion`
+          `${datasetId}.report_base_campaign_criterion`
         WHERE
           (
             campaign_criterion.LANGUAGE.language_constant IS NOT NULL
@@ -311,7 +201,3 @@ LEFT JOIN
   ) cc
   ON
     cc.campaign_id = camp.campaign.id
-WHERE
-  campaign.advertising_channel_type = "MULTI_CHANNEL"
-ORDER BY
-  segments_date DESC
