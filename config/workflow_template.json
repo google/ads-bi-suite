@@ -1,5 +1,30 @@
 {
   "lego_start": {
+    "type": "knot",
+    "appendedParameters": {
+      "configDatasetId": "ads_report_configs",
+      "configFxTableId": "fx_rate_raw",
+      "adsDatasetId": "${datasetId}"
+    },
+    "next": "prep_user_config"
+  },
+  "prep_user_config": {
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM ${configDatasetId}.${configFxTableId}",
+      "external": true
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${adsDatasetId}",
+        "tableId": "fx_rate$${partitionDay}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "next": "trigger_multi_mcc_pipeline"
+  },
+  "trigger_multi_mcc_pipeline": {
     "type": "multiple",
     "source": {
       "csv": {
