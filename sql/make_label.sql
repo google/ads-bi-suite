@@ -20,8 +20,8 @@ WITH
   )
 SELECT DISTINCT
   a.*,
-  b.billing_setup.payments_account_info.payments_account_id AS Billing_profile, 
-  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile_id,
+  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile,
+  b.billing_setup.payments_account_info.payments_account_id AS Billing_profile_id,
   l.name AS Label
 FROM `${datasetId}.${queryName}` a
 LEFT JOIN `${datasetId}.report_base_account_budget` b
@@ -31,6 +31,8 @@ LEFT JOIN AGGLabels l
 WHERE
   DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND b.account_budget.approved_start_date_time IS NOT NULL
+  AND CAST(b.account_budget.approved_start_date_time AS datetime)
+    <= PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND (
     b.account_budget.approved_end_date_time IS NULL
     OR CAST(b.account_budget.approved_end_date_time AS datetime)

@@ -40,7 +40,7 @@ WITH
             TRUE,
             FALSE)
             budget_constrained,
-          -- Low bid  is defined as: a campaign is currently (data refreshed day) bid low compared with its actual CPI/CPA/ROAS;
+          -- Low bid is defined as: a campaign is currently (data refreshed day) bid low compared with its actual CPI/CPA/ROAS;
           -- Low bid is more than continuous 4 days of the last 14 days
           CASE
             WHEN
@@ -163,15 +163,37 @@ SELECT DISTINCT
   ifnull(change_frequency_bp, TRUE) change_frequency_bp,
   segments_ad_networks,
   segments_ad_network_type segments_ad_network_type,
-  installs,
-  in_app_actions,
   metrics_clicks,
   metrics_impressions,
   metrics_conversions_value,
   metrics_conversions,
-  metrics_cost
+  metrics_cost,
+  installs,
+  in_app_actions
 FROM
-  `${datasetId}.base_snd_campaign_performance` base
+  (
+    SELECT
+      segments_date,
+      campaign_id,
+      segments_ad_network_type,
+      advertising_channel_type,
+      segments_ad_networks,
+      SUM(metrics_clicks) metrics_clicks,
+      SUM(metrics_impressions) metrics_impressions,
+      SUM(metrics_conversions_value) metrics_conversions_value,
+      SUM(metrics_conversions) metrics_conversions,
+      SUM(metrics_cost) metrics_cost,
+      SUM(installs) installs,
+      SUM(in_app_actions) in_app_actions
+    FROM
+      `${datasetId}.base_snd_campaign_performance`
+    GROUP BY
+      1,
+      2,
+      3,
+      4,
+      5
+  ) base
 LEFT JOIN
   (
     SELECT

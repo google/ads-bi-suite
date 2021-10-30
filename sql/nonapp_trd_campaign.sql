@@ -12,9 +12,23 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
+-- Copyright 2021 Google LLC.
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+
 SELECT DISTINCT
   m.customer_id Customer_ID,
-  m.customer_currency_code Currency,
+  m.currency Currency,
   m.customer_descriptive_name Account,
   c.segments_date Date,
   c.campaign_id Campaign_ID,
@@ -30,13 +44,16 @@ SELECT DISTINCT
   c.lead Lead,
   c.signup Signup,
   c.check_out Check_out,
-  c.metrics_clicks Click,
+  c.metrics_clicks Clicks,
   c.metrics_impressions Impressions,
   c.metrics_conversions_value Conv_value,
   c.metrics_conversions Conversions,
   c.metrics_conversions_by_conversion_date Conversions_by_conversion_date,
   c.metrics_cost Cost,
   c.metrics_view_through_conversions View_through_conversions,
+  c.metrics_video_views Video_views,
+  c.content_budget_lost_impression_share Content_budget_lost_impression_share,
+  c.content_rank_lost_impression_share Content_rank_lost_impression_share,
   c.search_impression_share Search_impressions_share,
   c.search_budget_lost_impression_share Search_budget_lost_impression_share,
   c.search_rank_lost_impression_share Search_rank_lost_impression_share,
@@ -46,8 +63,6 @@ SELECT DISTINCT
   c.metrics_video_quartile_p50_rate,
   c.metrics_video_quartile_p75_rate,
   c.metrics_video_quartile_p100_rate,
-  m.advertising_channel_sub_type Campaign_type,
-  m.advertising_channel_type Campaign_sub_type,
   m.campaign_name Campaign,
   m.campaign_status Campaign_status,
   m.campaign_bidding_strategy_type Bidding_type,

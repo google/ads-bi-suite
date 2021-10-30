@@ -15,10 +15,12 @@
 SELECT DISTINCT
   campaign_id,
   customer_id,
-  customer_currency_code,
+  customer_currency_code currency,
   customer_descriptive_name,
   campaign_name,
   campaign_status,
+  campaign_advertising_channel_type,
+  campaign_advertising_channel_sub_type,
   segments_week,
   geo_target_constant_canonical_name,
   geographic_view_country_criterion_id,
@@ -37,6 +39,8 @@ FROM
       customer.descriptive_name customer_descriptive_name,
       campaign.name campaign_name,
       campaign.status campaign_status,
+      campaign.advertising_channel_type campaign_advertising_channel_type,
+      campaign.advertising_channel_sub_type campaign_advertising_channel_sub_type,
       segments.week segments_week,
       segments.ad_network_type segments_ad_network_type,
       geographic_view.country_criterion_id geographic_view_country_criterion_id,
@@ -62,7 +66,7 @@ FROM
         t.partitionTime = r._partitionTime
         AND t.campaign_id = r.campaign.id
         AND t.segments_week = r.segments.week
-    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
+    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
   ) geo
 LEFT JOIN
   (

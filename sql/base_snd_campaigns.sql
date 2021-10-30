@@ -35,7 +35,7 @@ WITH
             MIN(camp.segments_date) fix
           FROM
             (
-              --If f.camp_segments_date is null, the campaign metadata of that day is missing
+              -- If f.camp_segments_date is null, the campaign metadata of that day is missing
               SELECT
                 perf.segments_date AS perf_date,
                 perf.campaign_id,
@@ -95,7 +95,7 @@ SELECT DISTINCT
     AS segments_week,
   customer.descriptive_name customer_descriptive_name,
   customer.id customer_id,
-  customer.currency_code customer_currency_code,
+  customer.currency_code currency,
   camp.segments_date segments_date,
   campaign.id campaign_id,
   campaign.advertising_channel_sub_type advertising_channel_sub_type,
@@ -143,10 +143,10 @@ SELECT DISTINCT
   IFNULL(language_code, "") language_code,
   IFNULL(country_code, "") country_code,
   IFNULL(country_name, "") country_name,
-  ROUND(campaign_budget.amount_micros / 1e6, 2) campaign_budget_amount,
-  IFNULL(campaign.target_roas.target_roas, 0) campaign_target_roas_target_roas,
-  ROUND(IFNULL(campaign.target_cpa.target_cpa_micros, 0) / 1e6, 2) campaign_target_cpa_target_cpa,
-  ROUND(campaign.optimization_score, 2) campaign_optimization_score
+  ROUND(AVG(campaign_budget.amount_micros) / 1e6, 2) campaign_budget_amount,
+  AVG(campaign.target_roas.target_roas) campaign_target_roas_target_roas,
+  ROUND(AVG(campaign.target_cpa.target_cpa_micros) / 1e6, 2) campaign_target_cpa_target_cpa,
+  ROUND(AVG(campaign.optimization_score), 2) campaign_optimization_score
 FROM
   camp
 LEFT JOIN
@@ -196,8 +196,8 @@ LEFT JOIN
       `${datasetId}.report_base_geo_target_constant` g
       ON
         g.geo_target_constant.resource_name = raw.geo_target_constant
-    GROUP BY
-      1
+    GROUP BY 1
   ) cc
   ON
     cc.campaign_id = camp.campaign.id
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18

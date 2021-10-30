@@ -20,9 +20,10 @@ SELECT DISTINCT
   b.payment_account_name Payment_account_name,
   b.budget_approved Budget_approved,
   b.budget_served Budget_served,
-  b.budget_start_tim Budget_start_time,
+  b.budget_start_time Budget_start_time,
   b.budget_end_time Budget_end_time,
   b.budget_remain Budget_remain,
+  b.spending_limit Spending_limit,
   CASE
     WHEN b.budget_start_time IS NOT NULL THEN b.budget_last
     WHEN b.budget_start_time IS NULL THEN 0
@@ -55,4 +56,4 @@ LEFT JOIN `${datasetId}.nonapp_snd_account_wow` w
   ON b.customer_id = w.customer_id
 LEFT JOIN `${datasetId}.base_snd_campaign_performance` c
   ON b.customer_id = c.customer_id
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25

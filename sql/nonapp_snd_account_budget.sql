@@ -23,6 +23,7 @@ SELECT
   b.account_budget.amount_served_micros / 1e6 budget_served,
   b.account_budget.approved_start_date_time budget_start_time,
   b.account_budget.approved_end_date_time budget_end_time,
+  b.account_budget.proposed_spending_limit_type spending_limit,
   (
     ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
     - b.account_budget.amount_served_micros)
@@ -36,12 +37,14 @@ FROM `${datasetId}.report_base_account_performance_*` a
 LEFT JOIN `${datasetId}.report_base_account_budget` b
   ON a.customer.id = b.customer.id
 WHERE
-  DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '20211019')
-  AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '20211019')
+  DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND b.account_budget.approved_start_date_time IS NOT NULL
+  AND CAST(b.account_budget.approved_start_date_time AS datetime)
+    <= PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND (
     b.account_budget.approved_end_date_time IS NULL
     OR CAST(b.account_budget.approved_end_date_time AS datetime)
       >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
 GROUP BY
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
