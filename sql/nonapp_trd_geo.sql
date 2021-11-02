@@ -15,10 +15,12 @@
 SELECT DISTINCT
   campaign_id Campaign_ID,
   customer_id Customer_ID,
-  customer_currency_code Currency,
+  currency Currency,
   customer_descriptive_name Account,
   campaign_name Campaign,
   campaign_status Campaign_status,
+  campaign_advertising_channel_type AS Campaign_type,
+  campaign_advertising_channel_sub_type AS Campaign_sub_type,
   segments_week Week,
   geo_target_constant_canonical_name Country_Territory,
   geographic_view_country_criterion_id,
