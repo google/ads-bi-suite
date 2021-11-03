@@ -25,7 +25,7 @@ FROM
       campaign.name campaign_name,
       campaign.status campaign_status,
       customer.id customer_id,
-      customer.currency_code customer_currency_code,
+      customer.currency_code currency,
       customer.descriptive_name customer_descriptive_name,
       campaign.advertising_channel_sub_type campaign_advertising_channel_sub_type,
       group_placement_view.display_name display_name,
