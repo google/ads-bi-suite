@@ -45,6 +45,7 @@ SELECTED_APIS_CODES=("PB")
 OUTBOUND=outbound/
 # The dataset name.
 DATASET_ID="ads_reports_data_v4"
+CONFIG_DATASET_ID="ads_report_configs"
 
 # The main workflow that this instance will install. There are following
 # available workflows:
@@ -71,6 +72,7 @@ CONFIG_ITEMS=(
   "GCS_BUCKET"
   "OUTBOUND"
   "DATASET_ID"
+  "CONFIG_DATASET_ID"
   "DATASET_LOCATION"
   "INSTALLED_WORKFLOW"
   "INSTALLED_TRDPTY_TRIX_DATA"
@@ -298,9 +300,9 @@ set_google_ads_account() {
       printf '%s' "    validating ${input}...... "
       validate_googleads_account ${input} ${DEVELOPER_TOKEN}
       if [[ $? -eq 1 ]]; then
-        printf '%s\n' "failed. 
-      Press 'd' to re-enter developer token or  
-            'C' to continue with this MCC CID or 
+        printf '%s\n' "failed.
+      Press 'd' to re-enter developer token or
+            'C' to continue with this MCC CID or
             any other key to enter another MCC CID..."
         local any
         read -n1 -s any
@@ -515,6 +517,7 @@ COMMON_INSTALL_TASKS=(
   confirm_region
   enable_apis
   "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION REGION"
   "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
   save_config
   create_subscriptions
@@ -558,6 +561,7 @@ MINIMALISM_TASKS=(
   confirm_project
   confirm_region
   "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION REGION"
   "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
   save_config
   do_oauth
