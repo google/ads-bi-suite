@@ -15,19 +15,76 @@
 WITH
   AGGLabels AS (
     SELECT id, STRING_AGG(name) AS name
-    FROM `${datasetId}.${labelSourceTable}`
+    FROM ${datasetId}.${labelSourceTable}
     GROUP BY id
   )
 SELECT DISTINCT
   a.*,
-  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile,
   b.billing_setup.payments_account_info.payments_account_id AS Billing_profile_id,
+  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile,
+  rate_usd,
+  rate_aud,
+  rate_sgd,
   l.name AS Label
-FROM `${datasetId}.${queryName}` a
-LEFT JOIN `${datasetId}.report_base_account_budget` b
+FROM ${datasetId}.${queryName} a
+LEFT JOIN ${datasetId}.report_base_account_budget b
   ON a.customer_id = b.customer.id
 LEFT JOIN AGGLabels l
   ON a.customer_id = l.id
+LEFT JOIN
+  (
+    SELECT DISTINCT
+      customer.id customer_id,
+      customer.currency_code currency,
+      rate AS rate_usd
+    FROM
+      ${datasetId}.report_base_campaigns c
+    LEFT JOIN
+      ${datasetId}.fx_rate f
+      ON
+        customer.currency_code = f.fromcur
+    WHERE
+      f.tocur = "USD"
+      AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  )
+  USING (customer_id)
+LEFT JOIN
+  (
+    SELECT DISTINCT
+      customer.id customer_id,
+      customer.currency_code currency,
+      rate AS rate_aud
+    FROM
+      ${datasetId}.report_base_campaigns c
+    LEFT JOIN
+      ${datasetId}.fx_rate f
+      ON
+        customer.currency_code = f.fromcur
+    WHERE
+      f.tocur = "AUD"
+      AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  )
+  USING (customer_id)
+LEFT JOIN
+  (
+    SELECT DISTINCT
+      customer.id customer_id,
+      customer.currency_code currency,
+      rate AS rate_sgd
+    FROM
+      ${datasetId}.report_base_campaigns c
+    LEFT JOIN
+      ${datasetId}.fx_rate f
+      ON
+        customer.currency_code = f.fromcur
+    WHERE
+      f.tocur = "SGD"
+      AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  )
+  USING (customer_id)
 WHERE
   DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND b.account_budget.approved_start_date_time IS NOT NULL
