@@ -15,24 +15,27 @@
 CREATE TABLE installed_users
 AS (
   SELECT *
-            FROM (
-              SELECT
-                impression_id,
-                b.app_id,
-                user_id,
-                ROW_NUMBER()
-                  OVER (
-                    PARTITION BY user_id, b.app_id
-                    ORDER BY query_id.time_usec DESC
-                  ) AS rank
-              FROM adh.google_ads_conversions a
-              INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` b
-              ON b.campaign_id = a.impression_data.campaign_id
-              AND b.conversion_id = cast(a.conversion_type as string)
-              WHERE user_id IS NOT NULL
-      )
-     WHERE rank = 1
+  FROM
+    (
+      SELECT
+        impression_id,
+        b.app_id,
+        user_id,
+        ROW_NUMBER()
+          OVER (
+            PARTITION BY user_id, b.app_id
+            ORDER BY query_id.time_usec DESC
+          ) AS rank
+      FROM adh.google_ads_conversions a
+      INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` b
+        ON
+          b.campaign_id = a.impression_data.campaign_id
+          AND b.conversion_id = CAST(a.conversion_type AS string)
+      WHERE user_id IS NOT NULL
+    )
+  WHERE rank = 1
 );
+
 SELECT
   impr.customer_id,
   impr.campaign_id,
@@ -41,29 +44,39 @@ SELECT
   location.country,
   aff.affinity_name,
   aff.affinity_category,
-  creative.video_message.youtube_video_id as video_id,
-  creative.video_message.video_ad_duration as video_ad_duration,
-  COUNT(distinct impr.user_id) target_users,
-  SUM(IFNULL(advertiser_impression_cost_usd,0) + IFNULL(clk.click_cost_usd,0)) AS cost_usd,
+  creative.video_message.youtube_video_id AS video_id,
+  creative.video_message.video_ad_duration AS video_ad_duration,
+  COUNT(DISTINCT impr.user_id) target_users,
+  SUM(IFNULL(advertiser_impression_cost_usd, 0) + IFNULL(clk.click_cost_usd, 0)) AS cost_usd,
   SUM(click_count) AS clicks,
   COUNT(impr.query_id.time_usec) AS impressions,
-  COUNT(distinct conv.user_id) installs
+  COUNT(DISTINCT conv.user_id) installs
 FROM adh.google_ads_impressions impr
 CROSS JOIN UNNEST(affinity) AS affinity_id
-LEFT JOIN adh.google_ads_campaign camp USING(campaign_id)
-LEFT JOIN (
+LEFT JOIN adh.google_ads_campaign camp
+  USING (campaign_id)
+LEFT JOIN
+  (
     SELECT
       impression_id,
       COUNT(*) click_count,
       SUM(IFNULL(c.advertiser_click_cost_usd, 0)) click_cost_usd
     FROM adh.google_ads_clicks c
-    where user_id IS NOT NULL
-    GROUP BY 1) clk using(impression_id)
-LEFT JOIN tmp.installed_users conv using(impression_id)
-LEFT JOIN adh.affinity aff USING (affinity_id)
-LEFT JOIN adh.google_ads_adgroup adg USING(adgroup_id)
-LEFT JOIN adh.google_ads_adgroupcreative USING (ad_group_creative_id)
-LEFT JOIN adh.google_ads_creative creative USING (creative_id)
-LEFT JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep ON prep.campaign_id = impr.campaign_id
+    WHERE user_id IS NOT NULL
+    GROUP BY 1
+  ) clk
+  USING (impression_id)
+LEFT JOIN tmp.installed_users conv
+  USING (impression_id)
+LEFT JOIN adh.affinity aff
+  USING (affinity_id)
+LEFT JOIN adh.google_ads_adgroup adg
+  USING (adgroup_id)
+LEFT JOIN adh.google_ads_adgroupcreative
+  USING (ad_group_creative_id)
+LEFT JOIN adh.google_ads_creative creative
+  USING (creative_id)
+INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep
+  ON prep.campaign_id = impr.campaign_id
 WHERE impr.user_id IS NOT NULL
-GROUP BY 1,2,3,4,5,6,7,8,9
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
