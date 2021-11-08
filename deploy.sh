@@ -17,6 +17,9 @@
 # Need to get shell lib files ready before import them.
 npm install
 
+# Cloud Functions Runtime Environment.
+CF_RUNTIME=nodejs14
+
 SOLUTION_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
   RELATIVE_PATH="node_modules/@google-cloud"

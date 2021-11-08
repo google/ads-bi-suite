@@ -39,6 +39,7 @@ LEFT JOIN `${datasetId}.report_base_account_budget` b
 WHERE
   DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+  AND b.account_budget.status = "APPROVED"
   AND b.account_budget.approved_start_date_time IS NOT NULL
   AND CAST(b.account_budget.approved_start_date_time AS datetime)
     <= PARSE_DATE('%Y%m%d', '${partitionDay}')
