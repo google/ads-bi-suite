@@ -25,8 +25,8 @@ SELECT DISTINCT
   b.budget_remain Budget_remain,
   b.spending_limit Spending_limit,
   CASE
-    WHEN b.budget_start_time IS NOT NULL THEN b.budget_last
-    WHEN b.budget_start_time IS NULL THEN 0
+    WHEN Budget_start_time IS NOT NULL THEN Budget_last
+    WHEN Budget_start_time IS NULL THEN 0
     ELSE 0
     END Budget_last_days,
   w.week1_cost AS Week1_cost,
@@ -55,5 +55,7 @@ FROM `${datasetId}.nonapp_snd_account_budget` b
 LEFT JOIN `${datasetId}.nonapp_snd_account_wow` w
   ON b.customer_id = w.customer_id
 LEFT JOIN `${datasetId}.base_snd_campaign_performance` c
-  ON b.customer_id = c.customer_id
+  ON
+    b.customer_id = c.customer_id
+    AND b.segment_date = c.segments_date
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
