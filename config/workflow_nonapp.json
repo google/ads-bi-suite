@@ -53,7 +53,7 @@
   "trigger_snd_query_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["nonapp_snd_query"]
+      "tasks": ["base_snd_query", "nonapp_snd_query"]
     },
     "next": "trigger_trd_query_impl"
   },
