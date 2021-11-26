@@ -20,15 +20,32 @@ WITH
   )
 SELECT DISTINCT
   a.*,
-  b.billing_setup.payments_account_info.payments_account_id AS Billing_profile_id,
-  b.billing_setup.payments_account_info.payments_account_name AS Billing_profile,
+  Billing_profile_id,
+  Billing_profile,
   rate_usd,
   rate_aud,
   rate_sgd,
   l.name AS Label
 FROM ${datasetId}.${queryName} a
-LEFT JOIN ${datasetId}.report_base_account_budget b
-  ON a.customer_id = b.customer.id
+LEFT JOIN
+  (
+    SELECT
+      customer.id AS id,
+      STRING_AGG(billing_setup.payments_account_info.payments_account_id) AS Billing_profile_id,
+      STRING_AGG(billing_setup.payments_account_info.payments_account_name) AS Billing_profile
+    FROM ${datasetId}.report_base_account_budget
+    WHERE
+      DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND account_budget.status = "APPROVED"
+      AND account_budget.approved_start_date_time IS NOT NULL
+      AND CAST(account_budget.approved_start_date_time AS datetime)
+        <= PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND (
+        account_budget.approved_end_date_time IS NULL
+        OR CAST(account_budget.approved_end_date_time AS datetime)
+          >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
+  ) b
+  ON a.customer_id = b.id
 LEFT JOIN AGGLabels l
   ON a.customer_id = l.id
 LEFT JOIN
@@ -85,13 +102,3 @@ LEFT JOIN
       AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   )
   USING (customer_id)
-WHERE
-  DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-  AND b.account_budget.status = "APPROVED"
-  AND b.account_budget.approved_start_date_time IS NOT NULL
-  AND CAST(b.account_budget.approved_start_date_time AS datetime)
-    <= PARSE_DATE('%Y%m%d', '${partitionDay}')
-  AND (
-    b.account_budget.approved_end_date_time IS NULL
-    OR CAST(b.account_budget.approved_end_date_time AS datetime)
-      >= PARSE_DATE('%Y%m%d', '${partitionDay}'))

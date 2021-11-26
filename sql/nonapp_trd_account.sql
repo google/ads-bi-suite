@@ -13,11 +13,9 @@
 -- limitations under the License.
 
 SELECT DISTINCT
-  b.customer_descriptive_name Account,
-  b.customer_id Customer_ID,
-  b.customer_currency_code Currency,
-  b.payment_account_id Payment_account_id,
-  b.payment_account_name Payment_account_name,
+  a.customer_descriptive_name Account,
+  c.customer_id Customer_ID,
+  a.currency Currency,
   b.budget_approved Budget_approved,
   b.budget_served Budget_served,
   b.budget_start_time Budget_start_time,
@@ -51,11 +49,21 @@ SELECT DISTINCT
   sum(c.metrics_all_conversions_value) All_conv_value,
   sum(c.metrics_conversions_by_conversion_date) Conversions_by_conversion_date,
   sum(c.metrics_view_through_conversions) View_through_conversions
-FROM `${datasetId}.nonapp_snd_account_budget` b
+FROM `${datasetId}.base_snd_campaign_performance` c
 LEFT JOIN `${datasetId}.nonapp_snd_account_wow` w
-  ON b.customer_id = w.customer_id
-LEFT JOIN `${datasetId}.base_snd_campaign_performance` c
+  ON c.customer_id = w.customer_id
+LEFT JOIN
+  (
+    SELECT DISTINCT
+      customer_descriptive_name,
+      customer_id,
+      currency
+    FROM `${datasetId}.base_snd_campaigns`
+    WHERE segments_date = (SELECT MAX(segments_date) FROM `${datasetId}.base_snd_campaigns`)
+  ) a
+  ON c.customer_id = a.customer_id
+LEFT JOIN `${datasetId}.nonapp_snd_account_budget` b
   ON
     b.customer_id = c.customer_id
     AND b.segment_date = c.segments_date
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
