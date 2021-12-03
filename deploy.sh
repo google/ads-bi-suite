@@ -49,6 +49,7 @@ OUTBOUND=outbound/
 # The dataset name.
 DATASET_ID="ads_reports_data_v4"
 CONFIG_DATASET_ID="ads_report_configs"
+REGION_FOR_DS="US"
 
 # The main workflow that this instance will install. There are following
 # available workflows:
@@ -62,6 +63,8 @@ INSTALLED_ADH_BRANDING_WORKFLOW="N"
 INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
 INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
+INSTALLED_YOUTUBE_WORKFLOW="N"
+
 # The task config files that will be installed by default
 DEFAULT_TASK_CONFIG=(
   "./config/task_base.json"
@@ -84,6 +87,7 @@ CONFIG_ITEMS=(
   "INSTALLED_ADH_CREATIVE_WORKFLOW"
   "INSTALLED_ADH_BRANDING_WORKFLOW"
   "INSTALLED_ADH_AUDIENCE_WORKFLOW"
+  "INSTALLED_YOUTUBE_WORKFLOW"
 )
 
 # Description of functionality.
@@ -96,6 +100,7 @@ INTEGRATION_APIS_DESCRIPTION=(
   "BigQuery query external tables based on Google Sheet"
   "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
 Reports also."
+  "LEGO Extension: YouTube Channel Analysis."
 )
 
 # APIs need to be enabled if corresponding functionality are selected.
@@ -107,6 +112,7 @@ INTEGRATION_APIS=(
   "adsdatahub.googleapis.com"
   "drive.googleapis.com"
   "N/A"
+  "youtube.googleapis.com"
 )
 
 #######################################
@@ -152,6 +158,14 @@ setup_functionality_for_installation() {
     ;;
   6)
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
+    ;;
+  7)
+    INSTALLED_YOUTUBE_WORKFLOW="Y"
+    if [[ "${INSTALLED_WORKFLOW}" == "NonApp" ]]; then
+      INSTALLED_WORKFLOW="App + NonApp"
+    elif [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
+      INSTALLED_WORKFLOW="App"
+    fi
     ;;
   *) ;;
   esac
@@ -390,6 +404,7 @@ any other key to enter another CID..."
 #   INSTALLED_ADH_BRANDING_WORKFLOW
 #   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
+#   INSTALLED_YOUTUBE_WORKFLOW
 # Arguments:
 #   Whether update cronjob.
 #######################################
@@ -518,7 +533,8 @@ initialize_workflow() {
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_branding_start
     fi
   fi
-    # Create/update ADH audience task config and cronjob.
+
+  # Create/update ADH audience task config and cronjob.
   if [[ ${INSTALLED_ADH_AUDIENCE_WORKFLOW,,} = "y" ]]; then
     update_workflow_task "./config/workflow_retail_adh.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
@@ -535,16 +551,27 @@ initialize_workflow() {
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_audience_start
     fi
   fi
+
+  # Create/update LEGO Youtube Extension.
+  if [[ ${INSTALLED_YOUTUBE_WORKFLOW,,} = "y" ]]; then
+    update_workflow_task "./config/workflow_youtube.json"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      local message_body='{
+        "timezone": "'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "legoDatasetId": "'"${DATASET_ID}"'"
+      }'
+      update_workflow_cronjob "youtube_start" "0 15 * * *" "${message_body}"
+    fi
+  fi
 }
-
-
 
 # Same tasks group for different installations.
 COMMON_INSTALL_TASKS=(
   confirm_region
   enable_apis
-  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
-  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS"
+  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION"
   "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
   save_config
   create_subscriptions
@@ -587,8 +614,8 @@ MINIMALISM_TASKS=(
   "print_welcome LEGO"
   confirm_project
   confirm_region
-  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION"
-  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION REGION"
+  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS"
+  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION"
   "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
   save_config
   do_oauth
@@ -611,6 +638,7 @@ setup_cn() {
   INSTALLED_ADH_BRANDING_WORKFLOW="N"
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
+  INSTALLED_YOUTUBE_WORKFLOW="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 }
@@ -618,6 +646,13 @@ setup_cn() {
 cn_app() {
   setup_cn
   INSTALLED_WORKFLOW="App"
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
+cn_app_with_youtube() {
+  setup_cn
+  INSTALLED_WORKFLOW="App"
+  INSTALLED_YOUTUBE_WORKFLOW="Y"
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 

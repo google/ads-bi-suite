@@ -251,6 +251,7 @@
           "segments": [
             "segments.date",
             "segments.week",
+            "segments.ad_network_type",
             "segments.conversion_action_category",
             "segments.conversion_action_name",
             "segments.conversion_action",

@@ -15,61 +15,58 @@
 WITH
   ce AS (
     SELECT
-      adgroup_id,
-      adgroup_status,
-      segments_date,
-      SUM(adg_records) adg_records,
-      SUM(headline) headline,
-      SUM(description) description,
-      SUM(image) image,
-      SUM(video) video
-    FROM
-      (
-        SELECT
-          ad_group.id adgroup_id,
-          ad_group.status adgroup_status,
-          segments.date segments_date,
-          COUNT(*) adg_records,
-          IF(ad_group_ad_asset_view.field_type = "HEADLINE", COUNT(DISTINCT asset.id), 0) headline,
+      ad_group.id adgroup_id,
+      ad_group.status adgroup_status,
+      segments.date segments_date,
+      COUNT(DISTINCT IF(ad_group_ad_asset_view.field_type = "HEADLINE", asset.id, NULL)) headline,
+      COUNT(
+        DISTINCT
           IF(
             ad_group_ad_asset_view.field_type = "DESCRIPTION",
-            COUNT(DISTINCT asset.id),
-            0)
-            description,
+            asset.id,
+            NULL))
+        description,
+      COUNT(
+        DISTINCT
           IF(
             ad_group_ad_asset_view.field_type = "MARKETING_IMAGE",
-            COUNT(DISTINCT asset.id),
-            0)
-            image,
-          IF(ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO", COUNT(DISTINCT asset.id), 0) video
+            asset.id,
+            NULL))
+        image,
+      COUNT(DISTINCT IF(ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO", asset.id, NULL)) video
+    FROM
+      `${datasetId}.report_app_asset_performance` r
+    INNER JOIN
+      (
+        SELECT
+          campaign.id campaign_id,
+          segments.date segments_date,
+          MAX(DATE(_partitionTime)) partitionTime
         FROM
-          `${datasetId}.report_app_asset_performance` r
-        INNER JOIN
-          (
-            SELECT
-              campaign.id campaign_id,
-              segments.date segments_date,
-              MAX(DATE(_partitionTime)) partitionTime
-            FROM
-              `${datasetId}.report_app_asset_performance`
-            GROUP BY
-              1,
-              2
-          ) t
-          ON
-            t.partitionTime = DATE(r._partitionTime)
-            AND t.campaign_id = r.campaign.id
-            AND t.segments_date = r.segments.date
+          `${datasetId}.report_app_asset_performance`
         GROUP BY
-          ad_group.id,
-          ad_group.status,
-          segments.date,
-          ad_group_ad_asset_view.field_type
-      )
+          1,
+          2
+      ) t
+      ON
+        t.partitionTime = DATE(r._partitionTime)
+        AND t.campaign_id = r.campaign.id
+        AND t.segments_date = r.segments.date
+    GROUP BY
+      ad_group.id,
+      ad_group.status,
+      segments.date
+  ),
+  base AS (
+    SELECT
+      ad_group.id adgroup_id,
+      segments.date segments_date,
+      MAX(DATE(_partitionTime)) partitionTime
+    FROM
+      `${datasetId}.report_app_ad_group_perf`
     GROUP BY
       1,
-      2,
-      3
+      2
   )
 SELECT DISTINCT
   campaign_id,
@@ -122,22 +119,11 @@ FROM
           SUM(metrics.conversions_value) metrics_conversions_value
         FROM
           `${datasetId}.report_app_ad_group_perf` r
-        INNER JOIN
-          (
-            SELECT
-              campaign.id campaign_id,
-              segments.date segments_date,
-              MAX(DATE(_partitionTime)) partitionTime
-            FROM
-              `${datasetId}.report_app_ad_group_perf`
-            GROUP BY
-              1,
-              2
-          ) t
+        INNER JOIN base
           ON
-            t.partitionTime = DATE(r._partitionTime)
-            AND t.campaign_id = r.campaign.id
-            AND t.segments_date = r.segments.date
+            base.partitionTime = DATE(r._partitionTime)
+            AND base.adgroup_id = r.ad_group.id
+            AND base.segments_date = r.segments.date
         GROUP BY
           1,
           2,
@@ -151,6 +137,7 @@ FROM
         SELECT
           ad_group.id adgroup_id,
           segments.date segments_date,
+          segments.ad_network_type segments_ad_network_type,
           SUM(
             IF(
               segments.conversion_action_category = "DOWNLOAD",
@@ -165,29 +152,20 @@ FROM
             in_app_actions
         FROM
           `${datasetId}.report_app_ad_group` r
-        INNER JOIN
-          (
-            SELECT
-              ad_group.id ad_group_id,
-              segments.date segments_date,
-              MAX(DATE(_partitionTime)) partitionTime
-            FROM
-              `${datasetId}.report_app_ad_group`
-            GROUP BY
-              1,
-              2
-          ) t
+        INNER JOIN base
           ON
-            t.partitionTime = DATE(r._partitionTime)
-            AND t.ad_group_id = r.ad_group.id
-            AND t.segments_date = r.segments.date
+            base.partitionTime = DATE(r._partitionTime)
+            AND base.adgroup_id = r.ad_group.id
+            AND base.segments_date = r.segments.date
         GROUP BY
           1,
-          2
+          2,
+          3
       )
       USING (
         adgroup_id,
-        segments_date)
+        segments_date,
+        segments_ad_network_type)
   ) adg
 LEFT JOIN
   ce
@@ -211,8 +189,6 @@ LEFT JOIN
           MAX(segments_date) segments_date
         FROM
           ce
-        WHERE
-          adgroup_status = "ENABLED"
         GROUP BY
           1
       )

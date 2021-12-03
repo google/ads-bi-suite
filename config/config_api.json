@@ -65,6 +65,20 @@
         "taskId": "${taskId}",
         "multipleTag": "${multipleTag}"
       }
+    },
+    "youtubeChannel": {
+      "qps": 20,
+      "numberOfThreads": 10,
+      "topic": "#PROJECT_NAMESPACE#-monitor",
+      "message": {
+        "partitionDay": "${partitionDay}",
+        "channelId": "${channelId}",
+        "batchId": "${batchId}"
+      },
+      "attributes": {
+        "taskId": "${taskId}",
+        "multipleTag": "${multipleTag}"
+      }
     }
   }
 }
