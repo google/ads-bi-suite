@@ -44,6 +44,7 @@ LEFT JOIN
         account_budget.approved_end_date_time IS NULL
         OR CAST(account_budget.approved_end_date_time AS datetime)
           >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
+    GROUP BY 1
   ) b
   ON a.customer_id = b.id
 LEFT JOIN AGGLabels l

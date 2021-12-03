@@ -44,7 +44,7 @@ SELECT DISTINCT
   sum(c.metrics_impressions) Impressions,
   sum(c.metrics_cost) Cost,
   sum(c.metrics_conversions) Conversions,
-  sum(c.metrics_all_conversions_value) Conv_value,
+  sum(c.metrics_conversions_value) Conv_value,
   sum(c.metrics_all_conversions) All_conversions,
   sum(c.metrics_all_conversions_value) All_conv_value,
   sum(c.metrics_conversions_by_conversion_date) Conversions_by_conversion_date,
