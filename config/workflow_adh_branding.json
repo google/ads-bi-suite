@@ -7,14 +7,14 @@
       "configTableId": "adh_user_config_input",
       "endDate": "${partitionDay}",
       "dateRangeInDays": "30",
-      "customerId":"${adhCustomerId}"
+      "adhCustomerId":"${adhCustomerId}"
     },
     "next": "adh_branding_prep_user_config"
   },
   "adh_branding_prep_user_config": {
     "type": "query",
     "source": {
-      "sql": "SELECT * FROM ${configDatasetId}.${configTableId}",
+      "sql": "SELECT * FROM ${configDatasetId}.${configTableId} WHERE enable = true",
       "external": true
     },
     "destination": {
@@ -47,8 +47,10 @@
   "adh_branding_distribute_tasks": {
     "type": "multiple",
     "source": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "adh_branding/${partitionDay}/adh_task_configs.ndjson"
+      "file": {
+        "bucket": "#GCS_BUCKET#",
+        "name": "adh_branding/${partitionDay}/adh_task_configs.ndjson"
+      }
     },
     "destination": {
       "taskId": "adh_branding_trigger_calc_query",
@@ -71,7 +73,7 @@
           "appendedParameters": {
             "queryName": "adh_branding_reach_frequency",
             "datasetId": "${adhDatasetId}",
-            "tableId": "adh_branding_reach_frequency_${partitionDay}"
+            "tableId": "${analysisName}_reach_frequency_${partitionDay}"
           }
         },
         {
@@ -79,7 +81,7 @@
           "appendedParameters": {
             "queryName": "adh_branding_conversion_uplift",
             "datasetId": "${adhDatasetId}",
-            "tableId": "adh_branding_conversion_uplift_${partitionDay}"
+            "tableId": "${analysisName}_conversion_uplift_${partitionDay}"
           }
         },
         {
@@ -87,7 +89,7 @@
           "appendedParameters": {
             "queryName": "adh_branding_conversion_uplift_MH",
             "datasetId": "${adhDatasetId}",
-            "tableId": "adh_branding_conversion_uplift_MH_${partitionDay}"
+            "tableId": "${analysisName}_conversion_uplift_MH_${partitionDay}"
           }
         },
         {
@@ -95,7 +97,7 @@
           "appendedParameters": {
             "queryName": "adh_branding_demographic_exploration",
             "datasetId": "${adhDatasetId}",
-            "tableId": "adh_branding_demographic_exploration_${partitionDay}"
+            "tableId": "${analysisName}_demographic_exploration_${partitionDay}"
           }
         }
       ]
@@ -104,7 +106,7 @@
   "adh_query_general": {
     "type": "query_adh",
     "adhConfig": {
-      "customerId": "${customerId}"
+      "customerId": "${adhCustomerId}"
     },
     "source": {
       "file": {

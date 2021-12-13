@@ -7,7 +7,7 @@ WITH imp_status as (
   FROM
     adh.google_ads_impressions
   WHERE user_id IS NOT NULL
-  AND (campaign_id IN UNNEST(SPLIT("${campaign_id}"))  OR customer_id IN UNNEST(SPLIT("${customer_id}"))  -- for cid or campaign ids
+  AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))  -- for cid or campaign ids
   GROUP BY 1,2,3,4
   ),
 
@@ -33,7 +33,7 @@ ac_impressions AS (
     `adh.google_ads_impressions`
   WHERE
     user_id IS NOT NULL
-    AND (campaign_id IN UNNEST(SPLIT("${campaign_id}")) OR customer_id IN UNNEST(SPLIT("${customer_id}"))
+    AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
   GROUP BY 1,2
   ),
 
@@ -47,7 +47,7 @@ ac_clicks AS (
     adh.google_ads_clicks
   WHERE
     user_id IS NOT NULL
-    AND (impression_data.campaign_id IN UNNEST(SPLIT("${campaign_id}"))  OR impression_data.customer_id IN UNNEST(SPLIT("${customer_id}"))
+    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
   GROUP BY 1,2
   ),
 
@@ -61,8 +61,8 @@ ac_conversions AS (
     adh.google_ads_conversions
   WHERE
     user_id IS NOT NULL
-          AND conversion_type IN UNNEST(SPLIT("${conversion_id}"))
-    AND (impression_data.campaign_id IN UNNEST(SPLIT("${campaign_id}"))  OR impression_data.customer_id IN UNNEST(SPLIT("${customer_id}"))
+          AND CAST(conversion_type AS STRING) IN UNNEST(SPLIT("${conversionId}"))
+    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
   GROUP BY 1,2
   )
 

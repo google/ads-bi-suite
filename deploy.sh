@@ -535,7 +535,7 @@ initialize_workflow() {
         "partitionDay": "${today}",
         "adhCustomerId": "'"${ADH_CID}"'"
       }'
-      update_workflow_cronjob "adh_branding_start" "0 11 * * 1" "${message_body}"
+      update_workflow_cronjob "adh_branding_start" "0 12 1 1 *" "${message_body}"
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_branding_start
     fi
   fi
