@@ -49,6 +49,9 @@ OUTBOUND=outbound/
 # The dataset name.
 DATASET_ID="ads_reports_data_v4"
 CONFIG_DATASET_ID="ads_report_configs"
+ADH_CREATIVE_DS_ID="adh_apps_data"
+ADH_BRANDING_DS_ID="adh_branding"
+ADH_AUDIENCE_DS_ID="adh_audience"
 REGION_FOR_DS="US"
 
 # The main workflow that this instance will install. There are following
@@ -80,6 +83,9 @@ CONFIG_ITEMS=(
   "OUTBOUND"
   "DATASET_ID"
   "CONFIG_DATASET_ID"
+  "ADH_CREATIVE_DS_ID"
+  "ADH_BRANDING_DS_ID"
+  "ADH_AUDIENCE_DS_ID"
   "DATASET_LOCATION"
   "INSTALLED_WORKFLOW"
   "INSTALLED_TRDPTY_TRIX_DATA"
@@ -566,13 +572,28 @@ initialize_workflow() {
   fi
 }
 
+confirm_data_locations() {
+  if [[ "${INSTALLED_WORKFLOW}" != "" ]]; then
+    confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS
+    confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION
+  fi
+  if [[ "${INSTALLED_ADH_CREATIVE_WORKFLOW}" == "Y" ]]; then
+    confirm_located_dataset ADH_CREATIVE_DS_ID DATASET_LOCATION REGION_FOR_DS
+  fi
+  if [[ "${INSTALLED_ADH_BRANDING_WORKFLOW}" == "Y" ]]; then
+    confirm_located_dataset ADH_BRANDING_DS_ID DATASET_LOCATION REGION_FOR_DS
+  fi
+  if [[ "${INSTALLED_ADH_AUDIENCE_WORKFLOW}" == "Y" ]]; then
+    confirm_located_dataset ADH_AUDIENCE_DS_ID DATASET_LOCATION REGION_FOR_DS
+  fi
+  confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION REGION_FOR_DS
+}
+
 # Same tasks group for different installations.
 COMMON_INSTALL_TASKS=(
   confirm_region
   enable_apis
-  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS"
-  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION"
-  "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
+  confirm_data_locations
   save_config
   create_subscriptions
   create_sink
@@ -614,9 +635,7 @@ MINIMALISM_TASKS=(
   "print_welcome LEGO"
   confirm_project
   confirm_region
-  "confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS"
-  "confirm_located_dataset CONFIG_DATASET_ID DATASET_LOCATION"
-  "confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION"
+  confirm_data_locations
   save_config
   do_oauth
   enable_apis
