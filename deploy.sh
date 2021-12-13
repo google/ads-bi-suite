@@ -58,6 +58,7 @@ CONFIG_DATASET_ID="ads_report_configs"
 INSTALLED_WORKFLOW=""
 # Other functionality, e.g. ADH or Google Sheet, etc.
 INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+INSTALLED_ADH_BRANDING_WORKFLOW="N"
 INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
 INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
@@ -81,6 +82,7 @@ CONFIG_ITEMS=(
   "INSTALLED_TRDPTY_TRIX_DATA"
   "INSTALLED_BACKFILL_WORKFLOW_TRIGGER"
   "INSTALLED_ADH_CREATIVE_WORKFLOW"
+  "INSTALLED_ADH_BRANDING_WORKFLOW"
   "INSTALLED_ADH_AUDIENCE_WORKFLOW"
 )
 
@@ -89,6 +91,7 @@ INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports for App"
   "Google Ads Reports for NonApp"
   "Ads Data Hub for App Creative"
+  "Ads Data Hub for App Branding"
   "Ads Data Hub for Audience+"
   "BigQuery query external tables based on Google Sheet"
   "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
@@ -99,6 +102,7 @@ Reports also."
 INTEGRATION_APIS=(
   "googleads.googleapis.com"
   "googleads.googleapis.com"
+  "adsdatahub.googleapis.com"
   "adsdatahub.googleapis.com"
   "adsdatahub.googleapis.com"
   "drive.googleapis.com"
@@ -135,15 +139,18 @@ setup_functionality_for_installation() {
     fi
     ;;
   3)
+    INSTALLED_ADH_BRANDING_WORKFLOW="Y"
+    ;;
+  4)
     INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
     if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
       INSTALLED_WORKFLOW="NonApp"
     fi
     ;;
-  4)
+  5)
     INSTALLED_TRDPTY_TRIX_DATA="Y"
     ;;
-  5)
+  6)
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
     ;;
   *) ;;
@@ -380,6 +387,7 @@ any other key to enter another CID..."
 #   INSTALLED_WORKFLOW
 #   INSTALLED_TRDPTY_TRIX_DATA
 #   INSTALLED_ADH_CREATIVE_WORKFLOW
+#   INSTALLED_ADH_BRANDING_WORKFLOW
 #   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
 # Arguments:
@@ -494,6 +502,22 @@ initialize_workflow() {
     fi
   fi
 
+  # Create/update ADH branding task config and cronjob.
+  if [[ ${INSTALLED_ADH_BRANDING_WORKFLOW,,} = "y" ]]; then
+    update_workflow_task "./config/workflow_adh_branding.json"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      if [[ -z "${ADH_CID}" ]]; then
+        set_adh_account
+      fi
+      local message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "adhCustomerId": "'"${ADH_CID}"'"
+      }'
+      update_workflow_cronjob "adh_branding_start" "0 11 * * 1" "${message_body}"
+      pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_branding_start
+    fi
+  fi
     # Create/update ADH audience task config and cronjob.
   if [[ ${INSTALLED_ADH_AUDIENCE_WORKFLOW,,} = "y" ]]; then
     update_workflow_task "./config/workflow_retail_adh.json"
@@ -584,6 +608,7 @@ setup_cn() {
   TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_ADH_BRANDING_WORKFLOW="N"
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
@@ -617,6 +642,14 @@ cn_adh_creative() {
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
+cn_adh_branding() {
+  setup_cn
+  INSTALLED_ADH_BRANDING_WORKFLOW="Y"
+  GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
+  customized_install "${MINIMALISM_TASKS[@]}"
+}
+
 cn_adh_audience() {
   setup_cn
   INSTALLED_WORKFLOW="NonApp"
@@ -629,6 +662,7 @@ cn_adh_audience() {
 setup_au() {
   TIMEZONE="Australia/Sydney"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
+  INSTALLED_ADH_BRANDING_WORKFLOW="N"
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_TRDPTY_TRIX_DATA="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"

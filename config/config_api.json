@@ -51,9 +51,14 @@
       "qps": 1,
       "topic": "#PROJECT_NAMESPACE#-monitor",
       "message": {
-        "appName": "${appName}",
-        "customerId": "${customerId}",
-        "campaignId": "${campaignId}",
+        "analysisName":"${analysisName}",
+        "status":"${status}",
+        "version":"${version}",
+        "customerId":"${customerId}",
+        "campaignId":"${campaignId}",
+        "conversionId": "${conversionId}",
+        "ytCampaignId": "${ytCampaignId}",
+        "ytCustomerId": "${ytCustomerId}",
         "partitionDay": "${partitionDay}"
       },
       "attributes": {
