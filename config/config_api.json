@@ -51,8 +51,10 @@
       "qps": 1,
       "topic": "#PROJECT_NAMESPACE#-monitor",
       "message": {
+        "adhDatasetId": "${adhDatasetId}",
+        "dateRangeInDays": "${dateRangeInDays}",
+        "adhCustomerId": "${adhCustomerId}",
         "analysisName":"${analysisName}",
-        "status":"${status}",
         "version":"${version}",
         "customerId":"${customerId}",
         "campaignId":"${campaignId}",
