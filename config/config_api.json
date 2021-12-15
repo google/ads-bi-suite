@@ -52,6 +52,7 @@
       "topic": "#PROJECT_NAMESPACE#-monitor",
       "message": {
         "adhDatasetId": "${adhDatasetId}",
+        "endDate": "${endDate}",
         "dateRangeInDays": "${dateRangeInDays}",
         "adhCustomerId": "${adhCustomerId}",
         "analysisName":"${analysisName}",
@@ -61,6 +62,7 @@
         "conversionId": "${conversionId}",
         "ytCampaignId": "${ytCampaignId}",
         "ytCustomerId": "${ytCustomerId}",
+        "mediaPlanId": "${mediaPlanId}",
         "partitionDay": "${partitionDay}"
       },
       "attributes": {

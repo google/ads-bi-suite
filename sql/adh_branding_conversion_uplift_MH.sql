@@ -3,14 +3,10 @@ WITH mh_disc_users AS (
     device_id_md5,
     1 AS user_type
   FROM adh.yt_reserve_impressions_rdid
-  WHERE media_plan_id IN (
-# branding media plan ids here
-11
-)
+  WHERE CAST(media_plan_id AS STRING) IN UNNEST(SPLIT("${mediaPlanId}"))
   AND device_id_md5 IS NOT NULL
   GROUP BY 1
   ),
-
 ac_impressions AS (
   SELECT
     device_id_md5,
@@ -21,10 +17,9 @@ ac_impressions AS (
     `adh.google_ads_impressions_rdid`
   WHERE
     device_id_md5 IS NOT NULL
-    AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   ),
-
 ac_clicks AS (
   SELECT
     device_id_md5,
@@ -35,10 +30,9 @@ ac_clicks AS (
     adh.google_ads_clicks_rdid
   WHERE
     device_id_md5 IS NOT NULL
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   ),
-
 ac_conversions AS (
   SELECT
     device_id_md5,
@@ -49,11 +43,11 @@ ac_conversions AS (
   WHERE
     device_id_md5 IS NOT NULL
           AND CAST(conversion_type AS STRING) IN UNNEST(SPLIT("${conversionId}"))
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   )
-
 SELECT
+  "${analysisName}" AS analysisName,
   ai.customer_id,
   customer_name,
   CASE
@@ -81,6 +75,6 @@ LEFT JOIN
   ac_conversions aconv ON ai.device_id_md5 = aconv.device_id_md5
                                                                               AND ai.customer_id = aconv.customer_id
 GROUP BY
-  1,2,3
+  1,2,3,4
 ORDER BY
  1,4 DESC

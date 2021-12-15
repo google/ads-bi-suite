@@ -7,10 +7,9 @@ WITH imp_status as (
   FROM
     adh.google_ads_impressions
   WHERE user_id IS NOT NULL
-  AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))  -- for cid or campaign ids
+  AND (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))  -- for cid or campaign ids
   GROUP BY 1,2,3,4
   ),
-
 user_demo AS (
   SELECT
     user_id,
@@ -22,7 +21,6 @@ user_demo AS (
   LEFT JOIN adh.age_group USING (age_group_id)
   GROUP BY 1,2,3,4
         ),
-
 ac_impressions AS (
   SELECT
     user_id,
@@ -33,10 +31,9 @@ ac_impressions AS (
     `adh.google_ads_impressions`
   WHERE
     user_id IS NOT NULL
-    AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   ),
-
 ac_clicks AS (
   SELECT
     user_id,
@@ -47,10 +44,9 @@ ac_clicks AS (
     adh.google_ads_clicks
   WHERE
     user_id IS NOT NULL
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   ),
-
 ac_conversions AS (
   SELECT
     user_id,
@@ -62,11 +58,11 @@ ac_conversions AS (
   WHERE
     user_id IS NOT NULL
           AND CAST(conversion_type AS STRING) IN UNNEST(SPLIT("${conversionId}"))
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}"))  OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   )
-
 SELECT
+  "${analysisName}" AS analysisName,
   ud.customer_id,
   customer_name,
   gender_name,
@@ -91,6 +87,6 @@ LEFT JOIN
   ac_conversions aconv ON ud.user_id = aconv.user_id
                                                                               AND ud.customer_id = aconv.customer_id
 GROUP BY
-  1,2,3,4
+  1,2,3,4,5
 ORDER BY
  1,4 DESC

@@ -4,11 +4,10 @@ WITH yt_disc_users AS (
     user_id,
     1 AS user_type
   FROM adh.google_ads_impressions
-  WHERE CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${ytCampaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${ytCustomerId}")) -- for youtube cid or campaign ids
+  WHERE (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${ytCampaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${ytCustomerId}"))) -- for youtube cid or campaign ids
   AND user_id IS NOT NULL
   GROUP BY 1
   ),
-
 ac_impressions AS (
   SELECT
     user_id,
@@ -19,10 +18,9 @@ ac_impressions AS (
     `adh.google_ads_impressions`
   WHERE
     user_id IS NOT NULL
-    AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))-- for AC cid or campaign ids
+    AND (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))) -- for AC cid or campaign ids
   GROUP BY 1,2
   ),
-
 ac_clicks AS (
   SELECT
     user_id,
@@ -33,10 +31,9 @@ ac_clicks AS (
     adh.google_ads_clicks
   WHERE
     user_id IS NOT NULL
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")) -- for AC cid or campaign ids
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))) -- for AC cid or campaign ids
   GROUP BY 1,2
   ),
-
 ac_conversions AS (
   SELECT
     user_id,
@@ -47,11 +44,11 @@ ac_conversions AS (
   WHERE
     user_id IS NOT NULL
           AND CAST(conversion_type AS STRING) IN UNNEST(SPLIT("${conversionId}")) -- for AC conversion ids, can be found via 1) google ads api 2) google teams
-    AND CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")) -- for AC cid or campaign ids
+    AND (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))) -- for AC cid or campaign ids
   GROUP BY 1,2
   )
-
 SELECT
+  "${analysisName}" AS analysisName,
   ai.customer_id,
   customer_name,
   CASE
@@ -79,6 +76,6 @@ LEFT JOIN
   ac_conversions aconv ON ai.user_id = aconv.user_id
                                                                               AND ai.customer_id = aconv.customer_id
 GROUP BY
-  1,2,3
+  1,2,3,4
 ORDER BY
  1,4 DESC

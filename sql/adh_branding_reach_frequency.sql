@@ -2,10 +2,9 @@ CREATE TABLE impressions AS (
   SELECT user_id, campaign_id, count(*) as freq, sum(advertiser_impression_cost_usd) as imp_cost
   FROM adh.google_ads_impressions
   WHERE user_id IS NOT NULL
-    AND CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    AND (CAST(campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1 ,2
 );
-
 CREATE TABLE clicks AS (
   SELECT
     user_id,
@@ -16,10 +15,9 @@ CREATE TABLE clicks AS (
     adh.google_ads_clicks
   WHERE user_id IS NOT NULL
     AND
-    CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
     GROUP BY 1,2
   );
-
 CREATE TABLE conversions AS (
   SELECT
     user_id,
@@ -30,11 +28,11 @@ CREATE TABLE conversions AS (
   WHERE user_id IS NOT NULL
     AND CAST(conversion_type AS STRING) IN UNNEST(SPLIT("${conversionId}"))
     AND
-    CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}"))
+    (CAST(impression_data.campaign_id AS STRING) IN UNNEST(SPLIT("${campaignId}")) OR CAST(impression_data.customer_id AS STRING) IN UNNEST(SPLIT("${customerId}")))
   GROUP BY 1,2
   );
-
 SELECT
+  "${analysisName}" AS analysisName,
   imp.campaign_id,
   t.campaign_name,
   imp.freq,
@@ -54,6 +52,6 @@ LEFT JOIN
 LEFT JOIN
   tmp.conversions conv ON imp.user_id = conv.user_id AND imp.campaign_id = conv.campaign_id
 GROUP BY
-  1,2,3
+  1,2,3,4
 ORDER BY
   freq ASC
