@@ -593,6 +593,7 @@ confirm_data_locations() {
 COMMON_INSTALL_TASKS=(
   confirm_region
   enable_apis
+  "confirm_firestore native"
   confirm_data_locations
   save_config
   create_subscriptions
@@ -635,6 +636,7 @@ MINIMALISM_TASKS=(
   "print_welcome LEGO"
   confirm_project
   confirm_region
+  "confirm_firestore native"
   confirm_data_locations
   save_config
   do_oauth
