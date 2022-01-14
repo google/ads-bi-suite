@@ -147,7 +147,8 @@
             "account_budget.approved_end_date_time",
             "account_budget.adjusted_spending_limit_micros",
             "account_budget.amount_served_micros",
-            "account_budget.proposed_spending_limit_type"
+            "account_budget.proposed_spending_limit_type",
+            "account_budget.purchase_order_number"
           ]
         }
       }
