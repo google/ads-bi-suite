@@ -22,6 +22,7 @@ SELECT
   b.account_budget.approved_start_date_time budget_start_time,
   b.account_budget.approved_end_date_time budget_end_time,
   b.account_budget.proposed_spending_limit_type spending_limit,
+  b.account_budget.purchase_order_number purchase_order_number,
   (
     ifnull(CAST(b.account_budget.adjusted_spending_limit_micros AS INT64), 0)
     - b.account_budget.amount_served_micros)
@@ -67,4 +68,4 @@ WHERE
     OR CAST(b.account_budget.approved_end_date_time AS datetime)
       >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
 GROUP BY
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11

@@ -22,6 +22,7 @@ SELECT DISTINCT
   b.budget_end_time Budget_end_time,
   b.budget_remain Budget_remain,
   b.spending_limit Spending_limit,
+  b.purchase_order_number Purchase_order_number,
   CASE
     WHEN Budget_start_time IS NOT NULL THEN Budget_last
     WHEN Budget_start_time IS NULL THEN 0
@@ -66,4 +67,4 @@ LEFT JOIN `${datasetId}.nonapp_snd_account_budget` b
   ON
     b.customer_id = c.customer_id
     AND b.segment_date = c.segments_date
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
