@@ -26,6 +26,7 @@ SELECT DISTINCT
   a.ad_group_ad.ad.name AS Ad_name,
   a.ad_group_ad.ad.type AS Ad_type,
   a.ad_group_ad.status AS Ad_status,
+  a.ad_group_ad.ad_strength AS Ad_strength,
   a.ad_group_ad.ad.expanded_text_ad.headline_part1 AS Expanded_text_ad_headline_part1,
   a.ad_group_ad.ad.expanded_text_ad.headline_part2 AS Expanded_text_ad_headline_part2,
   a.ad_group_ad.ad.expanded_text_ad.path1 AS Expanded_text_ad_path1,

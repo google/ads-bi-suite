@@ -31,12 +31,12 @@ LEFT JOIN
   (
     SELECT
       customer.id AS id,
-      STRING_AGG(billing_setup.payments_account_info.payments_account_id) AS Billing_profile_id,
+      STRING_AGG(billing_setup.payments_account_info.payments_profile_id) AS Billing_profile_id,
       STRING_AGG(billing_setup.payments_account_info.payments_account_name) AS Billing_profile
     FROM ${datasetId}.report_base_account_budget
     WHERE
       DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      AND account_budget.status = "APPROVED"
+      AND account_budget.status = 'APPROVED'
       AND account_budget.approved_start_date_time IS NOT NULL
       AND CAST(account_budget.approved_start_date_time AS datetime)
         <= PARSE_DATE('%Y%m%d', '${partitionDay}')
@@ -62,7 +62,7 @@ LEFT JOIN
       ON
         customer.currency_code = f.fromcur
     WHERE
-      f.tocur = "USD"
+      f.tocur = 'USD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
       AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   )
@@ -80,7 +80,7 @@ LEFT JOIN
       ON
         customer.currency_code = f.fromcur
     WHERE
-      f.tocur = "AUD"
+      f.tocur = 'AUD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
       AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   )
@@ -98,7 +98,7 @@ LEFT JOIN
       ON
         customer.currency_code = f.fromcur
     WHERE
-      f.tocur = "SGD"
+      f.tocur = 'SGD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
       AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   )

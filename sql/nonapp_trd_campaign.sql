@@ -49,6 +49,7 @@ SELECT DISTINCT
   c.metrics_conversions_value Conv_value,
   c.metrics_conversions Conversions,
   c.metrics_conversions_by_conversion_date Conversions_by_conversion_date,
+  c.metrics_conversions_value_by_conversion_date Conversions_value_by_conversion_date,
   c.metrics_cost Cost,
   c.metrics_view_through_conversions View_through_conversions,
   c.metrics_video_views Video_views,

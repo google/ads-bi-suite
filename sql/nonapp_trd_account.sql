@@ -49,6 +49,7 @@ SELECT DISTINCT
   sum(c.metrics_all_conversions) All_conversions,
   sum(c.metrics_all_conversions_value) All_conv_value,
   sum(c.metrics_conversions_by_conversion_date) Conversions_by_conversion_date,
+  sum(c.metrics_conversions_value_by_conversion_date) Conversions_value_by_conversion_date,
   sum(c.metrics_view_through_conversions) View_through_conversions
 FROM `${datasetId}.base_snd_campaign_performance` c
 LEFT JOIN `${datasetId}.nonapp_snd_account_wow` w

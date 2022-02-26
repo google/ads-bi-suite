@@ -588,6 +588,7 @@
             "campaign.advertising_channel_sub_type",
             "campaign.status",
             "ad_group.id",
+            "ad_group.name",
             "ad_group_criterion.user_interest.user_interest_category",
             "ad_group_criterion.status"
           ],
@@ -938,6 +939,7 @@
             "ad_group_ad.ad.type",
             "ad_group_ad.status",
             "ad_group.name",
+            "ad_group_ad.ad_strength",
             "ad_group_ad.ad.expanded_text_ad.headline_part1",
             "ad_group_ad.ad.expanded_text_ad.headline_part2",
             "ad_group_ad.ad.expanded_text_ad.path1",

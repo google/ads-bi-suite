@@ -24,6 +24,7 @@ SELECT DISTINCT
   b.user_interest_taxonomy_type AS User_interest_taxonomy,
   a.customer.currency_code AS Currency,
   a.ad_group.id AS Ad_group_id,
+  a.ad_group.name AS Ad_group_name,
   a.ad_group_criterion.status AS Status,
   a.metrics.clicks AS Clicks,
   a.metrics.impressions AS Impressions,
@@ -42,6 +43,6 @@ LEFT JOIN
     FROM `${datasetId}.report_nonapp_user_interest`
   ) b
   ON
-    REGEXP_EXTRACT(a.ad_group_criterion.user_interest.user_interest_category, r"[^\/]+$")
+    REGEXP_EXTRACT(a.ad_group_criterion.user_interest.user_interest_category, r'[^\/]+$')
     = CAST(b.user_interest_id AS STRING)
 WHERE DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')

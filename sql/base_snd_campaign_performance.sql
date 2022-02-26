@@ -44,6 +44,7 @@ WITH
       SUM(metrics.conversions) metrics_conversions,
       SUM(metrics.all_conversions) metrics_all_conversions,
       SUM(metrics.conversions_by_conversion_date) metrics_conversions_by_conversion_date,
+      SUM(metrics.conversions_value_by_conversion_date) metrics_conversions_value_by_conversion_date,
       SUM(metrics.view_through_conversions) metrics_view_through_conversions,
       SUM(metrics.video_views) metrics_video_views,
       AVG(metrics.content_budget_lost_impression_share) content_budget_lost_impression_share,
@@ -97,6 +98,7 @@ SELECT
   IFNULL(metrics_conversions_value, 0) metrics_conversions_value,
   IFNULL(metrics_conversions, 0) metrics_conversions,
   IFNULL(metrics_conversions_by_conversion_date, 0) metrics_conversions_by_conversion_date,
+  IFNULL(metrics_conversions_value_by_conversion_date, 0) metrics_conversions_value_by_conversion_date,
   IFNULL(metrics_cost, 0) metrics_cost,
   IFNULL(metrics_view_through_conversions, 0) metrics_view_through_conversions,
   IFNULL(metrics_all_conversions_value, 0) metrics_all_conversions_value,
@@ -133,44 +135,44 @@ LEFT JOIN
       segments.device segments_device,
       SUM(
         IF(
-          segments.conversion_action_category = "DOWNLOAD",
+          segments.conversion_action_category = 'DOWNLOAD',
           metrics.conversions,
           0))
         installs,
       SUM(
         IF(
-          segments.conversion_action_category != "DOWNLOAD",
+          segments.conversion_action_category != 'DOWNLOAD',
           metrics.conversions,
           0))
         in_app_actions,
       SUM(
         IF(
-          segments.conversion_action_category = "ADD_TO_CART",
+          segments.conversion_action_category = 'ADD_TO_CART',
           metrics.conversions,
           0))
         add_to_cart,
       SUM(
         IF(
-          segments.conversion_action_category = "BEGIN_CHECKOUT",
+          segments.conversion_action_category = 'BEGIN_CHECKOUT',
           metrics.conversions,
           0))
         check_out,
       SUM(
         IF(
-          segments.conversion_action_category = "PURCHASE",
+          segments.conversion_action_category = 'PURCHASE',
           metrics.conversions,
           0))
         purchase,
       SUM(
         IF(
-          segments.conversion_action_category = "SIGNUP",
+          segments.conversion_action_category = 'SIGNUP',
           metrics.conversions,
           0))
         signup,
       SUM(
         IF(
           segments.conversion_action_category
-            IN ("SUBMIT_LEAD_FORM", 'LEAD', 'IMPORTED_LEAD'),
+            IN ('SUBMIT_LEAD_FORM', 'LEAD', 'IMPORTED_LEAD'),
           metrics.conversions,
           0))
         lead

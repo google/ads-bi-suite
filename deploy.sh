@@ -67,6 +67,7 @@ INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
 INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
 INSTALLED_YOUTUBE_WORKFLOW="N"
+INSTALLED_CPP_WORKFLOW="N"
 
 # The task config files that will be installed by default
 DEFAULT_TASK_CONFIG=(
@@ -94,6 +95,7 @@ CONFIG_ITEMS=(
   "INSTALLED_ADH_BRANDING_WORKFLOW"
   "INSTALLED_ADH_AUDIENCE_WORKFLOW"
   "INSTALLED_YOUTUBE_WORKFLOW"
+  "INSTALLED_CPP_WORKFLOW"
 )
 
 # Description of functionality.
@@ -107,6 +109,7 @@ INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
 Reports also."
   "LEGO Extension: YouTube Channel Analysis."
+  "LEGO Extension: CPP"
 )
 
 # APIs need to be enabled if corresponding functionality are selected.
@@ -119,6 +122,7 @@ INTEGRATION_APIS=(
   "drive.googleapis.com"
   "N/A"
   "youtube.googleapis.com"
+  "N/A"
 )
 
 #######################################
@@ -172,6 +176,10 @@ setup_functionality_for_installation() {
     elif [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
       INSTALLED_WORKFLOW="App"
     fi
+    ;;
+  8)
+    INSTALLED_CPP_WORKFLOW="Y"
+    INSTALLED_WORKFLOW="App + NonApp"
     ;;
   *) ;;
   esac
@@ -411,6 +419,7 @@ any other key to enter another CID..."
 #   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
 #   INSTALLED_YOUTUBE_WORKFLOW
+#   INSTALLED_CPP_WORKFLOW
 # Arguments:
 #   Whether update cronjob.
 #######################################
@@ -570,6 +579,29 @@ initialize_workflow() {
       update_workflow_cronjob "youtube_start" "0 15 * * *" "${message_body}"
     fi
   fi
+
+  # Create/update LEGO CPP Extension for GrCN market.
+  if [[ ${INSTALLED_CPP_WORKFLOW,,} = "y" ]]; then
+    update_workflow_task "./config/workflow_cpp.json"
+    if [[ -z "${MCC_CIDS}" || -z "${DEVELOPER_TOKEN}" ]]; then
+      set_google_ads_account
+    fi
+    # Change MCC list string from comma separated into '\n' separated.
+    local mccCids
+    mccCids="$(printf '%s' "${MCC_CIDS}" | sed -r 's/,/\\\\n/g')"
+    if [[ ${updateCronjob} -eq 1 ]]; then
+      local message_body='{
+        "timezone":"'"${TIMEZONE}"'",
+        "partitionDay": "${today}",
+        "datasetId": "'"${DATASET_ID}"'",
+        "fromDate": "${today_sub_30_hyphenated}",
+        "datasetId": "'"${DATASET_ID}"'",
+        "developerToken":"'"${DEVELOPER_TOKEN}"'",
+        "mccCids": "'"${mccCids}"'"
+      }'
+      update_workflow_cronjob "lego_cpp_start" "0 12 * * *" "${message_body}"
+    fi
+  fi
 }
 
 confirm_data_locations() {
@@ -660,6 +692,7 @@ setup_cn() {
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
   INSTALLED_YOUTUBE_WORKFLOW="N"
+  INSTALLED_CPP_WORKFLOW="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 }
