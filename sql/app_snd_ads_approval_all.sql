@@ -63,8 +63,6 @@ FROM
       campaign.advertising_channel_type = "MULTI_CHANNEL"
       AND campaign.status = "ENABLED"
       AND ad_group.status = "ENABLED"
-      AND v.type IS NOT NULL
-      AND v.topic IS NOT NULL
   ) ag
 LEFT JOIN
   (
