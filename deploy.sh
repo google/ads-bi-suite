@@ -29,9 +29,11 @@ if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
 fi
 
 # Google Ads API version
-GOOGLE_ADS_API_VERSION=v7
+GOOGLE_ADS_API_VERSION=v10
 # ADH API version
 ADH_API_VERSION=v1
+# FX Rate Sheet
+FX_RATE_SHEET=https://docs.google.com/spreadsheets/d/1WGmemVpB-qNRjQ8Sw2pm2TebEMh6OcF2fcAcXIo64qE/copy
 
 # Project namespace will be used as prefix of the name of Cloud Functions,
 # Pub/Sub topics, etc.
@@ -621,6 +623,46 @@ confirm_data_locations() {
   confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION REGION_FOR_DS
 }
 
+#######################################
+# Creates the BigQuery table for fx_rate_table.
+# There are three steps:
+# 1. Asks the user to make a copy of the Google Sheet by clicking a link;
+# 2. The user clicks the menu in Google Sheet to register itself as en external
+#    table in BigQuery. The user needs to complete anthroization and input the
+#    Google Cloud Project in the Google Sheet.
+# 3. The user add the Cloud Functions' service account to the Google Sheet with
+#    Viewer access.
+# Arguments:
+#   N/A
+#######################################
+create_fx_rate_table() {
+  # 1, copy the sheet
+  ((STEP += 1))
+  printf '%s\n' "Step ${STEP}: Creating the FX rate table in BigQuery..."
+  printf '%s\n' "  1. Click the link and make your own copy ${FX_RATE_SHEET}"
+  printf '%s' "Press any key to continue after you have your copy..."
+  local any
+  read -n1 -s any
+  printf '\n'
+  # 2, register as external table
+  printf '%s\n' "  2. Click menu of your Google Sheet with the name \
+[LEGO] -> [Register as a BigQuery external table], enter the project id as \
+"${GCP_PROJECT}" then click [OK]"
+  printf '%s' "Press any key to continue after it completes..."
+  local any
+  read -n1 -s any
+  printf '\n'
+  # 3, add CF SA to the sheet
+  local defaultServiceAccount=$(get_cloud_functions_service_account \
+    "${PROJECT_NAMESPACE}_main")
+  printf '%s\n' "  3. Open the Google Sheet and grant the Viewer \
+access to service account: ${defaultServiceAccount}"
+  printf '%s' "Press any key to continue after you grant the access..."
+  local any
+  read -n1 -s any
+  printf '\n\n'
+}
+
 # Same tasks group for different installations.
 COMMON_INSTALL_TASKS=(
   confirm_region
@@ -636,6 +678,7 @@ COMMON_INSTALL_TASKS=(
   set_internal_task
   copy_sql_to_gcs
   "update_api_config ./config/config_api.json"
+  create_fx_rate_table
   "initialize_workflow updateCronjob"
   "print_finished LEGO"
 )
@@ -678,6 +721,7 @@ MINIMALISM_TASKS=(
   create_sink
   deploy_tentacles
   deploy_sentinel
+  create_fx_rate_table
   set_internal_task
   copy_sql_to_gcs
   "update_api_config ./config/config_api.json"
