@@ -20,7 +20,10 @@ SELECT
   b.account_budget.adjusted_spending_limit_micros / 1e6 budget_approved,
   b.account_budget.amount_served_micros / 1e6 budget_served,
   b.account_budget.approved_start_date_time budget_start_time,
-  b.account_budget.approved_end_date_time budget_end_time,
+  CASE
+    WHEN b.billing_setup.end_date_time IS NOT NULL THEN b.billing_setup.end_date_time
+    ELSE b.account_budget.approved_end_date_time
+    END budget_end_time,
   b.account_budget.proposed_spending_limit_type spending_limit,
   b.account_budget.purchase_order_number purchase_order_number,
   (
@@ -43,10 +46,14 @@ INNER JOIN
     FROM `${datasetId}.report_base_account_budget`
     WHERE
       DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      AND account_budget.status = "APPROVED"
+      AND account_budget.status = 'APPROVED'
       AND account_budget.approved_start_date_time IS NOT NULL
       AND CAST(account_budget.approved_start_date_time AS datetime)
         <= PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND (
+        billing_setup.end_date_time IS NULL
+        OR CAST(billing_setup.end_date_time AS datetime)
+          >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
       AND (
         account_budget.approved_end_date_time IS NULL
         OR CAST(account_budget.approved_end_date_time AS datetime)
@@ -59,10 +66,14 @@ INNER JOIN
 WHERE
   DATE(a._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND DATE(b._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-  AND b.account_budget.status = "APPROVED"
+  AND b.account_budget.status = 'APPROVED'
   AND b.account_budget.approved_start_date_time IS NOT NULL
   AND CAST(b.account_budget.approved_start_date_time AS datetime)
     <= PARSE_DATE('%Y%m%d', '${partitionDay}')
+  AND (
+    b.billing_setup.end_date_time IS NULL
+    OR CAST(b.billing_setup.end_date_time AS datetime)
+      >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
   AND (
     b.account_budget.approved_end_date_time IS NULL
     OR CAST(b.account_budget.approved_end_date_time AS datetime)

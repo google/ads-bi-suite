@@ -33,6 +33,8 @@
         "app_ad_group",
         "app_ad_group_perf",
         "app_asset_metadata",
+        "app_recommendations",
+        "app_skan",
         "nonapp_campaign_perf_age_range",
         "nonapp_campaign_perf_all_ad",
         "nonapp_campaign_perf_all_audience",

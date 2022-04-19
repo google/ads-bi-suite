@@ -60,9 +60,9 @@ FROM
     LEFT JOIN
       UNNEST(ad_group_ad.policy_summary.policy_topic_entries) AS v
     WHERE
-      campaign.advertising_channel_type = "MULTI_CHANNEL"
-      AND campaign.status = "ENABLED"
-      AND ad_group.status = "ENABLED"
+      campaign.advertising_channel_type = 'MULTI_CHANNEL'
+      AND campaign.status = 'ENABLED'
+      AND ad_group.status = 'ENABLED'
   ) ag
 LEFT JOIN
   (
@@ -89,8 +89,8 @@ LEFT JOIN
     FROM
       `${datasetId}.report_app_disapprovals_ad_group_ad_asset_view`
     WHERE
-      campaign.advertising_channel_type = "MULTI_CHANNEL"
-      AND campaign.status = "ENABLED"
+      campaign.advertising_channel_type = 'MULTI_CHANNEL'
+      AND campaign.status = 'ENABLED'
   ) asset
   USING (
     ad_group_id,

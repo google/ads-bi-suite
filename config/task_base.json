@@ -139,6 +139,7 @@
             "customer.id",
             "customer.currency_code",
             "customer.descriptive_name",
+            "billing_setup.end_date_time",
             "billing_setup.payments_account_info.payments_account_id",
             "billing_setup.payments_account_info.payments_profile_id",
             "billing_setup.payments_account_info.payments_account_name",

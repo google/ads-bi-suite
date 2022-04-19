@@ -41,6 +41,10 @@ LEFT JOIN
       AND CAST(account_budget.approved_start_date_time AS datetime)
         <= PARSE_DATE('%Y%m%d', '${partitionDay}')
       AND (
+        billing_setup.end_date_time IS NULL
+        OR CAST(billing_setup.end_date_time AS datetime)
+          >= PARSE_DATE('%Y%m%d', '${partitionDay}'))
+      AND (
         account_budget.approved_end_date_time IS NULL
         OR CAST(account_budget.approved_end_date_time AS datetime)
           >= PARSE_DATE('%Y%m%d', '${partitionDay}'))

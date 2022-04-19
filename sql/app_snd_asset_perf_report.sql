@@ -36,7 +36,9 @@ SELECT DISTINCT
   network.metrics_cost,
   network.metrics_conversions,
   network.metrics_all_conversions,
-  network.metrics_all_conversions_value
+  network.metrics_all_conversions_value,
+  network.metrics_installs,
+  network.metrics_in_app_actions
 FROM
   (
     SELECT
@@ -52,7 +54,7 @@ FROM
       asset.image_asset.full_size.height_pixels image_asset_full_size_height_pixels,
       asset.image_asset.full_size.url image_asset_full_size_url,
       CASE
-        WHEN ad_group_ad_asset_view.field_type IN ("HEADLINE", "DESCRIPTION", "MANDATORY_AD_TEXT")
+        WHEN ad_group_ad_asset_view.field_type IN ('HEADLINE', 'DESCRIPTION', 'MANDATORY_AD_TEXT')
           THEN asset.text_asset.text
         ELSE
           asset.name
@@ -61,23 +63,23 @@ FROM
       asset.id asset_id,
       ad_group_ad_asset_view.field_type ad_group_ad_asset_view_field_type,
       CASE
-        WHEN ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO"
+        WHEN ad_group_ad_asset_view.field_type = 'YOUTUBE_VIDEO'
           THEN
-            CONCAT("https://www.youtube.com/watch?v=", asset.youtube_video_asset.youtube_video_id)
-        WHEN ad_group_ad_asset_view.field_type = "MARKETING_IMAGE"
+            CONCAT('https://www.youtube.com/watch?v=', asset.youtube_video_asset.youtube_video_id)
+        WHEN ad_group_ad_asset_view.field_type = 'MARKETING_IMAGE'
           THEN asset.image_asset.full_size.url
         ELSE
           NULL
         END
         AS asset_link,
       CASE
-        WHEN ad_group_ad_asset_view.field_type = "YOUTUBE_VIDEO"
+        WHEN ad_group_ad_asset_view.field_type = 'YOUTUBE_VIDEO'
           THEN
             CONCAT(
-              "https://i.ytimg.com/vi/",
+              'https://i.ytimg.com/vi/',
               asset.youtube_video_asset.youtube_video_id,
-              "/hqdefault.jpg")
-        WHEN ad_group_ad_asset_view.field_type = "MARKETING_IMAGE"
+              '/hqdefault.jpg')
+        WHEN ad_group_ad_asset_view.field_type = 'MARKETING_IMAGE'
           THEN asset.image_asset.full_size.url
         ELSE
           NULL
@@ -89,7 +91,9 @@ FROM
       ROUND(SUM(metrics.cost_micros) / 1e6, 2) metrics_cost,
       SUM(metrics.conversions) metrics_conversions,
       SUM(metrics.all_conversions) metrics_all_conversions,
-      SUM(metrics.all_conversions_value) metrics_all_conversions_value
+      SUM(metrics.all_conversions_value) metrics_all_conversions_value,
+      SUM(metrics.biddable_app_install_conversions) metrics_installs,
+      SUM(metrics.biddable_app_post_install_conversions) metrics_in_app_actions
     FROM
       `${datasetId}.report_app_asset_performance` r
     INNER JOIN

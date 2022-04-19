@@ -35,7 +35,9 @@ SELECT DISTINCT
   metrics_cost,
   metrics_conversions,
   metrics_all_conversions,
-  metrics_all_conversions_value
+  metrics_all_conversions_value,
+  metrics_installs,
+  metrics_in_app_actions
 FROM `${datasetId}.app_snd_asset_perf_report` asset
 INNER JOIN
   `${datasetId}.base_snd_campaigns` camp

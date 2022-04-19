@@ -31,7 +31,9 @@
         "app_disapprovals_ad_group_ad_asset_view",
         "app_ad_group",
         "app_ad_group_perf",
-        "app_asset_metadata"
+        "app_asset_metadata",
+        "app_recommendations",
+        "app_skan"
       ]
     },
     "errorOptions": {
