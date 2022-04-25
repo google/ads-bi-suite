@@ -26,10 +26,7 @@
         }
       ]
     },
-    "next": [
-      "adh_pure_trigger_calc_query",
-      "adh_bi_trigger_load_query"
-    ]
+    "next": ["adh_pure_trigger_calc_query", "adh_bi_trigger_load_query"]
   },
   "adh_pure_trigger_calc_query": {
     "type": "knot",
@@ -137,7 +134,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/${queryName}.sql"
       },
       "endDate": "${partitionDay}",

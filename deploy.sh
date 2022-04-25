@@ -82,6 +82,7 @@ CONFIG_ITEMS=(
   "PROJECT_NAMESPACE"
   "TIMEZONE"
   "REGION"
+  "GCS_CONFIG_BUCKET"
   "GCS_BUCKET"
   "OUTBOUND"
   "DATASET_ID"
@@ -606,6 +607,28 @@ initialize_workflow() {
   fi
 }
 
+#######################################
+# Confirm and create the Big Query dataset and GCS buckets base on the
+# selected locations and name.
+# Globals:
+#   GCP_PROJECT
+#   INSTALLED_WORKFLOW
+#   INSTALLED_ADH_CREATIVE_WORKFLOW
+#   INSTALLED_ADH_BRANDING_WORKFLOW
+#   INSTALLED_ADH_AUDIENCE_WORKFLOW
+#   DATASET_ID
+#   CONFIG_DATASET_ID
+#   ADH_CREATIVE_DS_ID
+#   ADH_BRANDING_DS_ID
+#   ADH_AUDIENCE_DS_ID
+#   DATASET_LOCATION
+#   REGION_FOR_DS
+#   GCS_BUCKET
+#   GCS_CONFIG_BUCKET
+#   BUCKET_LOCATION
+# Arguments:
+#   None
+#######################################
 confirm_data_locations() {
   if [[ "${INSTALLED_WORKFLOW}" != "" ]]; then
     confirm_located_dataset DATASET_ID DATASET_LOCATION REGION_FOR_DS
@@ -620,7 +643,35 @@ confirm_data_locations() {
   if [[ "${INSTALLED_ADH_AUDIENCE_WORKFLOW}" == "Y" ]]; then
     confirm_located_dataset ADH_AUDIENCE_DS_ID DATASET_LOCATION REGION_FOR_DS
   fi
+
+  defaultBucketName=$(get_default_bucket_name "${GCP_PROJECT}")
+  GCS_CONFIG_BUCKET="${defaultBucketName}-config"
+
   confirm_located_bucket GCS_BUCKET BUCKET_LOCATION DATASET_LOCATION REGION_FOR_DS
+  confirm_located_bucket GCS_CONFIG_BUCKET BUCKET_LOCATION DATASET_LOCATION REGION_FOR_DS
+}
+
+#######################################
+# Copy sql to GCS config bucket.
+# Globals:
+#   GCS_CONFIG_BUCKET
+# Arguments:
+#   None
+#######################################
+copy_sql_to_gcs_config() {
+  copy_to_gcs "sql" "gs://${GCS_CONFIG_BUCKET}"
+}
+
+#######################################
+# Set report lifecycle rule to GCS report bucket.
+# Globals:
+#   CONFIG_GCS_REPORT_LIFECYCLE_FILE
+#   GCS_BUCKET
+# Arguments:
+#   None
+#######################################
+set_gcs_lifecycle() {
+  gsutil lifecycle set /dev/stdin "gs://${GCS_BUCKET}" <<< '{"rule":[{"action":{"type":"Delete"},"condition":{"age":3}}]}'
 }
 
 #######################################
@@ -676,7 +727,8 @@ COMMON_INSTALL_TASKS=(
   do_oauth
   deploy_sentinel
   set_internal_task
-  copy_sql_to_gcs
+  copy_sql_to_gcs_config
+  set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   create_fx_rate_table
   "initialize_workflow updateCronjob"
@@ -723,7 +775,8 @@ MINIMALISM_TASKS=(
   deploy_sentinel
   create_fx_rate_table
   set_internal_task
-  copy_sql_to_gcs
+  copy_sql_to_gcs_config
+  set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   "print_finished LEGO"
 )

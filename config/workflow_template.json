@@ -131,7 +131,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/workflow_active_account.sql"
       }
     },
@@ -258,7 +258,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/${queryName}.sql"
       }
     },
@@ -276,7 +276,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/make_label.sql"
       }
     },

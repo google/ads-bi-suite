@@ -8,7 +8,7 @@
       "configTableId": "adh_user_config_input",
       "endDate": "${partitionDay}",
       "dateRangeInDays": "30",
-      "customerId":"${adhCustomerId}"
+      "customerId": "${adhCustomerId}"
     },
     "next": "adh_audience_prep_user_config"
   },
@@ -107,7 +107,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/${queryName}.sql"
       },
       "endDate": "${partitionDay}",

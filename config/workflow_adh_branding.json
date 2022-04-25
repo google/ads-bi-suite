@@ -5,7 +5,7 @@
       "adhDatasetId": "adh_branding",
       "configDatasetId": "adh_branding",
       "configTableId": "adh_user_config_input",
-      "adhCustomerId":"${adhCustomerId}"
+      "adhCustomerId": "${adhCustomerId}"
     },
     "next": "adh_branding_prep_user_config"
   },
@@ -117,7 +117,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/${queryName}.sql"
       },
       "endDate": "${endDate}",

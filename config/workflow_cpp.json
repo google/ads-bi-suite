@@ -35,7 +35,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/cpp_download_report.sql"
       }
     },
@@ -53,7 +53,7 @@
     "source": {
       "file": {
         "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/cpp_combine_reports_with_cost.sql"
       }
     },
