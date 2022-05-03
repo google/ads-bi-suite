@@ -177,7 +177,9 @@
             "customer.id",
             "campaign.id",
             "change_event.change_date_time",
-            "change_event.change_resource_type"
+            "change_event.change_resource_type",
+            "change_event.user_email",
+            "change_event.resource_change_operation"
           ],
           "constraints": [
             {
@@ -223,7 +225,8 @@
             "customer.id",
             "customer.currency_code",
             "customer.descriptive_name",
-            "customer.optimization_score"
+            "customer.optimization_score",
+            "customer.optimization_score_weight"
           ],
           "from_date": "${fromDate}"
         }

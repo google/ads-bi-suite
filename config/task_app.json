@@ -182,6 +182,20 @@
             "queryName": "app_trd_skan_report",
             "tableId": "app_trd_skan_report"
           }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_trd_recommendations",
+            "tableId": "app_trd_recommendations"
+          }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "app_trd_account",
+            "tableId": "app_trd_account"
+          }
         }
       ]
     }
@@ -257,6 +271,18 @@
           "taskId": "mark_label",
           "appendedParameters": {
             "queryName": "app_trd_skan_report"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_recommendations"
+          }
+        },
+        {
+          "taskId": "mark_label",
+          "appendedParameters": {
+            "queryName": "app_trd_account"
           }
         }
       ]
