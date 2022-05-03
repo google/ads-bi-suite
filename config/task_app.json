@@ -208,79 +208,79 @@
     "embedded": {
       "tasks": [
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_ad_group_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_ads_disapproval_latest"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_asset_perf_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_bp_cc"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_campaign_conv_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_campaign_criterion"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_campaign_perf_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_geo_conv_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_geo_perf_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_placement_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_skan_report"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_recommendations"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_account"
           }

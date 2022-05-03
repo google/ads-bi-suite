@@ -61,9 +61,23 @@
       "table": {
         "projectId": "#PROJECT_ID#",
         "datasetId": "${datasetId}",
-        "tableId": "cpp_bfm_metrics_with_cost"
+        "tableId": "cpp_bfm_metrics_with_cost_with_label"
       },
       "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "next": "trigger_customized_task"
+  },
+  "cpp_mark_email": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "mark_email",
+          "appendedParameters": {
+            "queryName": "cpp_bfm_metrics_with_cost"
+          }
+        }
+      ]
     }
   }
 }

@@ -91,6 +91,9 @@
   },
   "youtube_trd_query": {
     "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_label"
+    },
     "embedded": {
       "tasks": [
         {
@@ -112,7 +115,7 @@
     "embedded": {
       "tasks": [
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "youtube_app_trd_placement_report"
           }

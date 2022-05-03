@@ -75,9 +75,21 @@
   },
   "trigger_fourth_query_impl": {
     "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_label"
+    },
     "embedded": {
       "tasks": ["app_fourth_query", "nonapp_fourth_query"]
     },
     "next": "trigger_customized_task"
+  },
+  "trigger_mark_email_impl": {
+    "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_email"
+    },
+    "embedded": {
+      "tasks": ["app_fourth_query", "nonapp_fourth_query"]
+    }
   }
 }

@@ -67,6 +67,9 @@
   },
   "trigger_trd_query_hourly": {
     "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_label"
+    },
     "embedded": {
       "tasks": [
         {
@@ -95,13 +98,13 @@
     "embedded": {
       "tasks": [
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_ads_disapproval_all"
           }
         },
         {
-          "taskId": "mark_label",
+          "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_ads_disapproval_latest"
           }

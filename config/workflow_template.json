@@ -288,5 +288,23 @@
       },
       "writeDisposition": "WRITE_TRUNCATE"
     }
+  },
+  "mark_email": {
+    "type": "query",
+    "source": {
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
+        "name": "sql/make_email.sql"
+      }
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${queryName}_with_label_and_email"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    }
   }
 }
