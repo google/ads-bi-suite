@@ -156,7 +156,7 @@
       "tableSchema": {
         "timePartitioning": {
           "type": "DAY",
-          "expirationMs": "2592000000"
+          "expirationMs": "5184000000"
         }
       }
     },
