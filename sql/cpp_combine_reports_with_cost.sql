@@ -14,10 +14,10 @@
 
 SELECT
   cpp.*,
-  c.account,
-  c.currency,
-  c.Billing_profile_id,
-  c.Billing_profile,
+  l.account,
+  l.currency,
+  l.Billing_profile_id,
+  l.Billing_profile,
   c.rate_usd,
   c.rate_aud,
   c.rate_sgd,
@@ -29,7 +29,7 @@ SELECT
   s.cost_nonac_28d,
   s.cost_video_28d,
   s.cost_28d,
-  label,
+  l.label,
   SUM(
     CASE
       WHEN c.Campaign_type = 'SEARCH' THEN c.Cost
@@ -152,6 +152,20 @@ LEFT JOIN
   ) s
   ON
     cpp.customer_id = s.customer_id
+LEFT JOIN
+  (
+    SELECT DISTINCT
+      account,
+      currency,
+      Billing_profile_id,
+      Billing_profile,
+      customer_id,
+      label
+    FROM
+      `${datasetId}.nonapp_trd_campaign_with_label` c
+  ) l
+  ON
+    cpp.customer_id = l.customer_id
 GROUP BY
   1,
   2,

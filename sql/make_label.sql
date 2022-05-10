@@ -60,7 +60,7 @@ LEFT JOIN
       customer.currency_code currency,
       rate AS rate_usd
     FROM
-      ${datasetId}.report_base_campaigns c
+      `${datasetId}.report_base_account_performance_*` c
     LEFT JOIN
       ${datasetId}.fx_rate f
       ON
@@ -68,7 +68,7 @@ LEFT JOIN
     WHERE
       f.tocur = 'USD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 day)
   )
   USING (customer_id)
 LEFT JOIN
@@ -78,7 +78,7 @@ LEFT JOIN
       customer.currency_code currency,
       rate AS rate_aud
     FROM
-      ${datasetId}.report_base_campaigns c
+      `${datasetId}.report_base_account_performance_*` c
     LEFT JOIN
       ${datasetId}.fx_rate f
       ON
@@ -86,7 +86,7 @@ LEFT JOIN
     WHERE
       f.tocur = 'AUD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 day)
   )
   USING (customer_id)
 LEFT JOIN
@@ -96,7 +96,7 @@ LEFT JOIN
       customer.currency_code currency,
       rate AS rate_sgd
     FROM
-      ${datasetId}.report_base_campaigns c
+      `${datasetId}.report_base_account_performance_*` c
     LEFT JOIN
       ${datasetId}.fx_rate f
       ON
@@ -104,6 +104,6 @@ LEFT JOIN
     WHERE
       f.tocur = 'SGD'
       AND date(f._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
-      AND date(c._partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}')
+      AND date(c._partitionTime) >= DATE_SUB(CURRENT_DATE(), INTERVAL 60 day)
   )
   USING (customer_id)

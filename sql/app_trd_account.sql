@@ -13,7 +13,20 @@
 -- limitations under the License.
 
 SELECT
-  r.*
+  rec.*,
+  r.metrics.cost_micros,
+  r.metrics.impressions,
+  r.metrics.clicks,
+  r.metrics.conversions,
+  r.metrics.conversions_value,
+  r.metrics.all_conversions,
+  r.metrics.all_conversions_value,
+  r.metrics.video_views,
+  r.customer.id,
+  r.customer.currency_code,
+  r.customer.descriptive_name,
+  r.customer.optimization_score,
+  r.customer.optimization_score_weight
 FROM
   `${datasetId}.report_base_account_performance_*` r
 INNER JOIN
