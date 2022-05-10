@@ -781,6 +781,18 @@ MINIMALISM_TASKS=(
   "print_finished LEGO"
 )
 
+upgrade_cf() {
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
+  confirm_region
+  do_oauth
+  deploy_sentinel
+}
+
+upgrade_cf_adh() {
+  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
+  upgrade_cf
+}
+
 setup_cn() {
   TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
