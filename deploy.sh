@@ -29,7 +29,7 @@ if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
 fi
 
 # Google Ads API version
-GOOGLE_ADS_API_VERSION=v10
+GOOGLE_ADS_API_VERSION=v9
 # ADH API version
 ADH_API_VERSION=v1
 # FX Rate Sheet
