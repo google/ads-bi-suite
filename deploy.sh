@@ -105,6 +105,7 @@ CONFIG_ITEMS=(
 INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports for App"
   "Google Ads Reports for NonApp"
+  "Google Ads Reports for NonApp lite"
   "Ads Data Hub for App Creative"
   "Ads Data Hub for App Branding"
   "Ads Data Hub for Audience+"
@@ -117,6 +118,7 @@ Reports also."
 
 # APIs need to be enabled if corresponding functionality are selected.
 INTEGRATION_APIS=(
+  "googleads.googleapis.com"
   "googleads.googleapis.com"
   "googleads.googleapis.com"
   "adsdatahub.googleapis.com"
@@ -152,27 +154,30 @@ setup_functionality_for_installation() {
     fi
     ;;
   2)
+    INSTALLED_WORKFLOW="NonAppLite"
+    ;;
+  3)
     INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
     if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
       INSTALLED_WORKFLOW="App"
     fi
     ;;
-  3)
+  4)
     INSTALLED_ADH_BRANDING_WORKFLOW="Y"
     ;;
-  4)
+  5)
     INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
     if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
       INSTALLED_WORKFLOW="NonApp"
     fi
     ;;
-  5)
+  6)
     INSTALLED_TRDPTY_TRIX_DATA="Y"
     ;;
-  6)
+  7)
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
     ;;
-  7)
+  8)
     INSTALLED_YOUTUBE_WORKFLOW="Y"
     if [[ "${INSTALLED_WORKFLOW}" == "NonApp" ]]; then
       INSTALLED_WORKFLOW="App + NonApp"
@@ -180,7 +185,7 @@ setup_functionality_for_installation() {
       INSTALLED_WORKFLOW="App"
     fi
     ;;
-  8)
+  9)
     INSTALLED_CPP_WORKFLOW="Y"
     INSTALLED_WORKFLOW="App + NonApp"
     ;;
@@ -454,6 +459,10 @@ initialize_workflow() {
   "NonApp")
     taskConfigs+=("./config/task_nonapp.json")
     taskConfigs+=("./config/workflow_nonapp.json")
+    ;;
+  "NonAppLite")
+    taskConfigs+=("./config/task_nonapp.json")
+    taskConfigs+=("./config/workflow_nonapplite.json")
     ;;
   "App + NonApp")
     taskConfigs+=("./config/task_app.json")

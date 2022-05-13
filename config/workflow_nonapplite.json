@@ -22,18 +22,7 @@
         "base_campaign_performance",
         "base_campaigns",
         "base_customer_label",
-        "base_detail_placement_view",
-        "base_geographic_view",
-        "base_videos",
-        "app_conversion_action",
-        "app_asset_performance",
-        "app_geo_conversion",
-        "app_disapprovals_ad_group_ad_asset_view",
-        "app_ad_group",
-        "app_ad_group_perf",
-        "app_asset_metadata",
-        "app_recommendations",
-        "app_skan"
+        "base_geographic_view"
       ]
     },
     "errorOptions": {
@@ -43,24 +32,20 @@
   "load_reports_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": [
-        "baselite_load_reports",
-        "base_load_reports",
-        "app_load_reports"
-      ]
+      "tasks": ["baselite_load_reports"]
     }
   },
   "trigger_snd_query_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["base_snd_query", "app_snd_query"]
+      "tasks": ["base_snd_query", "nonapp_snd_query"]
     },
     "next": "trigger_trd_query_impl"
   },
   "trigger_trd_query_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["app_trd_query"]
+      "tasks": ["nonapplite_trd_query"]
     },
     "next": "trigger_fourth_query_impl"
   },
@@ -70,7 +55,7 @@
       "markTaskId": "mark_label"
     },
     "embedded": {
-      "tasks": ["app_fourth_query"]
+      "tasks": ["nonapplite_fourth_query"]
     },
     "next": "trigger_customized_task"
   },
@@ -80,7 +65,7 @@
       "markTaskId": "mark_email"
     },
     "embedded": {
-      "tasks": ["app_fourth_query"]
+      "tasks": ["nonapplite_fourth_query"]
     }
   }
 }

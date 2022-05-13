@@ -126,7 +126,7 @@
       ]
     }
   },
-  "nonapp_trd_query": {
+  "nonapplite_trd_query": {
     "type": "knot",
     "embedded": {
       "tasks": [
@@ -144,6 +144,27 @@
             "tableId": "nonapp_trd_ads_approval"
           }
         },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "nonapp_trd_campaign",
+            "tableId": "nonapp_trd_campaign"
+          }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "nonapp_trd_geo",
+            "tableId": "nonapp_trd_geo"
+          }
+        }
+      ]
+    }
+  },
+  "nonapp_trd_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
         {
           "taskId": "query_general",
           "appendedParameters": {
@@ -168,13 +189,6 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
-            "queryName": "nonapp_trd_campaign",
-            "tableId": "nonapp_trd_campaign"
-          }
-        },
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
             "queryName": "nonapp_trd_dsa",
             "tableId": "nonapp_trd_dsa"
           }
@@ -191,13 +205,6 @@
           "appendedParameters": {
             "queryName": "nonapp_trd_gender",
             "tableId": "nonapp_trd_gender"
-          }
-        },
-        {
-          "taskId": "query_general",
-          "appendedParameters": {
-            "queryName": "nonapp_trd_geo",
-            "tableId": "nonapp_trd_geo"
           }
         },
         {
@@ -252,7 +259,7 @@
       ]
     }
   },
-  "nonapp_fourth_query": {
+  "nonapplite_fourth_query": {
     "type": "knot",
     "appendedParameters": {
       "labelSourceTable": "base_snd_account_label"
@@ -274,6 +281,28 @@
         {
           "taskId": "${markTaskId}",
           "appendedParameters": {
+            "queryName": "nonapp_trd_campaign"
+          }
+        },
+        {
+          "taskId": "${markTaskId}",
+          "appendedParameters": {
+            "queryName": "nonapp_trd_geo"
+          }
+        }
+      ]
+    }
+  },
+  "nonapp_fourth_query": {
+    "type": "knot",
+    "appendedParameters": {
+      "labelSourceTable": "base_snd_account_label"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "${markTaskId}",
+          "appendedParameters": {
             "queryName": "nonapp_trd_ads_perf"
           }
         },
@@ -292,12 +321,6 @@
         {
           "taskId": "${markTaskId}",
           "appendedParameters": {
-            "queryName": "nonapp_trd_campaign"
-          }
-        },
-        {
-          "taskId": "${markTaskId}",
-          "appendedParameters": {
             "queryName": "nonapp_trd_dsa"
           }
         },
@@ -311,12 +334,6 @@
           "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "nonapp_trd_gender"
-          }
-        },
-        {
-          "taskId": "${markTaskId}",
-          "appendedParameters": {
-            "queryName": "nonapp_trd_geo"
           }
         },
         {

@@ -47,7 +47,11 @@
   "load_reports_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["base_load_reports", "nonapp_load_reports"]
+      "tasks": [
+        "baselite_load_reports",
+        "base_load_reports",
+        "nonapp_load_reports"
+      ]
     }
   },
   "trigger_snd_query_impl": {
@@ -60,7 +64,7 @@
   "trigger_trd_query_impl": {
     "type": "knot",
     "embedded": {
-      "tasks": ["nonapp_trd_query"]
+      "tasks": ["nonapplite_trd_query", "nonapp_trd_query"]
     },
     "next": "trigger_fourth_query_impl"
   },
@@ -70,7 +74,7 @@
       "markTaskId": "mark_label"
     },
     "embedded": {
-      "tasks": ["nonapp_fourth_query"]
+      "tasks": ["nonapplite_fourth_query", "nonapp_fourth_query"]
     },
     "next": "trigger_customized_task"
   },
@@ -80,7 +84,7 @@
       "markTaskId": "mark_email"
     },
     "embedded": {
-      "tasks": ["nonapp_fourth_query"]
+      "tasks": ["nonapplite_fourth_query", "nonapp_fourth_query"]
     }
   }
 }
