@@ -18,7 +18,7 @@ WITH
     FROM ${datasetId}.trdpty_agency_email
     WHERE DATE(_partitionTime) = PARSE_DATE('%Y%m%d', '${partitionDay}') 
   )
-SELECT OriginalTable.*, LOWER(Email.email) AS email 
+SELECT OriginalTable.*, Email.email AS email
 FROM ${datasetId}.${queryName}_with_label OriginalTable
 LEFT JOIN Email
   ON CAST(OriginalTable.customer_id AS STRING) = Email.`id`
