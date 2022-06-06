@@ -53,6 +53,8 @@ ADH_CREATIVE_DS_ID="adh_apps_data"
 ADH_BRANDING_DS_ID="adh_branding"
 ADH_AUDIENCE_DS_ID="adh_audience"
 REGION_FOR_DS="US"
+# The Git commit id.
+GIT_COMMIT_ID="$(git log -1 --pretty=format:'%H')"
 
 # The main workflow that this instance will install. There are following
 # available workflows:
@@ -83,6 +85,7 @@ CONFIG_ITEMS=(
   "GCS_CONFIG_BUCKET"
   "GCS_BUCKET"
   "OUTBOUND"
+  "GIT_COMMIT_ID"
   "DATASET_ID"
   "CONFIG_DATASET_ID"
   "ADH_CREATIVE_DS_ID"
@@ -641,6 +644,7 @@ COMMON_INSTALL_TASKS=(
   deploy_sentinel
   set_internal_task
   copy_sql_to_gcs_config
+  "copy_to_gcs config gs://${GCS_CONFIG_BUCKET}"
   set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   create_fx_rate_table
@@ -689,6 +693,7 @@ MINIMALISM_TASKS=(
   create_fx_rate_table
   set_internal_task
   copy_sql_to_gcs_config
+  "copy_to_gcs config gs://${GCS_CONFIG_BUCKET}"
   set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   "print_finished LEGO"
