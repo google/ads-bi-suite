@@ -568,14 +568,14 @@ confirm_data_locations() {
 }
 
 #######################################
-# Copy sql to GCS config bucket.
+# Copy given folder to GCS config bucket.
 # Globals:
 #   GCS_CONFIG_BUCKET
 # Arguments:
-#   None
+#   The name of the folder.
 #######################################
-copy_sql_to_gcs_config() {
-  copy_to_gcs "sql" "gs://${GCS_CONFIG_BUCKET}"
+copy_folder_to_gcs_config() {
+  copy_to_gcs "${1}" "gs://${GCS_CONFIG_BUCKET}"
 }
 
 #######################################
@@ -643,8 +643,8 @@ COMMON_INSTALL_TASKS=(
   do_oauth
   deploy_sentinel
   set_internal_task
-  copy_sql_to_gcs_config
-  "copy_to_gcs config gs://${GCS_CONFIG_BUCKET}"
+  "copy_folder_to_gcs_config sql"
+  "copy_folder_to_gcs_config config"
   set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   create_fx_rate_table
@@ -692,8 +692,8 @@ MINIMALISM_TASKS=(
   deploy_sentinel
   create_fx_rate_table
   set_internal_task
-  copy_sql_to_gcs_config
-  "copy_to_gcs config gs://${GCS_CONFIG_BUCKET}"
+  "copy_folder_to_gcs_config sql"
+  "copy_folder_to_gcs_config config"
   set_gcs_lifecycle
   "update_api_config ./config/config_api.json"
   "print_finished LEGO"
