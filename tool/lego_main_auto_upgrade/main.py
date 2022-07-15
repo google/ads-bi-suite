@@ -19,8 +19,9 @@ gcloud cmd.
        Google Cloud Project.
 
        Required roles:
-         1. Storage Object Creator - roles/storage.objectCreator
+         1. Storage Admin - roles/storage.admin
          2. Cloud Functions Developer - roles/cloudfunctions.developer
+         3. Service Account User - roles/iam.serviceAccountUser
 
   Typical usage example:
 
@@ -60,6 +61,11 @@ _OAUTH_TOKEN_FILE_PATH = flags.DEFINE_string(
     'keys/oauth2.token.json',
     'The filepath to oauth token key in the zip file of Lego main Google Cloud Function.')
 
+_DRY_RUN = flags.DEFINE_bool(
+    'dry_run',
+    True,
+    'Dry run mode only fetches Oauth token key without deployment.',
+    short_name='d')
 
 def _deploy_lego_main(
     gcp_project_id: str,
@@ -83,6 +89,7 @@ def _deploy_lego_main(
   os.system((
       f'gcloud functions deploy {lego_name_space}_main '
       '--entry-point=coordinateTask '
+      f'--project={gcp_project_id} '
       f'--trigger-topic={lego_name_space}-monitor '
       f'--region={region} '
       f'--source=./{source_path} '
@@ -234,7 +241,10 @@ def _clean_up_lego_files(
       'Remove the files in %s and %s',
       lego_main_zip_file_name,
       lego_source_code_temp_folder)
-  os.remove(lego_main_zip_file_name)
+  if os.path.exists(
+      f'{os.getcwd()}/{lego_main_zip_file_name}'
+  ):
+    os.remove(lego_main_zip_file_name)
   shutil.rmtree(lego_source_code_temp_folder)
 
 
@@ -245,7 +255,8 @@ def _run(
     lego_source_code_temp_folder: str,
     lego_main_index_file_path: str,
     lego_main_package_file_path: str,
-    oauth_token_file_path: str
+    oauth_token_file_path: str,
+    dry_run: bool
 ) -> None:
   """The major method to control the deployment process.
 
@@ -272,6 +283,8 @@ def _run(
         Lego main Google Cloud Function.
       oauth_token_file_path (str): The filepath to oauth token key in the zip
         file of Lego main Google Cloud Function.
+      dry_run (bool): If True, program only fetches Oauth token key without
+        deployment.
   """
 
   # Prepares the lego files.
@@ -324,13 +337,16 @@ def _run(
           'Give up the deployment, (reason: No Oauth token in %s)',
           oauth_token_file_path)
 
-    # Deploys the new Lego main Google Cloud Function with the original
-    # Oauth token key.
-    _deploy_lego_main(
-        gcp_project_id,
-        lego_name_space,
-        region,
-        lego_source_code_temp_folder)
+    if not dry_run:
+      logging.info('Skip the step of new deployment in dry run mode.')
+    else:
+      # Deploys the new Lego main Google Cloud Function with the original
+      # Oauth token key.
+      _deploy_lego_main(
+          gcp_project_id,
+          lego_name_space,
+          region,
+          lego_source_code_temp_folder)
 
   # Cleans up the downloaded files.
   _clean_up_lego_files(
@@ -349,11 +365,13 @@ def main(unused_argv: Sequence[str]) -> None:
   lego_source_code_temp_folder = 'lego_temp'
   lego_main_index_file_path = _LEGO_MAIN_INDEX_FILE_PATH.value
   lego_main_package_file_path = _LEGO_MAIN_PACKAGE_FILE_PATH.value
+  dry_run = _DRY_RUN.value
 
   for gcp_project_id in _GCP_PROJECT_IDS.value:
     logging.info(
-        'Program starts to upgrade Lego Main Google Cloud Functions in %s',
-        gcp_project_id)
+        'Program starts to upgrade Lego Main Google Cloud Functions in %s. Dry run mode: %s ',
+        gcp_project_id, not dry_run)
+
     storage_client = storage.Client(project=gcp_project_id)
     _run(
         gcp_project_id=gcp_project_id,
@@ -362,7 +380,8 @@ def main(unused_argv: Sequence[str]) -> None:
         lego_source_code_temp_folder=lego_source_code_temp_folder,
         lego_main_index_file_path=lego_main_index_file_path,
         lego_main_package_file_path=lego_main_package_file_path,
-        oauth_token_file_path=oauth_token_file_path
+        oauth_token_file_path=oauth_token_file_path,
+        dry_run=dry_run
     )
 
 if __name__ == '__main__':
