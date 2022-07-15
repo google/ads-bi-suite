@@ -45,6 +45,21 @@ _GCP_PROJECT_IDS = flags.DEFINE_multi_string(
     'gcp_project_id', ['lego-chjerry-lab'],
     'The Google Cloud Project id.', short_name='gcp')
 
+_LEGO_MAIN_INDEX_FILE_PATH = flags.DEFINE_string(
+    'lego_main_index_file_path',
+    '../../index.js',
+    'The filepath to index.js for Lego main Google Cloud Function.')
+
+_LEGO_MAIN_PACKAGE_FILE_PATH = flags.DEFINE_string(
+    'lego_main_package_file_path',
+    '../../package.json',
+    'The filepath to package.json for Lego main Google Cloud Function.')
+
+_OAUTH_TOKEN_FILE_PATH = flags.DEFINE_string(
+    'oauth_token_file_path',
+    'keys/oauth2.token.json',
+    'The filepath to oauth token key in the zip file of Lego main Google Cloud Function.')
+
 
 def _deploy_lego_main(
     gcp_project_id: str,
@@ -110,7 +125,7 @@ def _is_lego_main_zip_blob(name: str) -> bool:
 
 def _get_gcf_region_from_bucket_name(name: str) -> str:
   """Parses the Google Cloud region from the name of Google Cloud built-in bucket.
-  
+
   The name of Google Cloud built-in bucket looks like
   'gcf-sources-642343838549-us-central1', which format is
   gcf-sources + Google Cloud project id + the region code in Google Cloud.
@@ -126,7 +141,7 @@ def _get_gcf_region_from_bucket_name(name: str) -> str:
 
 def _get_lego_name_space_from_blob_name(name: str) -> str:
   """Parses the Lego solution namespace from the name of the given blob.
-  
+
   Args:
       name (str): The name of Google Cloud Storage blob of
         Lego main Google Cloud Function.
@@ -180,7 +195,7 @@ def _prep_lego_files(
     lego_main_index_file_path: str,
     lego_main_package_file_path: str
 ) -> None:
-  """Prepares the lego files for sentinel further deployment.
+  """Prepares the lego files for Lego main Google Cloud Function further deployment.
 
   Args:
       lego_source_code_temp_folder (str): The tmp folder name to store files
@@ -207,7 +222,7 @@ def _clean_up_lego_files(
   lego_main_zip_file_name: str,
   lego_source_code_temp_folder: str
 ) -> None:
-  """Cleans up the lego files after the sentinel deployment.
+  """Cleans up the lego files after the Lego main Google Cloud Function deployment.
 
   Args:
       lego_main_zip_file_name (str): The zip file name in
@@ -235,12 +250,14 @@ def _run(
   """The major method to control the deployment process.
 
   Currently, the process can break down to 5 steps.
-    Step 1: Prepares the lego files for sentinel further deployment.
+    Step 1: Prepares the lego files for Lego main Google Cloud Function
+      further deployment.
     Step 2: Fetch the zip file which contains the source code of running
       Lego main Google Cloud Function and extract the oauth token key from it.
     Step 3: Deploy the files that prepared at Step 1 with oauth token got at
       Step 2 to Lego main Google Cloud Function.
-    Step 4: Cleans up the lego files after the sentinel deployment.
+    Step 4: Cleans up the lego files after the Lego main Google Cloud
+      Function deployment.
 
   Args:
       gcp_project_id (str): The Google Cloud Project id.
@@ -256,6 +273,8 @@ def _run(
       oauth_token_file_path (str): The filepath to oauth token key in the zip
         file of Lego main Google Cloud Function.
   """
+
+  # Prepares the lego files.
   _prep_lego_files(
       lego_source_code_temp_folder=lego_source_code_temp_folder,
       lego_main_index_file_path=lego_main_index_file_path,
@@ -278,31 +297,42 @@ def _run(
     logging.info(
         'The LEGO name space is: %s, (reason: bucket name is %s, blob name is %s)',
         lego_name_space, bucket.name, lego_main_blob.name)
-    
+
     logging.info(
       'Download the source code zip file from %s/%s to %s',
       bucket.name, lego_main_blob.name, lego_main_zip_file_name)
 
+    # Writes the original source code into the given zip file path.
     with open(lego_main_zip_file_name, 'wb') as binary_file:
       binary_file.write(lego_main_blob.download_as_bytes())
       binary_file.close()
 
-    
     logging.info(
       'Extract the oauth token key from %s to %s/',
       oauth_token_file_path, lego_source_code_temp_folder)
 
+    # Unzips the downloaded zip file path and extracts the Oauth token key.
     with zipfile.ZipFile(lego_main_zip_file_name, 'r') as zip_ref:
       zip_ref.extract(
           oauth_token_file_path, f'{lego_source_code_temp_folder}/')
       zip_ref.close()
 
+    if not os.path.exists(
+      f'{os.getcwd()}/{lego_source_code_temp_folder}/{oauth_token_file_path}'
+    ):
+      logging.error(
+          'Give up the deployment, (reason: No Oauth token in %s)',
+          oauth_token_file_path)
+
+    # Deploys the new Lego main Google Cloud Function with the original
+    # Oauth token key.
     _deploy_lego_main(
         gcp_project_id,
         lego_name_space,
         region,
         lego_source_code_temp_folder)
 
+  # Cleans up the downloaded files.
   _clean_up_lego_files(
       lego_main_zip_file_name=lego_main_zip_file_name,
       lego_source_code_temp_folder=lego_source_code_temp_folder
@@ -314,11 +344,11 @@ def _run(
 def main(unused_argv: Sequence[str]) -> None:
   del unused_argv  # Unused
 
-  oauth_token_file_path = 'keys/oauth2.token.json'
+  oauth_token_file_path = _OAUTH_TOKEN_FILE_PATH.value
   lego_main_zip_file_name = 'lego_main.zip'
   lego_source_code_temp_folder = 'lego_temp'
-  lego_main_index_file_path = '../../index.js'
-  lego_main_package_file_path = '../../package.json'
+  lego_main_index_file_path = _LEGO_MAIN_INDEX_FILE_PATH.value
+  lego_main_package_file_path = _LEGO_MAIN_PACKAGE_FILE_PATH.value
 
   for gcp_project_id in _GCP_PROJECT_IDS.value:
     logging.info(
@@ -336,4 +366,5 @@ def main(unused_argv: Sequence[str]) -> None:
     )
 
 if __name__ == '__main__':
+  flags.mark_flags_as_required(['gcp_project_id'])
   app.run(main)
