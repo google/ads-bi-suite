@@ -235,6 +235,13 @@
             "customer.optimization_score",
             "customer.optimization_score_weight"
           ],
+          "constraints": [
+            {
+              "key": "customer.status",
+              "op": "=",
+              "val": "ENABLED"
+            }
+          ],
           "from_date": "${fromDate}"
         }
       }

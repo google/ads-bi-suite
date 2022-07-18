@@ -101,7 +101,7 @@ FROM
         SELECT
           campaign.id campaign_id,
           segments.date segments_date,
-          MAX(DATE(_partitionTime)) partitionTime
+          MAX(_partitionTime) partitionTime
         FROM
           `${datasetId}.report_app_asset_performance`
         GROUP BY
@@ -109,7 +109,7 @@ FROM
           2
       ) t
       ON
-        t.partitionTime = DATE(r._partitionTime)
+        t.partitionTime = r._partitionTime
         AND t.campaign_id = r.campaign.id
         AND t.segments_date = r.segments.date
     GROUP BY

@@ -130,6 +130,13 @@
         {
           "taskId": "query_general",
           "appendedParameters": {
+            "queryName": "app_trd_adjusted_skan_report",
+            "tableId": "app_trd_adjusted_skan_report"
+          }
+        },
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
             "queryName": "app_trd_bp_cc",
             "tableId": "app_trd_bp_cc"
           }
@@ -223,6 +230,12 @@
           "taskId": "${markTaskId}",
           "appendedParameters": {
             "queryName": "app_trd_asset_perf_report"
+          }
+        },
+        {
+          "taskId": "${markTaskId}",
+          "appendedParameters": {
+            "queryName": "app_trd_adjusted_skan_report"
           }
         },
         {
@@ -672,7 +685,8 @@
             "segments.sk_ad_network_conversion_value",
             "segments.sk_ad_network_ad_event_type",
             "segments.sk_ad_network_source_app.sk_ad_network_source_app_id",
-            "segments.sk_ad_network_user_type"
+            "segments.sk_ad_network_user_type",
+            "segments.sk_ad_network_attribution_credit"
           ],
           "attributes": ["campaign.id", "campaign.name"],
           "date_constant": "LAST_30_DAYS"

@@ -163,6 +163,7 @@ LEFT JOIN
       label
     FROM
       `${datasetId}.nonapp_trd_campaign_with_label` c
+    WHERE c.Date = DATE_SUB(CURRENT_DATE(), INTERVAL 7 day)
   ) l
   ON
     cpp.customer_id = l.customer_id
