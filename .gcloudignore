@@ -13,10 +13,11 @@
 .git
 .gitignore
 *.iml
-sql/
-libs/
-config/
+sql
+config
 deploy.sh
+terraform
+tool
 tests
 package-lock.json
 node_modules
