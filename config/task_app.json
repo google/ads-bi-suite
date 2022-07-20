@@ -672,7 +672,8 @@
             "segments.sk_ad_network_conversion_value",
             "segments.sk_ad_network_ad_event_type",
             "segments.sk_ad_network_source_app.sk_ad_network_source_app_id",
-            "segments.sk_ad_network_user_type"
+            "segments.sk_ad_network_user_type",
+            "segments.sk_ad_network_attribution_credit"
           ],
           "attributes": ["campaign.id", "campaign.name"],
           "date_constant": "LAST_30_DAYS"
