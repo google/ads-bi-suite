@@ -40,7 +40,8 @@ from absl import flags
 from absl import logging
 
 # Imports the Google Cloud client library
-from google.cloud import storage
+from google.cloud import functions_v1, storage
+from google.api_core import exceptions
 
 _GCP_PROJECT_IDS = flags.DEFINE_multi_string(
     'gcp_project_id', ['lego-chjerry-lab'],
@@ -251,6 +252,7 @@ def _clean_up_lego_files(
 def _run(
     gcp_project_id: str,
     storage_client: storage.Client,
+    clouf_function_client:  functions_v1.CloudFunctionsServiceClient,
     lego_main_zip_file_name: str,
     lego_source_code_temp_folder: str,
     lego_main_index_file_path: str,
@@ -273,6 +275,8 @@ def _run(
   Args:
       gcp_project_id (str): The Google Cloud Project id.
       storage_client (storage.Client): The client lib for Google Cloud Storeage.
+      clouf_function_client (functions_v1.CloudFunctionsServiceClient): The
+        client lib for Google Cloud Function.
       lego_main_zip_file_name (str): The zip file name in
         Lego main Google Cloud Function.
       lego_source_code_temp_folder (str): The tmp folder name to store
@@ -285,6 +289,10 @@ def _run(
         file of Lego main Google Cloud Function.
       dry_run (bool): If True, program only fetches Oauth token key without
         deployment.
+
+  Raises:
+    exceptions.NotFound: If Lego main Google Cloud Function not found in Cloud
+      Function service.
   """
 
   # Prepares the lego files.
@@ -340,13 +348,28 @@ def _run(
     if not dry_run:
       logging.info('Skip the step of new deployment in dry run mode.')
     else:
-      # Deploys the new Lego main Google Cloud Function with the original
-      # Oauth token key.
-      _deploy_lego_main(
-          gcp_project_id,
-          lego_name_space,
-          region,
-          lego_source_code_temp_folder)
+      # Initialize request argument(s)
+      lego_main_cf_request = functions_v1.GetFunctionRequest(
+          name = (
+              f'projects/{gcp_project_id}'
+              f'/locations/{region}/functions/{lego_name_space}_maixn')
+      )
+
+      try:
+        # Checks the Lego main Google Cloud Function is in serving or not.
+        # clouf_function_client.get_function raises the exceptions.NotFound if
+        # it doen't get the function.
+        _ = clouf_function_client.get_function(request=lego_main_cf_request)
+
+        # Deploys the new Lego main Google Cloud Function with the original
+        # Oauth token key.
+        _deploy_lego_main(
+            gcp_project_id,
+            lego_name_space,
+            region,
+            lego_source_code_temp_folder)
+      except exceptions.NotFound as err:
+        logging.error(f'Skip the step of new deployment, reason (%s)', err)
 
   # Cleans up the downloaded files.
   _clean_up_lego_files(
@@ -373,9 +396,11 @@ def main(unused_argv: Sequence[str]) -> None:
         gcp_project_id, not dry_run)
 
     storage_client = storage.Client(project=gcp_project_id)
+    clouf_function_client = functions_v1.CloudFunctionsServiceClient()
     _run(
         gcp_project_id=gcp_project_id,
         storage_client=storage_client,
+        clouf_function_client=clouf_function_client,
         lego_main_zip_file_name=lego_main_zip_file_name,
         lego_source_code_temp_folder=lego_source_code_temp_folder,
         lego_main_index_file_path=lego_main_index_file_path,
