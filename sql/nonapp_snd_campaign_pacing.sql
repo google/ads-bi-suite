@@ -14,7 +14,6 @@
 
 SELECT
   p.campaign.id,
-  p.campaign.name,
   AVG(p.campaign_budget.amount_micros) / 1e6 AS budget,
   spend_7d,
   safe_divide(AVG(spend_7d), AVG(p.campaign_budget.amount_micros / 1e6)) AS budget_utilization
@@ -38,4 +37,4 @@ LEFT JOIN
 WHERE
   date(_partitionTime) <= PARSE_DATE('%Y%m%d', '${partitionDay}')
   AND date(_partitionTime) > date_sub(PARSE_DATE('%Y%m%d', '${partitionDay}'), INTERVAL 7 day)
-GROUP BY campaign.id, campaign.name, spend_7d
+GROUP BY campaign.id, spend_7d
