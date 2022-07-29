@@ -25,13 +25,15 @@ gcloud cmd.
 
   Typical usage example:
 
-    $ python main.py --gcp lego-apple --gcp lego-chjerry-lab
+    $ python main.py -d --gcp lego-apple --gcp lego-chjerry-lab
 """
 
+from ast import Try
 import os
 import re
 import shutil
 import zipfile
+import requests
 
 from typing import Union, Sequence, Iterable
 
@@ -41,7 +43,7 @@ from absl import logging
 
 # Imports the Google Cloud client library
 from google.cloud import functions_v1, storage
-from google.api_core import exceptions
+from google.api_core import exceptions, protobuf_helpers
 
 _GCP_PROJECT_IDS = flags.DEFINE_multi_string(
     'gcp_project_id', ['lego-chjerry-lab'],
@@ -68,39 +70,102 @@ _DRY_RUN = flags.DEFINE_bool(
     'Dry run mode only fetches Oauth token key without deployment.',
     short_name='d')
 
+def _upload_source_code(
+  storage_client: storage.Client,
+  clouf_function_client: functions_v1.CloudFunctionsServiceClient,
+  gcp_project_id: str,
+  region: str,
+  source_path: str
+):
+  """_summary_
+
+  Args:
+      storage_client (storage.Client): The client lib for Google Cloud Storeage.
+      clouf_function_client (functions_v1.CloudFunctionsServiceClient): The
+        client lib for Google Cloud Function.
+      gcp_project_id (str): The Google Cloud Project id.
+      region (str): The region code in Google Cloud.
+      source_path (str): The tmp folder name to store files for
+        Lego main Google Cloud Function.
+
+  Returns:
+      str: A signed URL for uploading a function source code.
+
+  Raises:
+    requests.exceptions.RequestException: If there is an unexpected error
+      happened during the uploading between local source codes and Google Cloud
+      Storage.
+  """
+  # Initialize request argument(s)
+  request = functions_v1.GenerateUploadUrlRequest(
+    parent = f'projects/{gcp_project_id}/locations/{region}'
+  )
+  # Make the request
+  upload_url_resp = clouf_function_client.generate_upload_url(request=request)
+  shutil.make_archive(f'{source_path}', 'zip', f'./{source_path}')
+
+  r = requests.put(
+    url = upload_url_resp.upload_url,
+    headers = {
+        'Content-type': 'application/zip',
+        'x-goog-content-length-range': '0,104857600'},
+    data = open(f'./{source_path}.zip', 'rb'))
+
+  try:
+    r.raise_for_status()
+  except requests.exceptions.RequestException as err:
+    logging.error('Skip the step of new deployment, reason (%s)', err)
+    return ''
+  return upload_url_resp.upload_url
+
+
 def _deploy_lego_main(
     gcp_project_id: str,
+    clouf_function_client: functions_v1.CloudFunctionsServiceClient,
     lego_name_space: str,
     region: str,
-    source_path: str
+    source_path: str,
+    upload_url: str,
+    cf: functions_v1.GetFunctionRequest
 ) -> None:
   """Deploys Lego Main Google Cloud Function.
 
   Args:
       gcp_project_id (str): The Google Cloud Project id.
+      clouf_function_client (functions_v1.CloudFunctionsServiceClient): The
+        client lib for Google Cloud Function.
       lego_name_space (str): The Lego solution namespace.
       region (str): The region code in Google Cloud.
       source_path (str): The tmp folder name to store files for
         Lego main Google Cloud Function.
+      upload_url (str): A signed URL for uploading a function source code. 
+      cf (functions_v1.CloudFunction): Lego main Google Cloud Function.
   """
   logging.info(
       'Deploy Lego Main (gcp id: %s, name space: %s, region: %s, source path: %s)',
       gcp_project_id, lego_name_space, region, source_path)
 
-  os.system((
-      f'gcloud functions deploy {lego_name_space}_main '
-      '--entry-point=coordinateTask '
-      f'--project={gcp_project_id} '
-      f'--trigger-topic={lego_name_space}-monitor '
-      f'--region={region} '
-      f'--source=./{source_path} '
-      f'--no-allow-unauthenticated '
-      f'--timeout=540 --memory=2048MB --runtime=nodejs14 '
-      f'--set-env-vars=OAUTH2_TOKEN_JSON=./keys/oauth2.token.json '
-      f'--set-env-vars=GCP_PROJECT={gcp_project_id} '
-      f'--set-env-vars=PROJECT_NAMESPACE={lego_name_space} '
-      f'--set-env-vars=DEBUG=false '
-      f'--set-env-vars=IN_GCP=true'))
+  new_cf = functions_v1.CloudFunction(
+    name = cf.name,
+    entry_point = cf.entry_point,
+    runtime = cf.runtime,
+    timeout = cf.timeout,
+    available_memory_mb = cf.available_memory_mb,
+    environment_variables = cf.environment_variables,
+    source_upload_url = upload_url,
+    # source_archive_url = cf.source_archive_url,
+    event_trigger = cf.event_trigger,
+    ingress_settings = cf.ingress_settings,
+  )
+
+  update_request = functions_v1.UpdateFunctionRequest(
+    function = new_cf,
+    update_mask = protobuf_helpers.field_mask(None, new_cf._pb)
+  )
+  operation = clouf_function_client.update_function(request=update_request)
+  logging.info("Waiting for the update to complete...")
+  response = operation.result()
+  logging.info("Succeeded to deploy the new version %s", response)
   return
 
 
@@ -242,17 +307,19 @@ def _clean_up_lego_files(
       'Remove the files in %s and %s',
       lego_main_zip_file_name,
       lego_source_code_temp_folder)
-  if os.path.exists(
-      f'{os.getcwd()}/{lego_main_zip_file_name}'
-  ):
-    os.remove(lego_main_zip_file_name)
+  for file_name in [
+      lego_main_zip_file_name, f'{lego_source_code_temp_folder}.zip']:
+    if os.path.exists(
+        f'{os.getcwd()}/{file_name}'
+    ):
+      os.remove(file_name)
   shutil.rmtree(lego_source_code_temp_folder)
 
 
 def _run(
     gcp_project_id: str,
     storage_client: storage.Client,
-    clouf_function_client:  functions_v1.CloudFunctionsServiceClient,
+    clouf_function_client: functions_v1.CloudFunctionsServiceClient,
     lego_main_zip_file_name: str,
     lego_source_code_temp_folder: str,
     lego_main_index_file_path: str,
@@ -345,29 +412,40 @@ def _run(
           'Give up the deployment, (reason: No Oauth token in %s)',
           oauth_token_file_path)
 
-    if not dry_run:
+    if dry_run:
       logging.info('Skip the step of new deployment in dry run mode.')
     else:
       # Initialize request argument(s)
       lego_main_cf_request = functions_v1.GetFunctionRequest(
           name = (
               f'projects/{gcp_project_id}'
-              f'/locations/{region}/functions/{lego_name_space}_maixn')
+              f'/locations/{region}/functions/{lego_name_space}_main')
       )
 
       try:
         # Checks the Lego main Google Cloud Function is in serving or not.
         # clouf_function_client.get_function raises the exceptions.NotFound if
         # it doen't get the function.
-        _ = clouf_function_client.get_function(request=lego_main_cf_request)
+        cf = clouf_function_client.get_function(request=lego_main_cf_request)
+        upload_url = _upload_source_code(
+            storage_client,
+            clouf_function_client,
+            gcp_project_id,
+            region,
+            lego_source_code_temp_folder)
+        if not upload_url:
+          return
 
         # Deploys the new Lego main Google Cloud Function with the original
         # Oauth token key.
         _deploy_lego_main(
             gcp_project_id,
+            clouf_function_client,
             lego_name_space,
             region,
-            lego_source_code_temp_folder)
+            lego_source_code_temp_folder,
+            upload_url,
+            cf)
       except exceptions.NotFound as err:
         logging.error(f'Skip the step of new deployment, reason (%s)', err)
 
