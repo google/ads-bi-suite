@@ -6,9 +6,15 @@ provider "google" {
   zone    = "us-central1-c"
 }
 
+module "billing" {
+  source = "./billing"
+  project_id = var.project_id
+}
+
 module "permission" {
   source = "./permission"
   project_id = var.project_id
+  depends_on = [module.billing]
 }
 
 module "api" {
