@@ -188,7 +188,9 @@ setup_functionality_for_installation() {
     ;;
   9)
     INSTALLED_CPP_WORKFLOW="Y"
-    INSTALLED_WORKFLOW="App + NonApp"
+    if [[ "${INSTALLED_WORKFLOW}" != "NonAppLite" ]]; then
+      INSTALLED_WORKFLOW="App + NonApp"
+    fi
     ;;
   *) ;;
   esac
