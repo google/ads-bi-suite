@@ -19,6 +19,8 @@ module "permission" {
 
 module "api" {
   source = "./api"
+  lego_functions = var.lego_functions
+
   depends_on = [module.permission]
 }
 
