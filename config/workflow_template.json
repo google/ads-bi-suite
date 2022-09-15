@@ -73,11 +73,10 @@
         "reportQuery": {
           "entity": "customer_client",
           "attributes": ["customer_client.id"],
-          "constraints": [
-            {
-              "customer_client.manager": "FALSE"
-            }
-          ]
+          "constraints": {
+            "customer_client.manager": "FALSE",
+            "customer_client.status": "ENABLED"
+          }
         }
       }
     },
