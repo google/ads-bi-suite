@@ -90,3 +90,8 @@ variable "lego_functions" {
         ads_data_hub = false
     }
 }
+
+variable "access_token" {
+    type = string
+    default = "$access_token"
+}

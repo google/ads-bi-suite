@@ -19,3 +19,5 @@ config_dataset_id = "ads_report_configs"
 adh_branding_dataset_id = "adh_branding"
 adh_audience_dataset_id = "adh_audience"
 adh_lego_dataset_id = "adh_apps_data"
+
+access_token = ""
