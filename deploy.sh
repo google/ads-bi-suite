@@ -71,10 +71,19 @@ INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
 INSTALLED_YOUTUBE_WORKFLOW="N"
 INSTALLED_CPP_WORKFLOW="N"
 
-# The task config files that will be installed by default
-DEFAULT_TASK_CONFIG=(
-  "./config/task_base.json"
-  "./config/workflow_template.json"
+# The map of task config files that will be installed.
+declare -A TASK_CONFIGS
+TASK_CONFIGS=(
+  ["./config/task_base.json"]=true
+  ["./config/workflow_template.json"]=true
+  ["./config/task_app.json"]=false
+  ["./config/task_nonapp.json"]=false
+  ["./config/workflow_app_hourly.json"]=false
+  ["./config/workflow_app_nonapp.json"]=false
+  ["./config/workflow_app_nonapplite.json"]=false
+  ["./config/workflow_app.json"]=false
+  ["./config/workflow_nonapp.json"]=false
+  ["./config/workflow_nonapplite.json"]=false
 )
 
 # Parameter name used by functions to load and save config.
@@ -117,6 +126,14 @@ Reports also."
   "LEGO Extension: CPP"
 )
 
+# Build installed workflows map and set each value to false as default.
+declare -A INSTALLED_LEGO_WORKFLOWS
+INSTALLED_LEGO_WORKFLOWS=(
+  ["App"]=false
+  ["NonApp"]=false
+  ["NonAppLite"]=false
+)
+
 # APIs need to be enabled if corresponding functionality are selected.
 INTEGRATION_APIS=(
   "googleads.googleapis.com"
@@ -134,43 +151,36 @@ INTEGRATION_APIS=(
 #######################################
 # Extra setting up for the LEGO functionality.
 # Globals:
-#   None
+#   INSTALLED_LEGO_WORKFLOWS
 # Arguments:
 #   None
 #######################################
 setup_functionality_for_installation() {
   case "${1}" in
   0)
-    if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
-      INSTALLED_WORKFLOW="App"
-    elif [[ "${INSTALLED_WORKFLOW}" == "NonApp" ]]; then
-      INSTALLED_WORKFLOW="App + NonApp"
-    fi
+    INSTALLED_LEGO_WORKFLOWS["App"]=true
     ;;
   1)
-    if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
-      INSTALLED_WORKFLOW="NonApp"
-    elif [[ "${INSTALLED_WORKFLOW}" == "App" ]]; then
-      INSTALLED_WORKFLOW="App + NonApp"
-    fi
+    INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
     ;;
   2)
-    INSTALLED_WORKFLOW="NonAppLite"
+    INSTALLED_LEGO_WORKFLOWS["NonAppLite"]=true
     ;;
   3)
+    # ADH creative workflow depends on lego app_trd_asset_perf_report,
+    # report_base_campaign_conversion, and report_base_campaigns tables
+    # which are created within Base and App workflow.
+    INSTALLED_LEGO_WORKFLOWS["App"]=true
     INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
-    if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
-      INSTALLED_WORKFLOW="App"
-    fi
     ;;
   4)
     INSTALLED_ADH_BRANDING_WORKFLOW="Y"
     ;;
   5)
+    # ADH audience workflow depends on lego nonapp_trd_user_interest table,
+    # which is created within NonApp workflow.
+    INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
     INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
-    if [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
-      INSTALLED_WORKFLOW="NonApp"
-    fi
     ;;
   6)
     INSTALLED_TRDPTY_TRIX_DATA="Y"
@@ -179,18 +189,11 @@ setup_functionality_for_installation() {
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
     ;;
   8)
+    INSTALLED_LEGO_WORKFLOWS["App"]=true
     INSTALLED_YOUTUBE_WORKFLOW="Y"
-    if [[ "${INSTALLED_WORKFLOW}" == "NonApp" ]]; then
-      INSTALLED_WORKFLOW="App + NonApp"
-    elif [[ "${INSTALLED_WORKFLOW}" == "" ]]; then
-      INSTALLED_WORKFLOW="App"
-    fi
     ;;
   9)
     INSTALLED_CPP_WORKFLOW="Y"
-    if [[ "${INSTALLED_WORKFLOW}" != "NonAppLite" ]]; then
-      INSTALLED_WORKFLOW="App + NonApp"
-    fi
     ;;
   *) ;;
   esac
@@ -200,7 +203,9 @@ setup_functionality_for_installation() {
 # Confirm LEGO functionality. This will update the API list that need to be
 # enabled and the scope for OAuth authentication.
 # Globals:
-#   None
+#   TASK_CONFIGS
+#   INSTALLED_WORKFLOW
+#   INSTALLED_LEGO_WORKFLOWS
 # Arguments:
 #   None
 #######################################
@@ -208,6 +213,35 @@ confirm_functionality() {
   ((STEP += 1))
   printf '%s\n' "Step ${STEP}: Selecting LEGO functionality..."
   confirm_apis "setup_functionality_for_installation"
+
+  if ${INSTALLED_LEGO_WORKFLOWS["NonApp"]} ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    if ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
+      TASK_CONFIGS["./config/task_app.json"]=true
+      TASK_CONFIGS["./config/workflow_app_nonapp.json"]=true
+      TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+      INSTALLED_WORKFLOW="App + NonApp"
+    else
+      TASK_CONFIGS["./config/workflow_nonapp.json"]=true
+      INSTALLED_WORKFLOW="NonApp"
+    fi
+  elif ${INSTALLED_LEGO_WORKFLOWS["NonAppLite"]} ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    if ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
+      TASK_CONFIGS["./config/task_app.json"]=true
+      TASK_CONFIGS["./config/workflow_app_nonapplite.json"]=true
+      TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+      INSTALLED_WORKFLOW="App + NonAppLite"
+    else
+      TASK_CONFIGS["./config/workflow_nonapplite.json"]=true
+      INSTALLED_WORKFLOW="NonAppLite"
+    fi
+  elif ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
+    TASK_CONFIGS["./config/task_app.json"]=true
+    TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+    TASK_CONFIGS["./config/workflow_app.json"]=true
+    INSTALLED_WORKFLOW="App"
+  fi
 }
 
 #######################################
@@ -330,6 +364,7 @@ any other key to enter another CID..."
 # workflow.
 # Globals:
 #   INSTALLED_WORKFLOW
+#   INSTALLED_LEGO_WORKFLOWS
 #   INSTALLED_TRDPTY_TRIX_DATA
 #   INSTALLED_ADH_CREATIVE_WORKFLOW
 #   INSTALLED_ADH_BRANDING_WORKFLOW
@@ -355,32 +390,14 @@ initialize_workflow() {
   fi
 
   check_firestore_existence
-  # Preparing configuration based on workflow
-  local taskConfigs
-  taskConfigs=("${DEFAULT_TASK_CONFIG[@]}")
 
-  case "${INSTALLED_WORKFLOW}" in
-  "App")
-    taskConfigs+=("./config/task_app.json")
-    taskConfigs+=("./config/workflow_app.json")
-    taskConfigs+=("./config/workflow_app_hourly.json")
-    ;;
-  "NonApp")
-    taskConfigs+=("./config/task_nonapp.json")
-    taskConfigs+=("./config/workflow_nonapp.json")
-    ;;
-  "NonAppLite")
-    taskConfigs+=("./config/task_nonapp.json")
-    taskConfigs+=("./config/workflow_nonapplite.json")
-    ;;
-  "App + NonApp")
-    taskConfigs+=("./config/task_app.json")
-    taskConfigs+=("./config/task_nonapp.json")
-    taskConfigs+=("./config/workflow_app_nonapp.json")
-    taskConfigs+=("./config/workflow_app_hourly.json")
-    ;;
-  *) ;;
-  esac
+  # Filter the required config files based on the selected lego workflows.
+  local taskConfigs
+  for config in "${!TASK_CONFIGS[@]}"; do
+    if ${TASK_CONFIGS["$config"]}; then
+      taskConfigs+=("$config")
+    fi
+  done
 
   # Create/update workflow task config and cronjob.
   update_workflow_task "${taskConfigs[@]}"
@@ -728,32 +745,33 @@ setup_cn() {
 
 cn_app() {
   setup_cn
-  INSTALLED_WORKFLOW="App"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
 cn_app_with_youtube() {
   setup_cn
-  INSTALLED_WORKFLOW="App"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
   INSTALLED_YOUTUBE_WORKFLOW="Y"
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
 cn_nonapp() {
   setup_cn
-  INSTALLED_WORKFLOW="NonApp"
+  INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
 cn_agency() {
   setup_cn
-  INSTALLED_WORKFLOW="App + NonApp"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
+  INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
 cn_adh_creative() {
   setup_cn
-  INSTALLED_WORKFLOW="App"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
   INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
   GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
@@ -770,7 +788,7 @@ cn_adh_branding() {
 
 cn_adh_audience() {
   setup_cn
-  INSTALLED_WORKFLOW="NonApp"
+  INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
   INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
   GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
@@ -784,7 +802,7 @@ setup_au() {
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_TRDPTY_TRIX_DATA="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
-  DEFAULT_TASK_CONFIG+=("./config/task_customized_empty.json")
+  TASK_CONFIGS["./config/task_customized_empty.json"]=true
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 }
@@ -792,14 +810,15 @@ setup_au() {
 # AU App: App, no ADH, no Sheet
 au_app() {
   setup_au
-  INSTALLED_WORKFLOW="App"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
   customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
 }
 
 # AU Agency: App + NonApp, no ADH, no Sheet
 au_agency() {
   setup_au
-  INSTALLED_WORKFLOW="App + NonApp"
+  INSTALLED_LEGO_WORKFLOWS["App"]=true
+  INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
   customized_install "${CUSTOMIZED_INSTALL_TASKS[@]}"
 }
 
