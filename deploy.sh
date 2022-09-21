@@ -215,31 +215,18 @@ confirm_functionality() {
   confirm_apis "setup_functionality_for_installation"
 
   if ${INSTALLED_LEGO_WORKFLOWS["NonApp"]} ; then
-    TASK_CONFIGS["./config/task_nonapp.json"]=true
     if ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
-      TASK_CONFIGS["./config/task_app.json"]=true
-      TASK_CONFIGS["./config/workflow_app_nonapp.json"]=true
-      TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
       INSTALLED_WORKFLOW="App + NonApp"
     else
-      TASK_CONFIGS["./config/workflow_nonapp.json"]=true
       INSTALLED_WORKFLOW="NonApp"
     fi
   elif ${INSTALLED_LEGO_WORKFLOWS["NonAppLite"]} ; then
-    TASK_CONFIGS["./config/task_nonapp.json"]=true
     if ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
-      TASK_CONFIGS["./config/task_app.json"]=true
-      TASK_CONFIGS["./config/workflow_app_nonapplite.json"]=true
-      TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
       INSTALLED_WORKFLOW="App + NonAppLite"
     else
-      TASK_CONFIGS["./config/workflow_nonapplite.json"]=true
       INSTALLED_WORKFLOW="NonAppLite"
     fi
   elif ${INSTALLED_LEGO_WORKFLOWS["App"]} ; then
-    TASK_CONFIGS["./config/task_app.json"]=true
-    TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
-    TASK_CONFIGS["./config/workflow_app.json"]=true
     INSTALLED_WORKFLOW="App"
   fi
 }
@@ -387,6 +374,28 @@ initialize_workflow() {
   fi
   if [[ -z "${INSTALLED_WORKFLOW}" ]]; then
     confirm_functionality
+  fi
+
+  if [[ ${INSTALLED_WORKFLOW} = "App + NonApp" ]] ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    TASK_CONFIGS["./config/task_app.json"]=true
+    TASK_CONFIGS["./config/workflow_app_nonapp.json"]=true
+    TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+  elif [[ ${INSTALLED_WORKFLOW} = "App + NonAppLite" ]] ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    TASK_CONFIGS["./config/task_app.json"]=true
+    TASK_CONFIGS["./config/workflow_app_nonapplite.json"]=true
+    TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+  elif [[ ${INSTALLED_WORKFLOW} = "NonApp" ]] ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    TASK_CONFIGS["./config/workflow_nonapp.json"]=true
+  elif [[ ${INSTALLED_WORKFLOW} = "NonAppLite" ]] ; then
+    TASK_CONFIGS["./config/task_nonapp.json"]=true
+    TASK_CONFIGS["./config/workflow_nonapplite.json"]=true
+  elif [[ ${INSTALLED_WORKFLOW} = "App" ]] ; then
+    TASK_CONFIGS["./config/task_app.json"]=true
+    TASK_CONFIGS["./config/workflow_app_hourly.json"]=true
+    TASK_CONFIGS["./config/workflow_app.json"]=true
   fi
 
   check_firestore_existence

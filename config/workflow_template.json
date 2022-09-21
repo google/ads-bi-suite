@@ -193,9 +193,6 @@
     },
     "next": "trigger_snd_query_impl"
   },
-  "trigger_snd_query_impl": {},
-  "trigger_trd_query_impl": {},
-  "trigger_fourth_query_impl": {},
   "load_report": {
     "type": "load",
     "source": {

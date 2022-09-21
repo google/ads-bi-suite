@@ -46,8 +46,7 @@
       "tasks": [
         "baselite_load_reports",
         "base_load_reports",
-        "app_load_reports",
-        "nonapp_load_reports"
+        "app_load_reports"
       ]
     }
   },
@@ -71,10 +70,7 @@
       "markTaskId": "mark_label"
     },
     "embedded": {
-      "tasks": [
-        "app_fourth_query",
-        "nonapplite_fourth_query"
-      ]
+      "tasks": ["app_fourth_query", "nonapplite_fourth_query"]
     },
     "next": "trigger_customized_task"
   },
@@ -84,10 +80,7 @@
       "markTaskId": "mark_email"
     },
     "embedded": {
-      "tasks": [
-        "app_fourth_query",
-        "nonapplite_fourth_query"
-      ]
+      "tasks": ["app_fourth_query", "nonapplite_fourth_query"]
     }
   }
 }
