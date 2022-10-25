@@ -964,7 +964,8 @@
             "ad_group_ad.ad.responsive_display_ad.headlines",
             "ad_group_ad.ad.responsive_display_ad.long_headline",
             "ad_group_ad.ad.responsive_search_ad.headlines",
-            "ad_group_ad.ad.responsive_search_ad.path1"
+            "ad_group_ad.ad.responsive_search_ad.path1",
+            "ad_group_ad.ad.image_ad.image_url"
           ],
           "constraints": [
             {
