@@ -129,6 +129,9 @@ SELECT DISTINCT
   IFNULL(language_code, "") language_code,
   IFNULL(country_code, "") country_code,
   IFNULL(country_name, "") country_name,
+  IFNULL(campaign.url_expansion_opt_out, false) as url_expansion_opt_out,
+  IFNULL(campaign_budget.has_recommended_budget, false) as limited_by_budget,
+  campaign.shopping_setting.merchant_id as merchant_id,
   ROUND(AVG(campaign_budget.amount_micros) / 1e6, 2) campaign_budget_amount,
   AVG(campaign.target_roas.target_roas) campaign_target_roas_target_roas,
   ROUND(AVG(campaign.target_cpa.target_cpa_micros) / 1e6, 2) campaign_target_cpa_target_cpa,
@@ -186,4 +189,4 @@ LEFT JOIN
   ) cc
   ON
     cc.campaign_id = camp.campaign.id
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21
