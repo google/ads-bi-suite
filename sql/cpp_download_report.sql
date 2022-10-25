@@ -12,6 +12,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
-SELECT *
+SELECT * except (parent_name, division_name, company_name)
 FROM `grcn-cpp-l2.cpp_for_client_view_only.gps_cpp_for_agency`
 WHERE mcc_cid = '${mccCid}'
