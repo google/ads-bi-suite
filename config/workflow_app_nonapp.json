@@ -46,7 +46,9 @@
         "nonapp_campaign_perf_search_keywords",
         "nonapp_campaign_perf_search_search_term",
         "nonapp_campaign_perf_user_interest",
-        "nonapp_user_lists"
+        "nonapp_user_lists",
+        "nonapp_pmax_assetgroup",
+        "nonapp_pmax_conversion"
       ]
     },
     "errorOptions": {

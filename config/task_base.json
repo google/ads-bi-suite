@@ -312,7 +312,10 @@
             "campaign.optimization_score",
             "campaign.bidding_strategy",
             "campaign.bidding_strategy_type",
-            "campaign.target_roas.target_roas"
+            "campaign.target_roas.target_roas",
+            "campaign_budget.has_recommended_budget",
+            "campaign.url_expansion_opt_out",
+            "campaign.shopping_setting.merchant_id"
           ],
           "constraints": [
             {

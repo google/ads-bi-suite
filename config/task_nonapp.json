@@ -80,6 +80,18 @@
           "appendedParameters": {
             "targetTable": "nonapp_user_lists"
           }
+        },
+        {
+            "taskId": "load_report",
+            "appendedParameters": {
+              "targetTable": "nonapp_pmax_assetgroup"
+            }
+        },
+        {
+            "taskId": "load_report",
+            "appendedParameters": {
+              "targetTable": "nonapp_pmax_conversion"
+            }
         }
       ]
     }
@@ -255,6 +267,20 @@
             "queryName": "nonapp_trd_video",
             "tableId": "nonapp_trd_video"
           }
+        },
+        {
+            "taskId": "query_general",
+            "appendedParameters": {
+              "queryName": "nonapp_trd_pmax",
+              "tableId": "nonapp_trd_pmax"
+            }
+        },
+        {
+            "taskId": "query_general",
+            "appendedParameters": {
+              "queryName": "nonapp_trd_pmax_conversion",
+              "tableId": "nonapp_trd_pmax_conversion"
+            }
         }
       ]
     }
@@ -377,6 +403,18 @@
           "appendedParameters": {
             "queryName": "nonapp_trd_video"
           }
+        },
+        {
+            "taskId": "${markTaskId}",
+            "appendedParameters": {
+              "queryName": "nonapp_trd_pmax"
+            }
+        },
+        {
+            "taskId": "${markTaskId}",
+            "appendedParameters": {
+              "queryName": "nonapp_trd_pmax_conversion"
+            }
         }
       ]
     }
@@ -1066,6 +1104,91 @@
     "destination": {
       "bucket": "#GCS_BUCKET#",
       "name": "reports/${partitionDay}/reports_nonapp_campaign_perf_age_range/${customerId}.ndjson"
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "nonapp_pmax_assetgroup": {
+    "type": "report",
+    "source": {
+      "target": "ADS",
+      "config": {
+        "developerToken": "${developerToken}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
+        "reportQuery": {
+          "entity": "asset_group_asset",
+          "metrics": [],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "asset_group.ad_strength",
+            "asset_group.id",
+            "asset_group.name",
+            "asset_group.status",
+            "asset_group_asset.field_type",
+            "asset_group_asset.performance_label",
+            "asset_group_asset.status",
+            "asset_group_asset.policy_summary.approval_status",
+            "asset.id",
+            "asset.name",
+            "asset.source"
+          ]
+        }
+      }
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/reports_nonapp_pmax_assetgroup/${customerId}.ndjson"
+    },
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "nonapp_pmax_conversion": {
+    "type": "report",
+    "source": {
+      "target": "ADS",
+      "config": {
+        "developerToken": "${developerToken}",
+        "customerId": "${customerId}",
+        "loginCustomerId": "${loginCustomerId}",
+        "reportQuery": {
+          "entity": "conversion_action",
+          "metrics": [],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "conversion_action.id",
+            "conversion_action.name",
+            "conversion_action.type",
+            "conversion_action.status",
+            "conversion_action.attribution_model_settings.attribution_model",
+            "conversion_action.attribution_model_settings.data_driven_model_status",
+            "metrics.all_conversions_value"
+          ],
+          "constraints": [
+            {
+              "key": "conversion_action.status",
+              "op": "=",
+              "val": "ENABLED"
+            }
+          ],
+          "date_constant": "LAST_30_DAYS"
+        }
+      }
+    },
+    "destination": {
+      "bucket": "#GCS_BUCKET#",
+      "name": "reports/${partitionDay}/reports_nonapp_pmax_conversion/${customerId}.ndjson"
     },
     "errorOptions": {
       "ignoreError": true
