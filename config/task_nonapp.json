@@ -1140,6 +1140,23 @@
             "asset.id",
             "asset.name",
             "asset.source"
+          ],
+          "constraints": [
+            {
+              "key": "campaign.advertising_channel_type",
+              "op": "=",
+              "val": "PERFORMANCE_MAX"
+            },
+            {
+              "key": "campaign.status",
+              "op": "IN",
+              "val": ["PAUSED", "ENABLED"]
+            },
+            {
+              "key": "asset_group.status",
+              "op": "IN",
+              "val": ["PAUSED", "ENABLED"]
+            }
           ]
         }
       }
