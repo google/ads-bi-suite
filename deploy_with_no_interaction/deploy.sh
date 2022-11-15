@@ -1,13 +1,50 @@
 # Automatic Deployment Bash Script
 # To deploy manually, please follow the LEGO deployment guide.
 
-# Need to get shell lib files ready before import them.
-npm install
-
 # Cloud Functions Runtime Environment.
 CF_RUNTIME=nodejs14
 
 SOLUTION_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LEGO_FILES=(
+  "index.js"
+  "package.json"
+  "LICENSE"
+  "config"
+  "sql"
+)
+
+fail() {
+    echo "$@"
+    exit 1
+}
+
+prepare_logo_files() {
+  for i in "${!LEGO_FILES[@]}"; do
+    cp -rf "${SOLUTION_ROOT}/../${LEGO_FILES[$i]}" "${SOLUTION_ROOT}" || fail "Unable to copy ${SOLUTION_ROOT}/../${LEGO_FILES[$i]} to build deploy environment."
+  done
+  echo "[Success] Prepared LEGO files for deployment."
+}
+
+clean_logo_files() {
+  local files
+  files=(
+    "node_modules"
+    "keys"
+    "package-lock.json"
+    "${LEGO_FILES[@]}"
+  )
+
+  for i in "${!files[@]}"; do
+    rm -rf "${SOLUTION_ROOT}/${files[$i]}" || fail "Unable to remove ${SOLUTION_ROOT}/../${files[$i]}."
+  done
+  echo "[Success] Cleaned LEGO files after deployment."
+}
+
+prepare_logo_files
+
+# Need to get shell lib files ready before import them.
+npm install
+
 if [[ "${BASH_SOURCE[0]}" -ef "$0" ]]; then
   RELATIVE_PATH="node_modules/@google-cloud"
   source "${SOLUTION_ROOT}/${RELATIVE_PATH}/nodejs-common/bin/install_functions.sh"
@@ -20,8 +57,6 @@ ADH_API_VERSION=v1
 # FX Rate Sheet
 FX_RATE_SHEET=https://docs.google.com/spreadsheets/d/1WGmemVpB-qNRjQ8Sw2pm2TebEMh6OcF2fcAcXIo64qE/copy
 
-# Project configuration file.
-CONFIG_FILE="./config/config.json"
 TIMEZONE="Asia/Shanghai"
 # Enabled API for Tentacles.
 # Use this to create of topics and subscriptions.
@@ -53,7 +88,8 @@ TASK_CONFIGS=(
   ["./config/workflow_nonapp.json"]=false
   ["./config/workflow_nonapplite.json"]=false
 )
-
+# Project configuration file.
+CONFIG_FILE="${SOLUTION_ROOT}/config/config.json"
 ### Configuration variables in Pangu Start.
 # Pub/Sub topics, etc.
 # Default project namespace is SOLUTION_NAME.
@@ -113,11 +149,6 @@ CONFIG_ITEMS=(
   "INSTALLED_CPP_WORKFLOW"
 )
 
-fail() {
-    echo "$@"
-    exit 1
-}
-
 enable_service() {
     gcloud services enable $1 || fail "Unable to enable service $1 for project $project_id, please check if you have the permissions"
     echo "[Success] Enabled service $1"
@@ -164,7 +195,7 @@ set_gcs_lifecycle() {
 }
 
 make_oauth_token() {
-  mkdir "keys"
+  mkdir "${SOLUTION_ROOT}/keys"
   local oauth=$(cat <<EOF
 {
   "client_id": "${CLIENT_ID}",
@@ -179,7 +210,7 @@ make_oauth_token() {
 }
 EOF
 )
-  echo "Saving Oauth token $oauth to file keys/oauth2.token.json ..."
+  echo "Saving Oauth token $oauth to file $SOLUTION_ROOT/keys/oauth2.token.json ..."
   echo $oauth > $SOLUTION_ROOT/keys/oauth2.token.json
 }
 
@@ -419,5 +450,6 @@ set_internal_task
 copy_to_gcs sql "gs://${GCS_CONFIG_BUCKET}"
 copy_to_gcs config "gs://${GCS_CONFIG_BUCKET}"
 set_gcs_lifecycle
-update_api_config ./config/config_api.json
+update_api_config "${SOLUTION_ROOT}/config/config_api.json"
 initialize_workflow
+clean_logo_files
