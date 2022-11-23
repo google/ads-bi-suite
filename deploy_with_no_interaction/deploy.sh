@@ -172,14 +172,38 @@ create_gcs_bucket() {
     local bucket=$1
     local gcs_location=$2
 
-    gsutil ls gs://$bucket >/dev/null 2>&1
+    gcloud storage buckets list gs://$bucket >/dev/null 2>&1
     
     if [ $? -ne 0 ] ; then
-        gsutil mb -l $gcs_location "gs://$bucket" || fail "Unable to create bucket $bucket."
+        gcloud storage buckets create -l $gcs_location "gs://$bucket" || fail "Unable to create bucket $bucket."
         echo "[Success] Created bucket $bucket"
     else
         echo "[Success] Bucket $bucket already exists, skip creation"
     fi
+}
+
+#######################################
+# Copy a local file or synchronize a local folder to the target Storage bucket
+# via gcloud cli.
+# Globals:
+#   CONFIG_FILE
+# Arguments:
+#   File or folder name, a string.
+#   Cloud Storage link, default value is 'gs://${GCS_BUCKET}'
+#######################################
+copy_to_gcs_by_gcloud() {
+  local source bucket target
+  source="${1}"
+  bucket="$(get_value_from_json_file "${CONFIG_FILE}" "GCS_BUCKET")"
+  target="${2-"gs://${bucket}"}"
+  if [[ -d "${source}" ]]; then
+    printf '%s\n' "  Synchronizing local folder [${source}] to target \
+[${target}]..."
+    gcloud storage cp --recursive "${source}" "${target}"
+  else
+    printf '%s\n' "  Copying local file [${source}] to target [${target}]..."
+    gcloud storage cp "${source}" "${target}"
+  fi
 }
 
 #######################################
@@ -191,7 +215,24 @@ create_gcs_bucket() {
 #   None
 #######################################
 set_gcs_lifecycle() {
-  gsutil lifecycle set /dev/stdin "gs://${GCS_BUCKET}" <<< '{"rule":[{"action":{"type":"Delete"},"condition":{"age":3}}]}'
+  local lifycycle_rule=$(cat <<EOF
+{
+  "rule": [
+    {
+      "action": {
+        "type": "Delete"
+      },
+      "condition": {
+        "age": 3
+      }
+    }
+  ]
+}
+EOF
+)
+  echo "Saving lifecycle rule $lifycycle_rule to file $SOLUTION_ROOT/config/lifecycle.json ..."
+  echo $lifycycle_rule > $SOLUTION_ROOT/config/lifecycle.json
+  gcloud storage buckets update "gs://${GCS_BUCKET}" --lifecycle-file="$SOLUTION_ROOT/config/lifecycle.json"
 }
 
 make_oauth_token() {
@@ -447,8 +488,8 @@ deploy_tentacles
 make_oauth_token
 deploy_sentinel
 set_internal_task
-copy_to_gcs sql "gs://${GCS_CONFIG_BUCKET}"
-copy_to_gcs config "gs://${GCS_CONFIG_BUCKET}"
+copy_to_gcs_by_gcloud sql "gs://${GCS_CONFIG_BUCKET}"
+copy_to_gcs_by_gcloud config "gs://${GCS_CONFIG_BUCKET}"
 set_gcs_lifecycle
 update_api_config "${SOLUTION_ROOT}/config/config_api.json"
 initialize_workflow
