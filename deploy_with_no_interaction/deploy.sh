@@ -95,6 +95,7 @@ CONFIG_FILE="${SOLUTION_ROOT}/config/config.json"
 # Default project namespace is SOLUTION_NAME.
 # Note: only lowercase letters, numbers and dashes(-) are allowed.
 PROJECT_NAMESPACE="lego"
+GCP_PROJECT="${project_id}"
 GCS_BUCKET="${PROJECT_NAMESPACE}-${GCP_PROJECT}"
 GCS_CONFIG_BUCKET="${PROJECT_NAMESPACE}-${GCP_PROJECT}-config"
 
@@ -150,7 +151,7 @@ CONFIG_ITEMS=(
 )
 
 enable_service() {
-    gcloud services enable $1 || fail "Unable to enable service $1 for project $project_id, please check if you have the permissions"
+    gcloud services enable $1 || fail "Unable to enable service $1 for project $GCP_PROJECT, please check if you have the permissions"
     echo "[Success] Enabled service $1"
 }
 

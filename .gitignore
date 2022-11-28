@@ -7,3 +7,4 @@ libs/
 config.json
 *.key.json
 *.token.json
+deploy_with_no_interaction/test_deploy.sh
