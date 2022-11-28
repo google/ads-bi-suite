@@ -458,7 +458,7 @@ initialize_workflow() {
   fi
 }
 
-printf "\n" | confirm_project
+printf "${GCP_PROJECT}\n" | confirm_project
 check_permissions
 enable_service "googleads.googleapis.com"
 create_bq_dataset "${DATASET_ID}"  "${REGION_FOR_DS}"
