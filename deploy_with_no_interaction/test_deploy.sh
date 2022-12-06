@@ -1,6 +1,7 @@
 #!/bin/bash
 # Global ENVs for PanGu.
-export GCP_PROJECT="your_gcp_project_id"
+export project_id="your_gcp_project_id"
+export GCP_PROJECT="$project_id"
 # Pub/Sub topics, etc.
 # Default project namespace is SOLUTION_NAME.
 # Note: only lowercase letters, numbers and dashes(-) are allowed.

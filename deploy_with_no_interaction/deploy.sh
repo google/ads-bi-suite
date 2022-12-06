@@ -96,6 +96,7 @@ CONFIG_FILE="${SOLUTION_ROOT}/config/config.json"
 # Note: only lowercase letters, numbers and dashes(-) are allowed.
 PROJECT_NAMESPACE="lego"
 GCP_PROJECT="${project_id}"
+DEVELOPER_TOKEN="${developer_token}"
 GCS_BUCKET="${PROJECT_NAMESPACE}-${GCP_PROJECT}"
 GCS_CONFIG_BUCKET="${PROJECT_NAMESPACE}-${GCP_PROJECT}-config"
 
@@ -151,7 +152,7 @@ CONFIG_ITEMS=(
 )
 
 enable_service() {
-    gcloud services enable $1 || fail "Unable to enable service $1 for project $GCP_PROJECT, please check if you have the permissions"
+    gcloud services enable $1 --project="${GCP_PROJECT}" || fail "Unable to enable service $1 for project $GCP_PROJECT, please check if you have the permissions"
     echo "[Success] Enabled service $1"
 }
 
@@ -160,9 +161,9 @@ create_bq_dataset() {
   local location=$2
   local datasetMetadata
 
-  datasetMetadata="$(bq --format json --dataset_id "${dataset}" show 2>&1)"
+  datasetMetadata="$(bq --format json --project_id ${GCP_PROJECT} --dataset_id "${dataset}" show 2>&1)"
   if [[ "${datasetMetadata}" == *"BigQuery error in show operation"* ]]; then
-    bq --location="${location}" mk "${dataset}" || fail "Unable to create dataset $dataset."
+    bq --project_id ${GCP_PROJECT} --location="${location}" mk "${dataset}" || fail "Unable to create dataset $dataset."
     echo "[Success] Created dataset $dataset"
   else
     echo "[Success] dataset $dataset already exists, skip creation"
@@ -173,10 +174,10 @@ create_gcs_bucket() {
     local bucket=$1
     local gcs_location=$2
 
-    gcloud storage buckets list gs://$bucket >/dev/null 2>&1
+    gcloud storage buckets list gs://$bucket --project="${GCP_PROJECT}" >/dev/null 2>&1
     
     if [ $? -ne 0 ] ; then
-        gcloud storage buckets create -l $gcs_location "gs://$bucket" || fail "Unable to create bucket $bucket."
+        gcloud storage buckets create -l $gcs_location "gs://$bucket" --project="${GCP_PROJECT}" || fail "Unable to create bucket $bucket."
         echo "[Success] Created bucket $bucket"
     else
         echo "[Success] Bucket $bucket already exists, skip creation"
@@ -200,10 +201,10 @@ copy_to_gcs_by_gcloud() {
   if [[ -d "${source}" ]]; then
     printf '%s\n' "  Synchronizing local folder [${source}] to target \
 [${target}]..."
-    gcloud storage cp --recursive "${source}" "${target}"
+    gcloud storage cp --recursive "${source}" "${target}" --project="${GCP_PROJECT}"
   else
     printf '%s\n' "  Copying local file [${source}] to target [${target}]..."
-    gcloud storage cp "${source}" "${target}"
+    gcloud storage cp "${source}" "${target}" --project="${GCP_PROJECT}"
   fi
 }
 
@@ -233,7 +234,7 @@ EOF
 )
   echo "Saving lifecycle rule $lifycycle_rule to file $SOLUTION_ROOT/config/lifecycle.json ..."
   echo $lifycycle_rule > $SOLUTION_ROOT/config/lifecycle.json
-  gcloud storage buckets update "gs://${GCS_BUCKET}" --lifecycle-file="$SOLUTION_ROOT/config/lifecycle.json"
+  gcloud storage buckets update "gs://${GCS_BUCKET}" --project="${GCP_PROJECT}" --lifecycle-file="$SOLUTION_ROOT/config/lifecycle.json"
 }
 
 make_oauth_token() {
@@ -459,6 +460,7 @@ initialize_workflow() {
   fi
 }
 
+gcloud config set project ${GCP_PROJECT}  || fail "Unable to set gcloud config project to $GCP_PROJECT"
 printf "${GCP_PROJECT}\n" | confirm_project
 check_permissions
 enable_service "googleads.googleapis.com"
