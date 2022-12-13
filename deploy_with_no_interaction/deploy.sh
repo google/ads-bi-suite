@@ -461,7 +461,6 @@ initialize_workflow() {
 }
 
 gcloud config set project ${GCP_PROJECT}  || fail "Unable to set gcloud config project to $GCP_PROJECT"
-printf "${GCP_PROJECT}\n" | confirm_project
 check_permissions
 enable_service "googleads.googleapis.com"
 create_bq_dataset "${DATASET_ID}"  "${REGION_FOR_DS}"
