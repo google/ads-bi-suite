@@ -69,7 +69,7 @@ CONFIG_DATASET_ID="ads_report_configs"
 ADH_CREATIVE_DS_ID="adh_apps_data"
 ADH_BRANDING_DS_ID="adh_branding"
 ADH_AUDIENCE_DS_ID="adh_audience"
-REGION_FOR_DS="US"
+
 # The Git commit id.
 GIT_COMMIT_ID="$(git log -1 --pretty=format:'%H')"
 SCOPE="https://www.googleapis.com/auth/adwords"
@@ -160,13 +160,35 @@ create_bq_dataset() {
   local dataset=$1
   local location=$2
   local datasetMetadata
+  datasetMetadata="$(curl -X GET \
+    "https://bigquery.googleapis.com/bigquery/v2/projects/${GCP_PROJECT}/datasets/${dataset}" \
+    --header 'Accept: application/json' \
+    --header "Authorization: Bearer ${CLOUDSDK_AUTH_ACCESS_TOKEN}")"
+  datasetLocation="$(get_value_from_json_string "${datasetMetadata}" "location")"
 
-  datasetMetadata="$(bq --format json --project_id ${GCP_PROJECT} --dataset_id "${dataset}" show 2>&1)"
-  if [[ "${datasetMetadata}" == *"BigQuery error in show operation"* ]]; then
-    bq --project_id ${GCP_PROJECT} --location="${location}" mk "${dataset}" || fail "Unable to create dataset $dataset."
+  if [[ ${datasetLocation,,} = "${location,,}" ]]; then
+    echo "[Success] dataset $dataset already exists, skip creation"
+  elif [[ ${datasetLocation,,} = "" ]]; then
+    local datasetConfig=$(cat <<EOF
+{
+  "location": "${location}",
+  "datasetReference": {
+    "datasetId": "${dataset}",
+    "projectId": "${GCP_PROJECT}"
+  }
+}
+EOF
+)
+    curl --request POST \
+      "https://bigquery.googleapis.com/bigquery/v2/projects/${GCP_PROJECT}/datasets" \
+      --header "Authorization: Bearer ${CLOUDSDK_AUTH_ACCESS_TOKEN}" \
+      --header 'Accept: application/json' \
+      --header 'Content-Type: application/json' \
+      --data "${datasetConfig}" \
+      --compressed
     echo "[Success] Created dataset $dataset"
   else
-    echo "[Success] dataset $dataset already exists, skip creation"
+    fail "Unable to create dataset $dataset in $location, it already exists in $datasetLocation."
   fi
 }
 
