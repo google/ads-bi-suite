@@ -13,5 +13,5 @@
 -- limitations under the License.
 
 SELECT * except (parent_name, division_name, company_name)
-FROM `grcn-cpp-l2.cpp_for_client_view_only.gps_cpp_for_agency`
+FROM `grcn-cpp-l2.cpp_for_client_view_only.gps_cpp_for_agency_2023`
 WHERE mcc_cid = '${mccCid}'
