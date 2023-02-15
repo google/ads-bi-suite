@@ -102,6 +102,7 @@ GCS_CONFIG_BUCKET="${PROJECT_NAMESPACE}-${GCP_PROJECT}-config"
 
 # REGION="us-central1"
 # REGION_FOR_DS="us"
+# REGION_FOR_GCS="us"
 # GCP_PROJECT="your_gcp_project_id"
 # # The main workflow that this instance will install. There are following
 # # available workflows:
@@ -132,6 +133,8 @@ CONFIG_ITEMS=(
   "PROJECT_NAMESPACE"
   "TIMEZONE"
   "REGION"
+  "REGION_FOR_DS"
+  "REGION_FOR_GCS"
   "GCS_CONFIG_BUCKET"
   "GCS_BUCKET"
   "OUTBOUND"
@@ -485,6 +488,15 @@ initialize_workflow() {
 gcloud config set project ${GCP_PROJECT}  || fail "Unable to set gcloud config project to $GCP_PROJECT"
 check_permissions
 enable_service "googleads.googleapis.com"
+enable_service "cloudscheduler.googleapis.com"
+enable_service "appengine.googleapis.com"
+enable_service "cloudbuild.googleapis.com"
+enable_service "cloudresourcemanager.googleapis.com"
+enable_service "iam.googleapis.com"
+enable_service "firestore.googleapis.com"
+enable_service "cloudfunctions.googleapis.com"
+enable_service "pubsub.googleapis.com"
+enable_service "cloudscheduler.googleapis.com"
 create_bq_dataset "${DATASET_ID}"  "${REGION_FOR_DS}"
 
 if [[ ${INSTALLED_ADH_AUDIENCE_WORKFLOW,,} = "y" ]]; then
@@ -502,19 +514,29 @@ if [[ ${INSTALLED_ADH_CREATIVE_WORKFLOW,,} = "y" ]]; then
   create_bq_dataset "${ADH_CREATIVE_DS_ID}"  "${REGION_FOR_DS}"
   SCOPE="${SCOPE} https://www.googleapis.com/auth/adsdatahub"
 fi
-create_gcs_bucket "${GCS_BUCKET}" "${REGION}"
-create_gcs_bucket "${GCS_CONFIG_BUCKET}" "${REGION}"
+if [[ ${INSTALLED_BACKFILL_WORKFLOW_TRIGGER,,} = "y" ]]; then
+  enable_service "drive.googleapis.com"
+fi
+create_gcs_bucket "${GCS_BUCKET}" "${REGION_FOR_GCS}"
+create_gcs_bucket "${GCS_CONFIG_BUCKET}" "${REGION_FOR_GCS}"
 confirm_firestore native "${REGION}"
 printf "\n" | save_config
-create_subscriptions
-create_sink
-deploy_tentacles
-make_oauth_token
-deploy_sentinel
-set_internal_task
-copy_to_gcs_by_gcloud sql "gs://${GCS_CONFIG_BUCKET}"
-copy_to_gcs_by_gcloud config "gs://${GCS_CONFIG_BUCKET}"
-set_gcs_lifecycle
-update_api_config "${SOLUTION_ROOT}/config/config_api.json"
-initialize_workflow
+
+# Only upload the latest CPP related sql files for GrCN 45 Agencies.
+if [[ ${ONLY_UPDLOAD_CPP_SQL,,} = "y" ]]; then
+  copy_to_gcs_by_gcloud sql/cpp_download_report.sql "gs://${GCS_CONFIG_BUCKET}/sql/cpp_download_report.sql"
+  copy_to_gcs_by_gcloud sql/cpp_combine_reports_with_cost.sql "gs://${GCS_CONFIG_BUCKET}/sql/cpp_combine_reports_with_cost.sql"
+else
+  create_subscriptions
+  create_sink
+  deploy_tentacles
+  make_oauth_token
+  deploy_sentinel
+  set_internal_task
+  copy_to_gcs_by_gcloud sql "gs://${GCS_CONFIG_BUCKET}"
+  copy_to_gcs_by_gcloud config "gs://${GCS_CONFIG_BUCKET}"
+  set_gcs_lifecycle
+  update_api_config "${SOLUTION_ROOT}/config/config_api.json"
+  initialize_workflow
+fi
 clean_logo_files

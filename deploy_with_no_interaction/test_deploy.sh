@@ -7,6 +7,7 @@ export GCP_PROJECT="$project_id"
 # Note: only lowercase letters, numbers and dashes(-) are allowed.
 export REGION="us-central1"
 export REGION_FOR_DS="us"
+export REGION_FOR_GCS="us"
 
 # The main workflow that this instance will install. There are following
 # available workflows:
@@ -30,5 +31,8 @@ export ADH_CID="your_adh_cid"
 export CLIENT_ID="your_oauth_client_id"
 export CLIENT_SECRET="your_oauth_client_secret"
 export REFRESH_TOKEN="your_oauth_refresh_token"
+
+# To only upload the latest CPP related sql files for GrCN 45 Agencies.
+export ONLY_UPDLOAD_CPP_SQL="Y"
 
 CLOUDSDK_AUTH_ACCESS_TOKEN=$(gcloud auth application-default print-access-token) bash deploy.sh
