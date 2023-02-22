@@ -150,19 +150,20 @@ class LegoInfo():
         Optional[storage.blob.Blob]: The latest blob of zip file of
           Lego main Google Cloud Function.
     """
-    def _is_lego_main_zip_blob(name: str) -> bool:
+    def _is_lego_main_zip_blob(namespace: str, name: str) -> bool:
       """Checks if the blob is the zip file of Lego main Google Cloud Function.
 
       Args:
-          name : The name of Google Cloud Storage blob.
+          namespace: The LEGO solution namespace.
+          name: The name of Google Cloud Storage blob.
 
       Returns:
           bool: True if the name of blob is matched.
       """
-      return re.search('.*_main-.*.zip', name) is not None
+      return re.search(f'.*{namespace}_main-.*.zip', name) is not None
     b = None
     for blob in self.storage_client.list_blobs(bucket):
-      if _is_lego_main_zip_blob(blob.name):
+      if _is_lego_main_zip_blob(self.namespace, blob.name):
         if not b or b.time_created <= blob.time_created:
           b = blob
     return b

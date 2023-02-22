@@ -40,7 +40,7 @@ deploy_cloud_functions_lego_health_checker(){
   cf_flag+=(--timeout=540 --memory=2048MB --runtime=python39)
   cf_flag+=(--set-env-vars=GCP_PROJECT="${gcp_project}")
   cf_flag+=(--set-env-vars=PROJECT_NAMESPACE="${project_namespace}")
-  cf_flag+=(--set-env-vars=GOOGLE_ADS_API_VERSION="10")
+  cf_flag+=(--set-env-vars=GOOGLE_ADS_API_VERSION="13")
   cf_flag+=(--set-env-vars=FUNCTION_REGION="${region}")
   cf_flag+=(--set-env-vars=SOURCEUPLOAD_URL="${sourceupload_url}")
   gcloud functions deploy "${project_namespace}"_health_chekcer "${cf_flag[@]}"
