@@ -37,7 +37,7 @@
       "target": "gcs",
       "file": {
         "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[mcc]_size[0.05]_${partitionDay}.ndjson"
+        "name": "#OUTBOUND#/API[PB]_config[mcc]_size[0.3]_${partitionDay}.ndjson"
       }
     },
     "multiple": {
@@ -174,7 +174,7 @@
       "target": "gcs",
       "file": {
         "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[lego]_size[0.05]_${partitionDay}.ndjson"
+        "name": "#OUTBOUND#/API[PB]_config[lego]_size[0.3]_${partitionDay}.ndjson"
       }
     },
     "errorOptions": {
