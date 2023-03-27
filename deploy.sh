@@ -56,6 +56,10 @@ REGION_FOR_DS="US"
 # The Git commit id.
 GIT_COMMIT_ID="$(git log -1 --pretty=format:'%H')"
 
+# The global value for `validate_googleads_account` function to connect
+# the active version Google Ads API.
+GOOGLE_ADS_API_VERSION=13
+
 # The main workflow that this instance will install. There are following
 # available workflows:
 # 1. App
