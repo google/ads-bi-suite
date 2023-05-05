@@ -1,8 +1,24 @@
+<!--
+ Copyright 2023 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+
 # Apps Google Ads reporting Automation
 
 ## 1. Disclaimer
 
-Copyright 2021 Google LLC.
+Copyright 2023 Google LLC.
 This is not an official Google product. This solution, including any related
 sample code or data, is made available on an “as is,” “as available,” and “with
 all faults” basis, solely for illustrative purposes, and without warranty or
@@ -43,11 +59,7 @@ developer token.
 ### 2.2. Check out source codes
 
 1. Open the [Cloud Shell](https://cloud.google.com/shell/)
-2. Fellow this [instructions](https://g3doc.corp.google.com/company/teams/gtech/ads/das/cse/faq/tools/professional-services-googlesource-com.md#working-from-gcp) to clone the repository:
-
-   ```shell
-   git clone https://professional-services.googlesource.com/solutions/ads-bi-suite
-   ```
+2. Git clone the repo
 
 ### 2.3. Run install script
 
@@ -79,34 +91,3 @@ Press any key to continue after you create the database...
 Follow [go/lego-release](go/lego-release) process, we release the system
 bi-weekly. The detail features/bugs between each release version are documented
 in [go/lego-release-note](go/lego-release-note).
-
-### 3.1 Command
-
-Command to fetch the codebase for a specific release version.
-
-```shell
-git clone https://professional-services.googlesource.com/solutions/ads-bi-suite && cd ads-bi-suite && git checkout $VERSION_TAG
-
-# Example
-git clone https://professional-services.googlesource.com/solutions/ads-bi-suite && cd ads-bi-suite && git checkout 541e1c3
-```
-
-_Due to [b/192634659](b/192634659), use git commit id (541e1c3) to fetch this version instead of version tag._
-
-### 3.2 Versions
-
-Follow preparation doc to create authentication credentials and Google Ads
-developer token.
-
-| Solution   | Demo Dashboard Link                                |
-| ---------- | -------------------------------------------------- |
-| Advertiser | [go/lego4advertiser-demo](go/lego4advertiser-demo) |
-| Agency     | [go/lego4agency-demo](go/lego4agency-demo)         |
-
-| Version    | Release Date | Worklog                    | BigQuery Schema Change | Note                                                                                                                                                                               |
-| ---------- | ------------ | -------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v.20210705 | 2021-07-05   | [b/192903846](b/192903846) | Yes                    | Advertiser: Add Video Campaign asset report. Agency: Add auto-bidding UI.                                                                                                          |
-| v.20210719 | 2021-07-19   | [b/194749564](b/194749564) | Yes                    | Advertiser: ADH Pure; Key BP Metrics Tracking. Agency: Bid low alert, AC cannibalization alert.                                                                                    |
-| v.20210802 | 2021-08-02   | [b/195254576](b/195254576) | Yes                    | Advertiser: ADH Pure Dashboard. Agency: Support multiple MCCs. (**Please be noted that this version requires the reinstallation.**)                                                |
-| v.20210816 | 2021-08-16   | [b/196923807](b/196923807) | Yes                    | Advertiser: Change frequency alert. Agency: Search impression share lost UI. AddSupport local customization.                                                                       |
-| v.20210913 | 2021-09-13   | [b/199669772](b/199669772) | Yes                    | Advertiser: Correct Firebase bidding percentile on Alert Center. Agency: UI and queries improvement. System: Enable the backfill function and upgrade Google Ads api to v8 from v7 |
