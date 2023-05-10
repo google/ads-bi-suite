@@ -72,22 +72,5 @@ cd ads-bi-suite; chmod a+x deploy.sh; ./deploy.sh
 
 ### 2.4. Possible extra tasks during installation
 
-#### 2.4.1. Initialize Firestore
-
-If the GCP hasn't got the Firestore (Datastore) initialized, during the
-installation, the script will print a link and ask you to create Firestore in
-the opened page before continue. The prompt looks like this:
-
-```shell
-Cannot find Firestore or Datastore in current project. Please visit
-https://console.cloud.google.com/firestore?project=[YOUR_PROJECT_ID] to
-create a database before continue.
-
-Press any key to continue after you create the database...
-```
-
-## 3. Release
-
-Follow [go/lego-release](go/lego-release) process, we release the system
-bi-weekly. The detail features/bugs between each release version are documented
-in [go/lego-release-note](go/lego-release-note).
+#### 2.4.1. Initialize Firestore in Google Console
+#### 2.4.2. Prepare the Google Ads API TOKEN
