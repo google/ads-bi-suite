@@ -687,7 +687,6 @@ COMMON_INSTALL_TASKS=(
 # Installation for default solution.
 DEFAULT_INSTALL_TASKS=(
   "print_welcome LEGO"
-  check_in_cloud_shell
   confirm_project
   check_permissions
   confirm_namespace
@@ -700,7 +699,6 @@ DEFAULT_INSTALL_TASKS=(
 # 'confirm_timezone' step
 CUSTOMIZED_INSTALL_TASKS=(
   "print_welcome LEGO"
-  check_in_cloud_shell
   confirm_project
   check_permissions
   confirm_namespace
