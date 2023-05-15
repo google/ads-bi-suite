@@ -48,10 +48,7 @@ The backend of LEGO leverages two Open-source solutions:
 #### 1.1.2 Features:
 LEGO offers a number of features that make it a valuable tool for businesses, including:
 
-- The ability to fetch Google Ads metrics in real time
-- The ability to create custom dashboards and reports
-- The ability to share dashboards and reports with others
-- The ability to export data to CSV or JSON files
+- The ability to daily fetch Google Ads metrics
 
 #### 1.1.3 Benefits:
 Lego can help businesses benefit in a number of ways, including:
