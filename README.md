@@ -14,9 +14,9 @@
  limitations under the License.
  -->
 
-# Apps Google Ads reporting Automation
+# Apps Google Ads reporting Automation a.k.a. “LEGO”
 
-## 1. Disclaimer
+## 1. Disclaimer and Intro
 
 Copyright 2023 Google LLC.
 This is not an official Google product. This solution, including any related
@@ -33,6 +33,33 @@ solution, you acknowledge, assume and accept all risks, known and unknown,
 associated with its usage, including with respect to your deployment of any
 portion of this solution in your systems, or usage in connection with your
 business, if at all.
+
+### 1.1 Apps Google Ads reporting Automation a.k.a. “LEGO”
+
+#### 1.1.1 Brief:
+LEGO is a data pipeline solution that helps clients fetch Google Ads metrics and stores the data in clients' Google Cloud Big Query tables.
+
+It is a powerful tool that can help businesses track their ad performance and make informed decisions about their campaigns.
+
+The backend of LEGO leverages two Open-source solutions:
+- https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/data-tasks-coordinator
+- https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/gmp-googleads-connector
+
+#### 1.1.2 Features:
+LEGO offers a number of features that make it a valuable tool for businesses, including:
+
+- The ability to fetch Google Ads metrics in real time
+- The ability to create custom dashboards and reports
+- The ability to share dashboards and reports with others
+- The ability to export data to CSV or JSON files
+
+#### 1.1.3 Benefits:
+Lego can help businesses benefit in a number of ways, including:
+
+- Improved ad performance
+- Increased ROI
+- Better decision-making
+- Increased efficiency
 
 ## 2. Deployment
 
@@ -72,5 +99,10 @@ cd ads-bi-suite; chmod a+x deploy.sh; ./deploy.sh
 
 ### 2.4. Possible extra tasks during installation
 
-#### 2.4.1. Initialize Firestore in Google Console
-#### 2.4.2. Prepare the Google Ads API TOKEN
+#### 2.4.1. Initialize [Firestore in Native mode](https://cloud.google.com/datastore/docs/firestore-or-datastore#in_native_mode) in Google Console
+#### 2.4.2. Prepare the Google Ads API TOKEN - [See Instruction](https://developers.google.com/google-ads/api/docs/first-call/dev-token?hl=en)
+
+## 3 RoadMap
+| Timeline | Item                          | Notes                                                            |
+| -------- | ----------------------------- | ---------------------------------------------------------------- |
+| Q2"23    | Upgade to Google Ads API v.13 | The top MCC account contains all the Ads accounts for reporting. |
