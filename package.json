@@ -1,15 +1,15 @@
 {
   "name": "apps-ads-reporting",
-  "version": "12.0.0",
-  "author": "xinxincheng@google.com, lushu@google.com, chjerry@google.com",
+  "version": "13.0.0",
+  "author": "lushu@google.com, chjerry@google.com, liulena@google.com, ritawang@google.com, mikawang@google.com",
   "files": [
     "src/"
   ],
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/data-tasks-coordinator": "1.4.0",
-    "@google-cloud/gmp-googleads-connector": "3.1.0",
-    "@google-cloud/nodejs-common": "1.6.0",
+    "@google-cloud/data-tasks-coordinator": "1.4.9-alpha",
+    "@google-cloud/gmp-googleads-connector": "3.1.9-alpha",
+    "@google-cloud/nodejs-common": "1.6.9-alpha",
     "@grpc/grpc-js": "1.7.0"
   },
   "scripts": {
