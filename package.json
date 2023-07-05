@@ -10,7 +10,7 @@
     "@google-cloud/data-tasks-coordinator": "1.4.9-alpha",
     "@google-cloud/gmp-googleads-connector": "3.1.9-alpha",
     "@google-cloud/nodejs-common": "1.6.9-alpha",
-    "@grpc/grpc-js": "1.7.0"
+    "@grpc/grpc-js": "1.8.8"
   },
   "scripts": {
     "test": "node node_modules/jasmine/bin/jasmine"
