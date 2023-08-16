@@ -21,3 +21,5 @@ tool
 tests
 package-lock.json
 node_modules
+oauth_health_checker
+deploy_with_no_interaction
