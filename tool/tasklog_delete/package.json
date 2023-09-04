@@ -4,6 +4,6 @@
   "author": "xinxincheng@google.com, lushu@google.com, chjerry@google.com",
   "main": "delete.js",
   "dependencies": {
-    "@google-cloud/firestore": "^4.13.2"
+    "@google-cloud/firestore": "^6.7.0"
   }
 }
