@@ -101,10 +101,8 @@
   },
   "adh_query_general": {
     "type": "query_adh",
-    "adhConfig": {
-      "customerId": "${customerId}"
-    },
     "source": {
+      "customerId": "${customerId}",
       "file": {
         "projectId": "#PROJECT_ID#",
         "bucket": "#GCS_CONFIG_BUCKET#",

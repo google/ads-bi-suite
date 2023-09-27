@@ -32,6 +32,7 @@ AS (
           b.campaign_id = a.impression_data.campaign_id
           AND b.conversion_id = CAST(a.conversion_type AS string)
       WHERE user_id IS NOT NULL
+      AND conversion_attribution_model_type = 'LAST_CLICK'
     )
   WHERE rank = 1
 );
@@ -79,4 +80,6 @@ LEFT JOIN tmp.installed_users conv
 INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep
   ON prep.campaign_id = impr.campaign_id
 WHERE impr.user_id IS NOT NULL
+AND creative.video_message.youtube_video_id IS NOT ''
+AND creative.video_message.youtube_video_id IS NOT NULL
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
