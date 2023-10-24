@@ -7,9 +7,9 @@
   ],
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/data-tasks-coordinator": "1.7.0",
-    "@google-cloud/gmp-googleads-connector": "4.0.2",
-    "@google-cloud/nodejs-common": "1.8.0",
+    "@google-cloud/data-tasks-coordinator": "1.7.1-beta",
+    "@google-cloud/gmp-googleads-connector": "4.0.4-beta",
+    "@google-cloud/nodejs-common": "1.8.2-beta",
     "@grpc/grpc-js": "1.7.0"
   },
   "scripts": {
