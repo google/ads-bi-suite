@@ -4,5 +4,5 @@ google-cloud-logging==3.2.5
 google-cloud-storage==2.4.0
 google-cloud-functions==1.8.0
 requests==2.*
-google-cloud-bigquery==3.3.5
+google-cloud-bigquery==3.13.0
 google-cloud-bigquery-storage==2.16.2
