@@ -417,7 +417,7 @@
             "campaign.id",
             "campaign.advertising_channel_type"
           ],
-          "date_constant": "LAST_30_DAYS"
+          "from_date": "${fromDate}"
         }
       }
     },
