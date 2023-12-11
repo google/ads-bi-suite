@@ -16,7 +16,7 @@
 # To deploy manually, please follow the LEGO deployment guide.
 
 # Cloud Functions Runtime Environment.
-CF_RUNTIME=nodejs14
+CF_RUNTIME=nodejs18
 
 SOLUTION_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LEGO_FILES=(
