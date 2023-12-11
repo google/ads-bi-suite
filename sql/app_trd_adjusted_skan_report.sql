@@ -253,7 +253,7 @@ WITH
                     * CampaignNonNullSkanCvYouTubeExcludedByDate.distributed_denominator),
                 0))
         ELSE CampaignSkanCvByDate.skan_conversion_counts
-        END AS skan_null_distributed_conversion_counts
+        END AS skan_null_distributed_cv
     FROM CampaignSkanCvByDate
     LEFT JOIN CampaignSkanCvWonButNullByDate
       USING (segments_date, campaign_id)
