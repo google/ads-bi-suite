@@ -80,6 +80,6 @@ LEFT JOIN tmp.installed_users conv
 INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep
   ON prep.campaign_id = impr.campaign_id
 WHERE impr.user_id IS NOT NULL
-AND creative.video_message.youtube_video_id IS NOT ''
+AND creative.video_message.youtube_video_id != ''
 AND creative.video_message.youtube_video_id IS NOT NULL
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
