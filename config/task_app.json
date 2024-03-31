@@ -679,7 +679,9 @@
         "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "campaign",
-          "metrics": ["metrics.sk_ad_network_conversions"],
+          "metrics": [
+            "metrics.sk_ad_network_installs"
+          ],
           "segments": [
             "segments.date",
             "segments.sk_ad_network_conversion_value",

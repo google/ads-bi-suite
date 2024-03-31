@@ -21,7 +21,7 @@ WITH
       segments.sk_ad_network_ad_event_type AS skan_event_type,
       segments.sk_ad_network_source_app.sk_ad_network_source_app_id AS skan_source_app_id,
       segments.sk_ad_network_user_type AS skan_user_type,
-      SUM(metrics.sk_ad_network_conversions) AS skan_conversions
+      SUM(metrics.sk_ad_network_installs) AS skan_conversions
     FROM
       `${datasetId}.report_app_skan` r
     INNER JOIN

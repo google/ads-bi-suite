@@ -141,7 +141,7 @@ WITH
       segments.sk_ad_network_source_app.sk_ad_network_source_app_id AS skan_source_app_id,
       segments.sk_ad_network_user_type AS skan_user_type,
       segments.sk_ad_network_attribution_credit AS skan_attribution_credit,
-      SUM(metrics.sk_ad_network_conversions) AS skan_conversion_counts
+      SUM(metrics.sk_ad_network_installs) AS skan_conversion_counts
     FROM `${datasetId}.report_app_skan` AS AppSkan
     INNER JOIN LastCampaignDate
       ON (
