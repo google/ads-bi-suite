@@ -46,6 +46,8 @@ TIMEZONE="Asia/Shanghai"
 SELECTED_APIS_CODES=("PB")
 # Tentacles monitor folder.
 OUTBOUND=outbound/
+DATABASE_ID="(default)"
+DATABASE_MODE="FIRESTORE"
 # The dataset name.
 DATASET_ID="ads_reports_data_v4"
 CONFIG_DATASET_ID="ads_report_configs"
@@ -58,7 +60,7 @@ GIT_COMMIT_ID="$(git log -1 --pretty=format:'%H')"
 
 # The global value for `validate_googleads_account` function to connect
 # the active version Google Ads API.
-GOOGLE_ADS_API_VERSION=13
+GOOGLE_ADS_API_VERSION=16
 
 # The main workflow that this instance will install. There are following
 # available workflows:
@@ -68,12 +70,9 @@ GOOGLE_ADS_API_VERSION=13
 INSTALLED_WORKFLOW=""
 # Other functionality, e.g. ADH or Google Sheet, etc.
 INSTALLED_ADH_CREATIVE_WORKFLOW="N"
-INSTALLED_ADH_BRANDING_WORKFLOW="N"
 INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
 INSTALLED_TRDPTY_TRIX_DATA="N"
 INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
-INSTALLED_YOUTUBE_WORKFLOW="N"
-INSTALLED_CPP_WORKFLOW="N"
 
 # The map of task config files that will be installed.
 declare -A TASK_CONFIGS
@@ -99,6 +98,8 @@ CONFIG_ITEMS=(
   "GCS_BUCKET"
   "OUTBOUND"
   "GIT_COMMIT_ID"
+  "DATABASE_ID"
+  "DATABASE_MODE"
   "DATASET_ID"
   "CONFIG_DATASET_ID"
   "ADH_CREATIVE_DS_ID"
@@ -109,10 +110,7 @@ CONFIG_ITEMS=(
   "INSTALLED_TRDPTY_TRIX_DATA"
   "INSTALLED_BACKFILL_WORKFLOW_TRIGGER"
   "INSTALLED_ADH_CREATIVE_WORKFLOW"
-  "INSTALLED_ADH_BRANDING_WORKFLOW"
   "INSTALLED_ADH_AUDIENCE_WORKFLOW"
-  "INSTALLED_YOUTUBE_WORKFLOW"
-  "INSTALLED_CPP_WORKFLOW"
 )
 
 # Description of functionality.
@@ -121,13 +119,10 @@ INTEGRATION_APIS_DESCRIPTION=(
   "Google Ads Reports for NonApp"
   "Google Ads Reports for NonApp lite"
   "Ads Data Hub for App Creative"
-  "Ads Data Hub for App Branding"
   "Ads Data Hub for Audience+"
   "BigQuery query external tables based on Google Sheet"
   "Google Ads Reports backfill for the past 90 days. Must select Google Ads \
 Reports also."
-  "LEGO Extension: YouTube Channel Analysis."
-  "LEGO Extension: CPP"
 )
 
 # Build installed workflows map and set each value to false as default.
@@ -145,10 +140,7 @@ INTEGRATION_APIS=(
   "googleads.googleapis.com"
   "adsdatahub.googleapis.com"
   "adsdatahub.googleapis.com"
-  "adsdatahub.googleapis.com"
   "drive.googleapis.com"
-  "N/A"
-  "youtube.googleapis.com"
   "N/A"
 )
 
@@ -178,26 +170,16 @@ setup_functionality_for_installation() {
     INSTALLED_ADH_CREATIVE_WORKFLOW="Y"
     ;;
   4)
-    INSTALLED_ADH_BRANDING_WORKFLOW="Y"
-    ;;
-  5)
     # ADH audience workflow depends on lego nonapp_trd_user_interest table,
     # which is created within NonApp workflow.
     INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
     INSTALLED_ADH_AUDIENCE_WORKFLOW="Y"
     ;;
-  6)
+  5)
     INSTALLED_TRDPTY_TRIX_DATA="Y"
     ;;
-  7)
+  6)
     INSTALLED_BACKFILL_WORKFLOW_TRIGGER="Y"
-    ;;
-  8)
-    INSTALLED_LEGO_WORKFLOWS["App"]=true
-    INSTALLED_YOUTUBE_WORKFLOW="Y"
-    ;;
-  9)
-    INSTALLED_CPP_WORKFLOW="Y"
     ;;
   *) ;;
   esac
@@ -358,11 +340,8 @@ any other key to enter another CID..."
 #   INSTALLED_LEGO_WORKFLOWS
 #   INSTALLED_TRDPTY_TRIX_DATA
 #   INSTALLED_ADH_CREATIVE_WORKFLOW
-#   INSTALLED_ADH_BRANDING_WORKFLOW
 #   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   INSTALLED_BACKFILL_WORKFLOW_TRIGGER
-#   INSTALLED_YOUTUBE_WORKFLOW
-#   INSTALLED_CPP_WORKFLOW
 # Arguments:
 #   Whether update cronjob.
 #######################################
@@ -483,23 +462,6 @@ initialize_workflow() {
     fi
   fi
 
-  # Create/update ADH branding task config and cronjob.
-  if [[ ${INSTALLED_ADH_BRANDING_WORKFLOW,,} = "y" ]]; then
-    update_workflow_task "./config/workflow_adh_branding.json"
-    if [[ ${updateCronjob} -eq 1 ]]; then
-      if [[ -z "${ADH_CID}" ]]; then
-        set_adh_account
-      fi
-      local message_body='{
-        "timezone":"'"${TIMEZONE}"'",
-        "partitionDay": "${today}",
-        "adhCustomerId": "'"${ADH_CID}"'"
-      }'
-      update_workflow_cronjob "adh_branding_start" "0 12 1 1 *" "${message_body}"
-      pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_branding_start
-    fi
-  fi
-
   # Create/update ADH audience task config and cronjob.
   if [[ ${INSTALLED_ADH_AUDIENCE_WORKFLOW,,} = "y" ]]; then
     update_workflow_task "./config/workflow_retail_adh.json"
@@ -517,42 +479,6 @@ initialize_workflow() {
       pause_cloud_scheduler ${PROJECT_NAMESPACE}-adh_audience_start
     fi
   fi
-
-  # Create/update LEGO Youtube Extension.
-  if [[ ${INSTALLED_YOUTUBE_WORKFLOW,,} = "y" ]]; then
-    update_workflow_task "./config/workflow_youtube.json"
-    if [[ ${updateCronjob} -eq 1 ]]; then
-      local message_body='{
-        "timezone": "'"${TIMEZONE}"'",
-        "partitionDay": "${today}",
-        "legoDatasetId": "'"${DATASET_ID}"'"
-      }'
-      update_workflow_cronjob "youtube_start" "0 15 * * *" "${message_body}"
-    fi
-  fi
-
-  # Create/update LEGO CPP Extension for GrCN market.
-  if [[ ${INSTALLED_CPP_WORKFLOW,,} = "y" ]]; then
-    update_workflow_task "./config/workflow_cpp.json"
-    if [[ -z "${MCC_CIDS}" || -z "${DEVELOPER_TOKEN}" ]]; then
-      set_google_ads_account
-    fi
-    # Change MCC list string from comma separated into '\n' separated.
-    local mccCids
-    mccCids="$(printf '%s' "${MCC_CIDS}" | sed -r 's/,/\\\\n/g')"
-    if [[ ${updateCronjob} -eq 1 ]]; then
-      local message_body='{
-        "timezone":"'"${TIMEZONE}"'",
-        "partitionDay": "${today}",
-        "datasetId": "'"${DATASET_ID}"'",
-        "fromDate": "${today_sub_30_hyphenated}",
-        "datasetId": "'"${DATASET_ID}"'",
-        "developerToken":"'"${DEVELOPER_TOKEN}"'",
-        "mccCids": "'"${mccCids}"'"
-      }'
-      update_workflow_cronjob "lego_cpp_start" "0 12 * * *" "${message_body}"
-    fi
-  fi
 }
 
 #######################################
@@ -562,7 +488,6 @@ initialize_workflow() {
 #   GCP_PROJECT
 #   INSTALLED_WORKFLOW
 #   INSTALLED_ADH_CREATIVE_WORKFLOW
-#   INSTALLED_ADH_BRANDING_WORKFLOW
 #   INSTALLED_ADH_AUDIENCE_WORKFLOW
 #   DATASET_ID
 #   CONFIG_DATASET_ID
@@ -584,9 +509,6 @@ confirm_data_locations() {
   fi
   if [[ "${INSTALLED_ADH_CREATIVE_WORKFLOW}" == "Y" ]]; then
     confirm_located_dataset ADH_CREATIVE_DS_ID DATASET_LOCATION REGION_FOR_DS
-  fi
-  if [[ "${INSTALLED_ADH_BRANDING_WORKFLOW}" == "Y" ]]; then
-    confirm_located_dataset ADH_BRANDING_DS_ID DATASET_LOCATION REGION_FOR_DS
   fi
   if [[ "${INSTALLED_ADH_AUDIENCE_WORKFLOW}" == "Y" ]]; then
     confirm_located_dataset ADH_AUDIENCE_DS_ID DATASET_LOCATION REGION_FOR_DS
@@ -671,7 +593,9 @@ COMMON_INSTALL_TASKS=(
   save_config
   create_subscriptions
   create_sink
-  deploy_tentacles
+  deploy_cloud_functions_file_job_manager
+  deploy_cloud_functions_transporter
+  deploy_cloud_functions_api_requester
   do_oauth
   deploy_sentinel
   set_internal_task
@@ -718,7 +642,9 @@ MINIMALISM_TASKS=(
   "initialize_workflow updateCronjob"
   create_subscriptions
   create_sink
-  deploy_tentacles
+  deploy_cloud_functions_file_job_manager
+  deploy_cloud_functions_transporter
+  deploy_cloud_functions_api_requester
   deploy_sentinel
   create_fx_rate_table
   set_internal_task
@@ -745,11 +671,8 @@ setup_cn() {
   TIMEZONE="Asia/Shanghai"
   INSTALLED_TRDPTY_TRIX_DATA="Y"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
-  INSTALLED_ADH_BRANDING_WORKFLOW="N"
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
-  INSTALLED_YOUTUBE_WORKFLOW="N"
-  INSTALLED_CPP_WORKFLOW="N"
   GOOGLE_CLOUD_APIS["googleads.googleapis.com"]+="Google Ads API"
   ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adwords")
 }
@@ -757,13 +680,6 @@ setup_cn() {
 cn_app() {
   setup_cn
   INSTALLED_LEGO_WORKFLOWS["App"]=true
-  customized_install "${MINIMALISM_TASKS[@]}"
-}
-
-cn_app_with_youtube() {
-  setup_cn
-  INSTALLED_LEGO_WORKFLOWS["App"]=true
-  INSTALLED_YOUTUBE_WORKFLOW="Y"
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
@@ -789,14 +705,6 @@ cn_adh_creative() {
   customized_install "${MINIMALISM_TASKS[@]}"
 }
 
-cn_adh_branding() {
-  setup_cn
-  INSTALLED_ADH_BRANDING_WORKFLOW="Y"
-  GOOGLE_CLOUD_APIS["adsdatahub.googleapis.com"]+="Ads Data Hub Queries"
-  ENABLED_OAUTH_SCOPES+=("https://www.googleapis.com/auth/adsdatahub")
-  customized_install "${MINIMALISM_TASKS[@]}"
-}
-
 cn_adh_audience() {
   setup_cn
   INSTALLED_LEGO_WORKFLOWS["NonApp"]=true
@@ -809,7 +717,6 @@ cn_adh_audience() {
 setup_au() {
   TIMEZONE="Australia/Sydney"
   INSTALLED_ADH_CREATIVE_WORKFLOW="N"
-  INSTALLED_ADH_BRANDING_WORKFLOW="N"
   INSTALLED_ADH_AUDIENCE_WORKFLOW="N"
   INSTALLED_TRDPTY_TRIX_DATA="N"
   INSTALLED_BACKFILL_WORKFLOW_TRIGGER="N"
