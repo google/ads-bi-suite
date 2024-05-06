@@ -19,7 +19,7 @@
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
+        "projectId": "${projectId}",
         "datasetId": "${datasetId}",
         "tableId": "${destinationTable}$${partitionDay}"
       },

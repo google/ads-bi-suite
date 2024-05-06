@@ -1,23 +1,14 @@
 {
   "lego_start": {
-    "type": "knot",
-    "appendedParameters": {
-      "configDatasetId": "ads_report_configs",
-      "configFxTableId": "fx_rate_raw",
-      "adsDatasetId": "${datasetId}"
-    },
-    "next": "prep_user_config"
-  },
-  "prep_user_config": {
     "type": "query",
     "source": {
-      "sql": "SELECT * FROM ${configDatasetId}.${configFxTableId}",
+      "sql": "SELECT * FROM `${configDatasetId}.fx_rate_raw`",
       "external": true
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
-        "datasetId": "${adsDatasetId}",
+        "projectId": "${projectId}",
+        "datasetId": "${datasetId}",
         "tableId": "fx_rate$${partitionDay}"
       },
       "writeDisposition": "WRITE_TRUNCATE"
@@ -32,16 +23,25 @@
         "records": "${mccCids}"
       }
     },
+    "multiple": {
+      "dueTime": "240"
+    },
     "destination": {
       "taskId": "download_mcc_reports_and_child_accounts",
-      "target": "gcs",
-      "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[mcc]_size[0.3]_${partitionDay}.ndjson"
+      "target": "pubsub",
+      "qps": 1,
+      "message": {
+        "projectId": "${projectId}",
+        "namespace": "${namespace}",
+        "locationId": "${locationId}",
+        "datasetId": "${datasetId}",
+        "reportBucket": "${reportBucket}",
+        "timezone": "${timezone}",
+        "partitionDay": "${partitionDay}",
+        "fromDate": "${fromDate}",
+        "developerToken": "${developerToken}",
+        "mccCid": "${mccCid}"
       }
-    },
-    "multiple": {
-      "dueTime": 240
     },
     "errorOptions": {
       "ignoreError": true
@@ -93,20 +93,31 @@
     "type": "multiple",
     "source": {
       "file": {
-        "bucket": "#GCS_BUCKET#",
+        "bucket": "${reportFile.bucket}",
         "name": "${reportFile.name}"
       }
+    },
+    "multiple": {
+      "dueTime": "180"
     },
     "destination": {
       "taskId": "base_account_performance",
       "target": "gcs",
-      "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[account]_size[0.3]_${partitionDay}_${mccCid}.ndjson"
+      "http": {
+        "config": {
+          "message": {
+            "projectId": "${projectId}",
+            "reportBucket": "${reportBucket}",
+            "customerId": "${customer_client.id}",
+            "loginCustomerId": "${mccCid}",
+            "fromDate": "${fromDate}",
+            "developerToken": "${developerToken}",
+            "partitionDay": "${partitionDay}"
+          },
+          "numberOfThreads": "2",
+          "qps": "10"
+        }
       }
-    },
-    "multiple": {
-      "dueTime": 180
     },
     "errorOptions": {
       "ignoreError": true
@@ -127,54 +138,68 @@
   },
   "query_active_account": {
     "type": "query",
+    "ancestor": "query_general",
     "source": {
       "file": {
-        "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/workflow_active_account.sql"
       }
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
-        "datasetId": "${datasetId}",
         "tableId": "active_account$${partitionDay}"
-      },
-      "writeDisposition": "WRITE_TRUNCATE"
+      }
     },
-    "next": "export_active_account"
+    "next": [
+      {
+        "taskId": "export_active_account",
+        "appendedParameters": {
+          "afterExportTask": "get_reports"
+        }
+      }
+    ]
   },
   "export_active_account": {
     "type": "export",
     "source": {
-      "projectId": "#PROJECT_ID#",
-      "datasetId": "${datasetId}",
-      "tableId": "active_account$${partitionDay}"
+      "projectId": "${destinationTable.projectId}",
+      "datasetId": "${destinationTable.datasetId}",
+      "tableId": "${destinationTable.tableId}"
     },
     "destination": {
-      "bucket": "#GCS_BUCKET#",
+      "bucket": "${reportBucket}",
       "name": "reports/${partitionDay}/active_cids.ndjson"
     },
     "options": {
-      "destinationFormat": "NEWLINE_DELIMITED_JSON",
-      "printHeader": false
+      "printHeader": false,
+      "allowMultiple": false,
+      "destinationFormat": "NEWLINE_DELIMITED_JSON"
     },
-    "next": "get_reports"
+    "next": "${afterExportTask}"
   },
   "get_reports": {
     "type": "multiple",
     "source": {
       "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "reports/${partitionDay}/active_cids.ndjson"
+        "bucket": "${destination.bucket}",
+        "name": "${destination.name}"
       }
     },
     "destination": {
       "taskId": "download_reports_impl",
       "target": "gcs",
-      "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[lego]_size[0.3]_${partitionDay}.ndjson"
+      "http": {
+        "config": {
+          "message": {
+            "projectId": "${projectId}",
+            "reportBucket": "${reportBucket}",
+            "customerId": "${customerId}",
+            "loginCustomerId": "${loginCustomerId}",
+            "fromDate": "${fromDate}",
+            "developerToken": "${developerToken}",
+            "partitionDay": "${partitionDay}"
+          },
+          "qps": "1"
+        }
       }
     },
     "errorOptions": {
@@ -195,72 +220,44 @@
   },
   "load_report": {
     "type": "load",
+    "ancestor": "load_task_default",
     "source": {
       "file": {
-        "bucket": "#GCS_BUCKET#",
         "name": "reports/${partitionDay}/reports_${targetTable}/*"
       }
     },
     "destination": {
       "table": {
-        "datasetId": "${datasetId}",
         "tableId": "report_${targetTable}$${partitionDay}"
-      },
-      "tableSchema": {
-        "timePartitioning": {
-          "type": "DAY",
-          "expirationMs": "5184000000"
-        }
-      },
-      "schemaSource": "${targetTable}"
-    },
-    "options": {
-      "sourceFormat": "NEWLINE_DELIMITED_JSON",
-      "writeDisposition": "WRITE_TRUNCATE",
-      "ignoreUnknownValues": true,
-      "autodetect": false
+      }
     }
   },
   "load_mcc_report": {
     "type": "load",
+    "ancestor": "load_task_default",
     "source": {
       "file": {
-        "bucket": "#GCS_BUCKET#",
         "name": "reports/${partitionDay}/reports_${targetTable}/${mccCid}/*"
       }
     },
     "destination": {
       "table": {
-        "datasetId": "${datasetId}",
         "tableId": "report_${targetTable}_${mccCid}$${partitionDay}"
-      },
-      "tableSchema": {
-        "timePartitioning": {
-          "type": "DAY",
-          "expirationMs": "5184000000"
-        }
-      },
-      "schemaSource": "${targetTable}"
-    },
-    "options": {
-      "sourceFormat": "NEWLINE_DELIMITED_JSON",
-      "writeDisposition": "WRITE_TRUNCATE",
-      "ignoreUnknownValues": true,
-      "autodetect": false
+      }
     }
   },
   "query_general": {
     "type": "query",
     "source": {
       "file": {
-        "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_CONFIG_BUCKET#",
+        "projectId": "${projectId}",
+        "bucket": "${configBucket}",
         "name": "sql/${queryName}.sql"
       }
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
+        "projectId": "${projectId}",
         "datasetId": "${datasetId}",
         "tableId": "${tableId}"
       },
@@ -269,38 +266,56 @@
   },
   "mark_label": {
     "type": "query",
+    "ancestor": "query_general",
     "source": {
       "file": {
-        "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/make_label.sql"
       }
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
-        "datasetId": "${datasetId}",
         "tableId": "${queryName}_with_label"
-      },
-      "writeDisposition": "WRITE_TRUNCATE"
+      }
     }
   },
   "mark_email": {
     "type": "query",
+    "ancestor": "query_general",
     "source": {
       "file": {
-        "projectId": "#PROJECT_ID#",
-        "bucket": "#GCS_CONFIG_BUCKET#",
         "name": "sql/make_email.sql"
       }
     },
     "destination": {
       "table": {
-        "projectId": "#PROJECT_ID#",
-        "datasetId": "${datasetId}",
         "tableId": "${queryName}_with_label_and_email"
+      }
+    }
+  },
+  "load_task_default": {
+    "type": "load",
+    "source": {
+      "file": {
+        "bucket": "${reportBucket}"
+      }
+    },
+    "destination": {
+      "table": {
+        "datasetId": "${datasetId}"
       },
-      "writeDisposition": "WRITE_TRUNCATE"
+      "schemaSource": "${targetTable}",
+      "tableSchema": {
+        "timePartitioning": {
+          "type": "DAY",
+          "expirationMs": "5184000000"
+        }
+      }
+    },
+    "options": {
+      "sourceFormat": "NEWLINE_DELIMITED_JSON",
+      "writeDisposition": "WRITE_TRUNCATE",
+      "autodetect": false,
+      "ignoreUnknownValues": true
     }
   }
 }

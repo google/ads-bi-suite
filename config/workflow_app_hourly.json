@@ -1,26 +1,21 @@
 {
   "lego_start_hourly": {
-    "type": "knot",
-    "next": "get_reports_hourly"
+    "type": "query",
+    "ancestor": "query_active_account",
+    "next": [
+      {
+        "taskId": "export_active_account",
+        "appendedParameters": {
+          "afterExportTask": "get_reports_hourly"
+        }
+      }
+    ]
   },
   "get_reports_hourly": {
     "type": "multiple",
-    "source": {
-      "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "reports/${partitionDay}/active_cids.ndjson"
-      }
-    },
+    "ancestor": "get_reports",
     "destination": {
-      "taskId": "download_reports_hourly",
-      "target": "gcs",
-      "file": {
-        "bucket": "#GCS_BUCKET#",
-        "name": "#OUTBOUND#/API[PB]_config[lego]_size[0.3]_${partitionDay}_hourly.ndjson"
-      }
-    },
-    "errorOptions": {
-      "ignoreError": true
+      "taskId": "download_reports_hourly"
     },
     "next": "load_reports_hourly"
   },
