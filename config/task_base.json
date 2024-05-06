@@ -134,12 +134,9 @@
   },
   "base_account_budget": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "account_budget",
           "attributes": [
@@ -161,23 +158,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_account_budget/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_account_change_event": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "change_event",
           "attributes": [
@@ -198,23 +185,13 @@
           "limit": 1000
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_account_change_event/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_account_performance": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer",
           "metrics": [
@@ -245,23 +222,13 @@
           "from_date": "${fromDate}"
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_account_performance/${loginCustomerId}/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_campaign_criterion": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "campaign_criterion",
           "metrics": [],
@@ -276,23 +243,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_campaign_criterion/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_campaigns": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "campaign",
           "attributes": [
@@ -326,23 +283,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_campaigns/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_campaign_ads_approval": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "ad_group_ad",
           "segments": [],
@@ -378,23 +325,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_campaign_ads_approval/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_campaign_conversion": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "campaign",
           "metrics": [
@@ -420,23 +357,13 @@
           "from_date": "${fromDate}"
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_campaign_conversion/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_campaign_performance": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "campaign",
           "metrics": [
@@ -487,23 +414,13 @@
           "from_date": "${fromDate}"
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_campaign_performance/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_detail_placement_view": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "group_placement_view",
           "metrics": [
@@ -558,23 +475,13 @@
           "limit": 1000
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_detail_placement_view/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_geo_target_constant": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "geo_target_constant",
           "attributes": [
@@ -586,23 +493,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_geo_target_constant/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_geographic_view": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "geographic_view",
           "metrics": [
@@ -642,23 +539,13 @@
           "from_date": "${fromDate}"
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_geographic_view/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_language_constant": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "language_constant",
           "attributes": [
@@ -669,23 +556,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_language_constant/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_labels": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "label",
           "metrics": [],
@@ -699,23 +576,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_labels/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_customer_label": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer_label",
           "metrics": [],
@@ -727,23 +594,13 @@
           ]
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_customer_label/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   },
   "base_videos": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "video",
           "metrics": [
@@ -789,13 +646,6 @@
           "from_date": "${fromDate}"
         }
       }
-    },
-    "destination": {
-      "bucket": "#GCS_BUCKET#",
-      "name": "reports/${partitionDay}/reports_base_videos/${customerId}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     }
   }
 }

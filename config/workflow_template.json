@@ -64,12 +64,9 @@
   },
   "get_child_accounts": {
     "type": "report",
+    "ancestor": "google_ads_report",
     "source": {
-      "target": "ADS",
       "config": {
-        "developerToken": "${developerToken}",
-        "customerId": "${customerId}",
-        "loginCustomerId": "${loginCustomerId}",
         "reportQuery": {
           "entity": "customer_client",
           "attributes": ["customer_client.id"],
@@ -81,11 +78,7 @@
       }
     },
     "destination": {
-      "bucket": "#GCS_BUCKET#",
       "name": "reports/${partitionDay}/cid_list/${mccCid}.ndjson"
-    },
-    "errorOptions": {
-      "ignoreError": true
     },
     "next": "get_all_account_performance"
   },
@@ -316,6 +309,25 @@
       "writeDisposition": "WRITE_TRUNCATE",
       "autodetect": false,
       "ignoreUnknownValues": true
+    }
+  },
+  "google_ads_report": {
+    "type": "report",
+    "source": {
+      "target": "ADS",
+      "config": {
+        "snakeCase": true,
+        "loginCustomerId": "${loginCustomerId}",
+        "customerId": "${customerId}",
+        "developerToken": "${developerToken}"
+      }
+    },
+    "destination": {
+      "bucket": "${reportBucket}",
+      "name": "reports/${partitionDay}/reports_${taskConfigId}/${customerId}.ndjson"
+    },
+    "errorOptions": {
+      "ignoreError": true
     }
   }
 }
