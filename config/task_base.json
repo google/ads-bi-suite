@@ -222,6 +222,9 @@
           "from_date": "${fromDate}"
         }
       }
+    },
+    "destination": {
+      "name": "reports/${partitionDay}/reports_base_account_performance/${loginCustomerId}/${customerId}.ndjson"
     }
   },
   "base_campaign_criterion": {
