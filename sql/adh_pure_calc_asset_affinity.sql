@@ -31,7 +31,7 @@ AS (
         ON
           b.campaign_id = a.impression_data.campaign_id
           AND b.conversion_id = CAST(a.conversion_type AS string)
-      WHERE user_id IS NOT NULL
+      WHERE user_id != '0'
       AND conversion_attribution_model_type = 'LAST_CLICK'
     )
   WHERE rank = 1
@@ -48,27 +48,17 @@ SELECT
   creative.video_message.youtube_video_id AS video_id,
   creative.video_message.video_ad_duration AS video_ad_duration,
   COUNT(DISTINCT impr.user_id) target_users,
-  SUM(IFNULL(advertiser_impression_cost_usd, 0) + IFNULL(clk.click_cost_usd, 0)) AS cost_usd,
-  SUM(click_count) AS clicks,
+  SUM(IFNULL(impr.advertiser_impression_cost_usd, 0)) + SUM(IFNULL(clk.advertiser_cost_usd, 0)) AS cost_usd,
+  SUM(clk.num_clicks) AS clicks,
   COUNT(impr.query_id.time_usec) AS impressions,
   COUNT(DISTINCT conv.user_id) installs
 FROM adh.google_ads_impressions impr
 CROSS JOIN UNNEST(affinity) AS affinity_id
 LEFT JOIN adh.google_ads_campaign camp
   USING (campaign_id)
-LEFT JOIN
-  (
-    SELECT
-      impression_id,
-      COUNT(*) click_count,
-      SUM(IFNULL(c.advertiser_click_cost_usd, 0)) click_cost_usd
-    FROM adh.google_ads_clicks c
-    WHERE user_id IS NOT NULL
-    GROUP BY 1
-  ) clk
-  USING (impression_id)
+LEFT JOIN adh.google_ads_creative_conversions clk USING (impression_id)
 LEFT JOIN tmp.installed_users conv
-  USING (impression_id)
+  ON impr.impression_id = conv.impression_id
 LEFT JOIN adh.affinity aff
   USING (affinity_id)
 LEFT JOIN adh.google_ads_adgroup adg
@@ -79,7 +69,7 @@ LEFT JOIN adh.google_ads_creative creative
   USING (creative_id)
 INNER JOIN `${datasetId}.adh_app_prep_${partitionDay}` prep
   ON prep.campaign_id = impr.campaign_id
-WHERE impr.user_id IS NOT NULL
+WHERE impr.user_id != '0'
 AND creative.video_message.youtube_video_id != ''
 AND creative.video_message.youtube_video_id IS NOT NULL
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
