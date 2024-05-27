@@ -1,6 +1,6 @@
 {
   "name": "apps-ads-reporting",
-  "version": "15.0.0",
+  "version": "16.0.1",
   "author": "lushu@google.com, chjerry@google.com, liulena@google.com, ritawang@google.com, mikawang@google.com",
   "files": [
     "src/"

@@ -401,7 +401,7 @@ initialize_workflow() {
     local mccCids
     mccCids="$(printf '%s' "${MCC_CIDS}" | sed -r 's/,/\\\\n/g')"
     local message_body='{
-      "projectId":"'"${PROJECT_ID}"'",
+      "projectId":"'"${GCP_PROJECT}"'",
       "locationId":"'"${REGION}"'",
       "namespace":"'"${PROJECT_NAMESPACE}"'",
       "configDatasetId":"'"${CONFIG_DATASET_ID}"'",
@@ -422,7 +422,7 @@ initialize_workflow() {
     # Create backfill cronjob.
     if [[ ${INSTALLED_BACKFILL_WORKFLOW_TRIGGER,,} = "y" ]]; then
       local backfill_message_body='{
-        "projectId":"'"${PROJECT_ID}"'",
+        "projectId":"'"${GCP_PROJECT}"'",
         "locationId":"'"${REGION}"'",
         "namespace":"'"${PROJECT_NAMESPACE}"'",
         "configDatasetId":"'"${CONFIG_DATASET_ID}"'",
@@ -446,7 +446,7 @@ initialize_workflow() {
     update_workflow_task "./config/task_trdpty.json"
     if [[ ${updateCronjob} -eq 1 ]]; then
       local message_body='{
-        "projectId":"'"${PROJECT_ID}"'",
+        "projectId":"'"${GCP_PROJECT}"'",
         "locationId":"'"${REGION}"'",
         "namespace":"'"${PROJECT_NAMESPACE}"'",
         "configDatasetId":"'"${CONFIG_DATASET_ID}"'",
@@ -470,7 +470,7 @@ initialize_workflow() {
         set_adh_account
       fi
       local message_body='{
-        "projectId":"'"${PROJECT_ID}"'",
+        "projectId":"'"${GCP_PROJECT}"'",
         "locationId":"'"${REGION}"'",
         "namespace":"'"${PROJECT_NAMESPACE}"'",
         "configDatasetId":"'"${CONFIG_DATASET_ID}"'",
@@ -494,7 +494,7 @@ initialize_workflow() {
         set_adh_account
       fi
       local message_body='{
-        "projectId":"'"${PROJECT_ID}"'",
+        "projectId":"'"${GCP_PROJECT}"'",
         "locationId":"'"${REGION}"'",
         "namespace":"'"${PROJECT_NAMESPACE}"'",
         "configDatasetId":"'"${CONFIG_DATASET_ID}"'",
