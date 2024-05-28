@@ -7,7 +7,7 @@
   ],
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/data-tasks-coordinator": "2.1.0",
+    "@google-cloud/data-tasks-coordinator": "2.1.1",
     "@google-cloud/gmp-googleads-connector": "4.4.2"
   },
   "scripts": {
