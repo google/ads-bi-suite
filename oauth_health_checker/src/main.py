@@ -32,7 +32,7 @@ import logging
 PROJECT_ID = os.environ.get('GCP_PROJECT', 'lego-chjerry-lab')
 REGION = os.environ.get('FUNCTION_REGION', 'us-central1')
 NAMESPACE = os.environ.get('NAMESPACE', 'lego')
-GOOGLE_ADS_API_VERSION = os.environ.get('GOOGLE_ADS_API_VERSION', '15')
+GOOGLE_ADS_API_VERSION = os.environ.get('GOOGLE_ADS_API_VERSION', '16')
 
 def create_table_from_sql(sql: str, table:str) -> bigquery.table.RowIterator:
   """Loads bigquery result into the given table.
