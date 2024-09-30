@@ -1,0 +1,11 @@
+{
+  "lego": {
+    "source": "./src/lego",
+    "env": {
+      "dev": {
+        "scriptId": "1_jiXcYYv7U4hOMYGg8qcBwoSlEeG-ZOfGAWGHC-ztNQQ54LfxS1Ypkyi",
+        "parentId": "1IkcwUUdFNQ1GS43WfrZTW2lQtGaM4-ea6_b1jGmTNE8"
+      }
+    }
+  }
+}
