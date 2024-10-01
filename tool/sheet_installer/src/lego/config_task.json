@@ -1,0 +1,3231 @@
+{
+  "adh_lego_start": {
+    "type": "knot",
+    "appendedParameters": {
+      "legoDatasetId": "${legoDatasetId}",
+      "adhDatasetId": "adh_apps_data",
+      "biDatasetId": "adh_apps_data",
+      "biTableId": "firebase_bi",
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": "7",
+      "customerId": "${adhCustomerId}"
+    },
+    "next": "adh_trigger_prep_query"
+  },
+  "adh_trigger_prep_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_app_prep",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_app_prep_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": [
+      "adh_pure_trigger_calc_query",
+      "adh_bi_trigger_load_query"
+    ]
+  },
+  "adh_pure_trigger_calc_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_pure_calc_asset_demo",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_pure_calc_asset_demo_${partitionDay}"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_pure_calc_asset_affinity",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_pure_calc_asset_affinity_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_pure_trigger_join_query"
+  },
+  "adh_pure_trigger_join_query": {
+    "type": "knot",
+    "next": [
+      {
+        "taskId": "query_general",
+        "appendedParameters": {
+          "queryName": "adh_pure_join_lego_perf",
+          "datasetId": "${adhDatasetId}",
+          "tableId": "adh_pure_join_lego_perf_${partitionDay}"
+        }
+      }
+    ]
+  },
+  "adh_bi_trigger_load_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_bi_load_data",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_bi_load_data_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_bi_trigger_calc_query"
+  },
+  "adh_bi_trigger_calc_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_bi_calc_affinity",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_bi_calc_affinity_${partitionDay}"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_bi_calc_demo",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_bi_calc_demo_${partitionDay}"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_bi_calc_video_asset",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_bi_calc_video_asset_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_bi_trigger_join_query"
+  },
+  "adh_bi_trigger_join_query": {
+    "type": "knot",
+    "next": [
+      {
+        "taskId": "query_general",
+        "appendedParameters": {
+          "queryName": "adh_bi_join_lego_perf",
+          "datasetId": "${adhDatasetId}",
+          "tableId": "adh_bi_join_lego_perf_${partitionDay}"
+        }
+      }
+    ]
+  },
+  "adh_audience_start": {
+    "type": "knot",
+    "appendedParameters": {
+      "legoDatasetId": "ads_reports_data_v4",
+      "adhDatasetId": "adh_audience",
+      "configDatasetId": "adh_audience",
+      "configTableId": "adh_user_config_input",
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": "30",
+      "customerId": "${adhCustomerId}"
+    },
+    "next": "adh_audience_prep_user_config"
+  },
+  "adh_audience_prep_user_config": {
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM ${configDatasetId}.${configTableId}",
+      "external": true
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${adhDatasetId}",
+        "tableId": "adh_config_prep_${partitionDay}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "next": "adh_audience_trigger_prep_query"
+  },
+  "adh_audience_trigger_prep_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_prep",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_prep_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_audience_trigger_calc_query"
+  },
+  "adh_audience_trigger_calc_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_calc_affinity",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_calc_affinity_${partitionDay}"
+          }
+        },
+        {
+          "taskId": "adh_query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_calc_in_market",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_calc_in_market_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_pure_trigger_init_join_query"
+  },
+  "adh_pure_trigger_init_join_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_join_lego_init",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_join_lego_init_${partitionDay}"
+          }
+        }
+      ]
+    },
+    "next": "adh_pure_trigger_final_join_query"
+  },
+  "adh_pure_trigger_final_join_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "taskId": "query_general",
+          "appendedParameters": {
+            "queryName": "adh_retail_join_lego_final",
+            "datasetId": "${adhDatasetId}",
+            "tableId": "adh_retail_join_lego_final_${partitionDay}"
+          }
+        }
+      ]
+    }
+  },
+  "adh_query_general": {
+    "type": "query_adh",
+    "source": {
+      "customerId": "${customerId}",
+      "file": {
+        "projectId": "#PROJECT_ID#",
+        "bucket": "#GCS_CONFIG_BUCKET#",
+        "name": "sql/${queryName}.sql"
+      },
+      "endDate": "${partitionDay}",
+      "dateRangeInDays": "${dateRangeInDays}"
+    },
+    "destination": {
+      "table": {
+        "projectId": "#PROJECT_ID#",
+        "datasetId": "${datasetId}",
+        "tableId": "${tableId}"
+      }
+    }
+  },
+  "app_ad_group": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "ad_group",
+          "segments": [
+            "segments.date",
+            "segments.week",
+            "segments.ad_network_type",
+            "segments.conversion_action_category",
+            "segments.conversion_action_name",
+            "segments.conversion_action",
+            "segments.external_conversion_source"
+          ],
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ],
+          "attributes": [
+            "campaign.advertising_channel_type",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group.status"
+          ],
+          "from_date": "${fromDate}",
+          "metrics": [
+            "metrics.conversions",
+            "metrics.conversions_value"
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "app_ad_group_perf": {
+    "ancestor": "google_ads_report",
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "segments": [
+            "segments.date",
+            "segments.ad_network_type"
+          ],
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.interactions"
+          ],
+          "from_date": "${fromDate}",
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "campaign.advertising_channel_type",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group.status"
+          ],
+          "entity": "ad_group",
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "app_asset_metadata": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "ad_group_ad_asset_view",
+          "constraints": [
+            {
+              "val": "YOUTUBE_VIDEO",
+              "op": "=",
+              "key": "asset.type"
+            }
+          ],
+          "attributes": [
+            "asset.type",
+            "asset.youtube_video_asset.youtube_video_id",
+            "asset.youtube_video_asset.youtube_video_title",
+            "asset.mobile_app_asset.start_date",
+            "asset.mobile_app_asset.end_date"
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "app_asset_performance": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "ad_group_ad_asset_view",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions_value",
+            "metrics.all_conversions",
+            "metrics.biddable_app_install_conversions",
+            "metrics.biddable_app_post_install_conversions"
+          ],
+          "attributes": [
+            "ad_group_ad_asset_view.field_type",
+            "ad_group_ad_asset_view.performance_label",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group.status",
+            "asset.id",
+            "asset.image_asset.full_size.height_pixels",
+            "asset.image_asset.full_size.url",
+            "asset.image_asset.full_size.width_pixels",
+            "asset.name",
+            "asset.text_asset.text",
+            "asset.type",
+            "asset.youtube_video_asset.youtube_video_id",
+            "asset.youtube_video_asset.youtube_video_title",
+            "campaign.advertising_channel_type",
+            "campaign.id",
+            "customer.id"
+          ],
+          "segments": [
+            "segments.date",
+            "segments.week",
+            "segments.ad_network_type"
+          ],
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ],
+          "from_date": "${fromDate}"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "app_conversion_action": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "conversion_action.app_id",
+            "conversion_action.category",
+            "conversion_action.counting_type",
+            "conversion_action.firebase_settings.event_name",
+            "conversion_action.include_in_conversions_metric",
+            "conversion_action.name",
+            "conversion_action.owner_customer",
+            "conversion_action.resource_name",
+            "conversion_action.status",
+            "conversion_action.third_party_app_analytics_settings.event_name",
+            "conversion_action.type",
+            "customer.id"
+          ],
+          "constraints": [
+            {
+              "val": "ENABLED",
+              "op": "=",
+              "key": "conversion_action.status"
+            }
+          ],
+          "entity": "conversion_action",
+          "metrics": [
+            "metrics.conversion_last_conversion_date",
+            "metrics.conversion_last_received_request_date_time"
+          ]
+        }
+      }
+    }
+  },
+  "app_disapprovals_ad_group_ad_asset_view": {
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": [
+                "PAUSED",
+                "REMOVED"
+              ],
+              "op": "NOT IN",
+              "key": "ad_group_ad.status"
+            }
+          ],
+          "attributes": [
+            "customer.id",
+            "campaign.advertising_channel_type",
+            "campaign.app_campaign_setting.app_id",
+            "campaign.status",
+            "ad_group.id",
+            "ad_group_ad.status",
+            "ad_group_ad.ad.id",
+            "ad_group_ad_asset_view.field_type",
+            "ad_group_ad_asset_view.policy_summary",
+            "asset.id",
+            "asset.name",
+            "asset.type"
+          ],
+          "entity": "ad_group_ad_asset_view"
+        }
+      }
+    },
+    "ancestor": "google_ads_report"
+  },
+  "app_fourth_query": {
+    "appendedParameters": {
+      "labelSourceTable": "base_snd_account_label"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ad_group_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_asset_perf_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_adjusted_skan_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_bp_cc"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_conv_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_criterion"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_perf_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_geo_conv_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_geo_perf_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_placement_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_skan_report"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_recommendations"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_account"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_redistributed_with_1p_report"
+          },
+          "taskId": "${markTaskId}"
+        }
+      ]
+    },
+    "type": "knot"
+  },
+  "app_geo_conversion": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value"
+          ],
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "geographic_view.country_criterion_id"
+          ],
+          "entity": "geographic_view",
+          "segments": [
+            "segments.week",
+            "segments.ad_network_type",
+            "segments.conversion_action_name",
+            "segments.conversion_action_category"
+          ],
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ],
+          "from_date": "${fromDate}"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "app_load_reports": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "app_conversion_action"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_asset_performance"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_geo_conversion"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_disapprovals_ad_group_ad_asset_view"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_ad_group"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_ad_group_perf"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_asset_metadata"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_recommendations"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_skan"
+          },
+          "taskId": "load_report"
+        }
+      ]
+    }
+  },
+  "app_recommendations": {
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "constraints": [
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ],
+          "attributes": [
+            "campaign.id"
+          ],
+          "entity": "campaign",
+          "metrics": [
+            "metrics.optimization_score_uplift",
+            "metrics.optimization_score_url"
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report"
+  },
+  "app_skan": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "date_constant": "LAST_30_DAYS",
+          "entity": "campaign",
+          "attributes": [
+            "campaign.id",
+            "campaign.name"
+          ],
+          "segments": [
+            "segments.date",
+            "segments.sk_ad_network_conversion_value",
+            "segments.sk_ad_network_ad_event_type",
+            "segments.sk_ad_network_source_app.sk_ad_network_source_app_id",
+            "segments.sk_ad_network_user_type",
+            "segments.sk_ad_network_attribution_credit"
+          ],
+          "metrics": [
+            "metrics.sk_ad_network_installs"
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "app_snd_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "tableId": "app_snd_account_changes",
+            "queryName": "app_snd_account_changes"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "tableId": "app_snd_ad_group_perf_report",
+            "queryName": "app_snd_ad_group_perf_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "tableId": "app_snd_ads_approval_all",
+            "queryName": "app_snd_ads_approval_all"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "tableId": "app_snd_asset_perf_report",
+            "queryName": "app_snd_asset_perf_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_snd_campaign_conv_report",
+            "tableId": "app_snd_campaign_conv_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "tableId": "app_snd_ads_approval_all_danny",
+            "queryName": "app_snd_ads_approval_all_danny"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    }
+  },
+  "app_trd_query": {
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ad_group_report",
+            "tableId": "app_trd_ad_group_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest",
+            "tableId": "app_trd_ads_disapproval_latest"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_asset_perf_report",
+            "tableId": "app_trd_asset_perf_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_adjusted_skan_report",
+            "tableId": "app_trd_adjusted_skan_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_bp_cc",
+            "tableId": "app_trd_bp_cc"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_conv_report",
+            "tableId": "app_trd_campaign_conv_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_criterion",
+            "tableId": "app_trd_campaign_criterion"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_campaign_perf_report",
+            "tableId": "app_trd_campaign_perf_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_geo_conv_report",
+            "tableId": "app_trd_geo_conv_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_geo_perf_report",
+            "tableId": "app_trd_geo_perf_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_placement_report",
+            "tableId": "app_trd_placement_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_skan_report",
+            "tableId": "app_trd_skan_report"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_recommendations",
+            "tableId": "app_trd_recommendations"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_account",
+            "tableId": "app_trd_account"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    },
+    "type": "knot"
+  },
+  "base_account_budget": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "billing_setup.end_date_time",
+            "billing_setup.payments_account_info.payments_account_id",
+            "billing_setup.payments_account_info.payments_profile_id",
+            "billing_setup.payments_account_info.payments_account_name",
+            "account_budget.status",
+            "account_budget.approved_spending_limit_micros",
+            "account_budget.approved_start_date_time",
+            "account_budget.approved_end_date_time",
+            "account_budget.adjusted_spending_limit_micros",
+            "account_budget.amount_served_micros",
+            "account_budget.proposed_spending_limit_type",
+            "account_budget.purchase_order_number"
+          ],
+          "entity": "account_budget"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "base_account_change_event": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "change_event",
+          "constraints": [
+            {
+              "val": "LAST_14_DAYS",
+              "op": "DURING",
+              "key": "change_event.change_date_time"
+            }
+          ],
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "change_event.change_date_time",
+            "change_event.change_resource_type",
+            "change_event.user_email",
+            "change_event.resource_change_operation"
+          ],
+          "limit": 1000
+        }
+      }
+    },
+    "type": "report"
+  },
+  "base_account_performance": {
+    "destination": {
+      "name": "reports/${partitionDay}/reports_base_account_performance/${loginCustomerId}/${customerId}.ndjson"
+    },
+    "source": {
+      "config": {
+        "reportQuery": {
+          "constraints": [
+            {
+              "val": "ENABLED",
+              "op": "=",
+              "key": "customer.status"
+            }
+          ],
+          "segments": [
+            "segments.date"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "customer.optimization_score",
+            "customer.optimization_score_weight"
+          ],
+          "entity": "customer",
+          "from_date": "${fromDate}",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ]
+        }
+      }
+    },
+    "type": "report",
+    "ancestor": "google_ads_report"
+  },
+  "base_campaign_ads_approval": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group.status",
+            "ad_group_ad.ad.id",
+            "ad_group_ad.ad.name",
+            "ad_group_ad.ad.type",
+            "ad_group_ad.policy_summary.approval_status",
+            "ad_group_ad.policy_summary.policy_topic_entries",
+            "ad_group_ad.policy_summary.review_status"
+          ],
+          "constraints": [
+            {
+              "val": [
+                "PAUSED",
+                "REMOVED"
+              ],
+              "op": "NOT IN",
+              "key": "ad_group_ad.status"
+            },
+            {
+              "val": [
+                "PAUSED",
+                "REMOVED"
+              ],
+              "op": "NOT IN",
+              "key": "ad_group.status"
+            }
+          ],
+          "entity": "ad_group_ad"
+        }
+      }
+    }
+  },
+  "base_campaign_conversion": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "campaign.advertising_channel_type"
+          ],
+          "metrics": [
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions_value",
+            "metrics.all_conversions"
+          ],
+          "segments": [
+            "segments.date",
+            "segments.device",
+            "segments.ad_network_type",
+            "segments.conversion_action_category",
+            "segments.conversion_action_name",
+            "segments.conversion_action",
+            "segments.external_conversion_source"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "entity": "campaign"
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "base_campaign_criterion": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "campaign.id",
+            "campaign_criterion.location.geo_target_constant",
+            "campaign_criterion.language.language_constant",
+            "campaign_criterion.negative",
+            "campaign.advertising_channel_type"
+          ],
+          "entity": "campaign_criterion"
+        }
+      }
+    },
+    "type": "report",
+    "ancestor": "google_ads_report"
+  },
+  "base_campaign_performance": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign.campaign_budget"
+          ],
+          "from_date": "${fromDate}",
+          "entity": "campaign",
+          "segments": [
+            "segments.date",
+            "segments.ad_network_type",
+            "segments.device"
+          ],
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_by_conversion_date",
+            "metrics.conversions_value",
+            "metrics.conversions_value_by_conversion_date",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views",
+            "metrics.search_impression_share",
+            "metrics.view_through_conversions",
+            "metrics.search_budget_lost_impression_share",
+            "metrics.search_rank_lost_impression_share",
+            "metrics.content_budget_lost_impression_share",
+            "metrics.content_rank_lost_impression_share",
+            "metrics.video_quartile_p100_rate",
+            "metrics.video_quartile_p75_rate",
+            "metrics.video_quartile_p50_rate",
+            "metrics.video_quartile_p25_rate"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            }
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "base_campaigns": {
+    "ancestor": "google_ads_report",
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "campaign",
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign_budget.amount_micros",
+            "campaign.status",
+            "campaign.app_campaign_setting.app_id",
+            "campaign.app_campaign_setting.app_store",
+            "campaign.target_cpa.target_cpa_micros",
+            "campaign.app_campaign_setting.bidding_strategy_goal_type",
+            "campaign.optimization_score",
+            "campaign.bidding_strategy",
+            "campaign.bidding_strategy_type",
+            "campaign.target_roas.target_roas",
+            "campaign_budget.has_recommended_budget",
+            "campaign.url_expansion_opt_out",
+            "campaign.shopping_setting.merchant_id"
+          ],
+          "constraints": [
+            {
+              "val": [
+                "PAUSED",
+                "ENABLED"
+              ],
+              "op": "IN",
+              "key": "campaign.status"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "base_customer_label": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "customer_label",
+          "attributes": [
+            "customer.id",
+            "customer.descriptive_name",
+            "customer_label.label"
+          ]
+        }
+      }
+    },
+    "type": "report",
+    "ancestor": "google_ads_report"
+  },
+  "base_detail_placement_view": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "sort_order": "DESC",
+          "entity": "group_placement_view",
+          "constraints": [
+            {
+              "val": "ENABLED",
+              "op": "=",
+              "key": "campaign.status"
+            },
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.clicks"
+            },
+            {
+              "val": 100,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": [
+                "SEARCH",
+                "SHOPPING"
+              ],
+              "op": "NOT IN",
+              "key": " campaign.advertising_channel_type"
+            }
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "group_placement_view.display_name",
+            "group_placement_view.placement",
+            "group_placement_view.placement_type",
+            "group_placement_view.target_url"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "order_by": "metrics.impressions",
+          "limit": 1000
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "base_geo_target_constant": {
+    "ancestor": "google_ads_report",
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "geo_target_constant.canonical_name",
+            "geo_target_constant.country_code",
+            "geo_target_constant.id",
+            "geo_target_constant.resource_name",
+            "geo_target_constant.name"
+          ],
+          "entity": "geo_target_constant"
+        }
+      }
+    }
+  },
+  "base_geographic_view": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "segments": [
+            "segments.ad_network_type",
+            "segments.week",
+            "segments.device"
+          ],
+          "entity": "geographic_view",
+          "from_date": "${fromDate}",
+          "attributes": [
+            "campaign.advertising_channel_sub_type",
+            "campaign.advertising_channel_type",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "customer.id",
+            "geographic_view.country_criterion_id"
+          ],
+          "metrics": [
+            "metrics.all_conversions_value",
+            "metrics.clicks",
+            "metrics.conversions_value",
+            "metrics.conversions",
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.interactions",
+            "metrics.all_conversions",
+            "metrics.video_views"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            }
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "base_labels": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "label.id",
+            "label.name",
+            "label.resource_name",
+            "label.status"
+          ],
+          "entity": "label"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "base_language_constant": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "language_constant.code",
+            "language_constant.id",
+            "language_constant.resource_name",
+            "language_constant.name"
+          ],
+          "entity": "language_constant"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "base_load_reports": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "base_detail_placement_view"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_videos"
+          },
+          "taskId": "load_report"
+        }
+      ]
+    }
+  },
+  "base_snd_query": {
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "base_snd_campaign_performance",
+            "tableId": "base_snd_campaign_performance"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "base_snd_account_label",
+            "tableId": "base_snd_account_label"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "base_snd_campaigns",
+            "tableId": "base_snd_campaigns"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "base_snd_geo_perf_report",
+            "tableId": "base_snd_geo_perf_report"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    },
+    "type": "knot"
+  },
+  "base_videos": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.view_through_conversions",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.video_views",
+            "metrics.engagements",
+            "metrics.video_quartile_p25_rate",
+            "metrics.video_quartile_p50_rate",
+            "metrics.video_quartile_p75_rate",
+            "metrics.video_quartile_p100_rate",
+            "metrics.cost_micros"
+          ],
+          "from_date": "${fromDate}",
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">",
+              "key": "metrics.impressions"
+            }
+          ],
+          "segments": [
+            "segments.date"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.descriptive_name",
+            "customer.currency_code",
+            "video.id",
+            "video.title",
+            "video.duration_millis",
+            "video.channel_id",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "ad_group.id",
+            "ad_group.name"
+          ],
+          "entity": "video"
+        }
+      }
+    }
+  },
+  "baselite_load_reports": {
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "base_geo_target_constant"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_language_constant"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_labels"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_account_budget"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_account_change_event"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaign_ads_approval"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaign_conversion"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaign_criterion"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaign_performance"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaigns"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_customer_label"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "base_geographic_view"
+          },
+          "taskId": "load_report"
+        }
+      ]
+    },
+    "type": "knot"
+  },
+  "download_mcc_reports_and_child_accounts": {
+    "type": "knot",
+    "appendedParameters": {
+      "loginCustomerId": "${mccCid}",
+      "customerId": "${mccCid}"
+    },
+    "next": "load_account_performance",
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "embedded": {
+      "tasks": [
+        "download_mcc_reports_impl",
+        "get_child_accounts"
+      ]
+    }
+  },
+  "download_mcc_reports_impl": {
+    "embedded": {
+      "tasks": [
+        "base_geo_target_constant",
+        "base_language_constant",
+        "base_labels",
+        "nonapp_user_interest"
+      ]
+    },
+    "type": "knot"
+  },
+  "download_reports_hourly": {
+    "embedded": {
+      "tasks": [
+        "base_campaign_ads_approval",
+        "app_disapprovals_ad_group_ad_asset_view"
+      ],
+      "dueTime": 40
+    },
+    "type": "knot",
+    "errorOptions": {
+      "ignoreError": true
+    }
+  },
+  "download_reports_impl": {
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "embedded": {
+      "dueTime": 40,
+      "tasks": [
+        "base_account_budget",
+        "base_account_change_event",
+        "base_campaign_ads_approval",
+        "base_campaign_conversion",
+        "base_campaign_criterion",
+        "base_campaign_performance",
+        "base_campaigns",
+        "base_customer_label",
+        "base_detail_placement_view",
+        "base_geographic_view",
+        "base_videos",
+        "app_conversion_action",
+        "app_asset_performance",
+        "app_geo_conversion",
+        "app_disapprovals_ad_group_ad_asset_view",
+        "app_ad_group",
+        "app_ad_group_perf",
+        "app_asset_metadata",
+        "app_recommendations",
+        "app_skan",
+        "nonapp_campaign_perf_age_range",
+        "nonapp_campaign_perf_all_ad",
+        "nonapp_campaign_perf_all_audience",
+        "nonapp_campaign_perf_all_feed_item",
+        "nonapp_campaign_perf_all_time",
+        "nonapp_campaign_perf_dsa",
+        "nonapp_campaign_perf_gender",
+        "nonapp_campaign_perf_search_extensions",
+        "nonapp_campaign_perf_search_keywords",
+        "nonapp_campaign_perf_search_search_term",
+        "nonapp_campaign_perf_user_interest",
+        "nonapp_user_lists",
+        "nonapp_pmax_assetgroup",
+        "nonapp_pmax_conversion"
+      ]
+    },
+    "type": "knot"
+  },
+  "export_active_account": {
+    "source": {
+      "projectId": "${destinationTable.projectId}",
+      "tableId": "${destinationTable.tableId}",
+      "datasetId": "${destinationTable.datasetId}"
+    },
+    "type": "export",
+    "next": "${afterExportTask}",
+    "options": {
+      "allowMultiple": false,
+      "destinationFormat": "NEWLINE_DELIMITED_JSON",
+      "printHeader": false
+    },
+    "destination": {
+      "name": "reports/${partitionDay}/active_cids.ndjson",
+      "bucket": "${reportBucket}"
+    }
+  },
+  "get_all_account_performance": {
+    "type": "multiple",
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "source": {
+      "file": {
+        "bucket": "${reportFile.bucket}",
+        "name": "${reportFile.name}"
+      }
+    },
+    "multiple": {
+      "dueTime": "180"
+    },
+    "destination": {
+      "taskId": "base_account_performance",
+      "http": {
+        "config": {
+          "qps": "10",
+          "numberOfThreads": "2",
+          "message": {
+            "partitionDay": "${partitionDay}",
+            "developerToken": "${developerToken}",
+            "reportBucket": "${reportBucket}",
+            "projectId": "${projectId}",
+            "customerId": "${customer_client.id}",
+            "loginCustomerId": "${mccCid}",
+            "fromDate": "${fromDate}"
+          }
+        }
+      },
+      "target": "gcs"
+    }
+  },
+  "get_child_accounts": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "customer_client",
+          "attributes": [
+            "customer_client.id"
+          ],
+          "constraints": {
+            "customer_client.manager": "FALSE",
+            "customer_client.status": "ENABLED"
+          }
+        }
+      }
+    },
+    "type": "report",
+    "next": "get_all_account_performance",
+    "destination": {
+      "name": "reports/${partitionDay}/cid_list/${mccCid}.ndjson"
+    },
+    "ancestor": "google_ads_report"
+  },
+  "get_reports": {
+    "source": {
+      "file": {
+        "bucket": "${destination.bucket}",
+        "name": "${destination.name}"
+      }
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "next": "load_reports",
+    "destination": {
+      "http": {
+        "config": {
+          "qps": "1",
+          "message": {
+            "developerToken": "${developerToken}",
+            "loginCustomerId": "${loginCustomerId}",
+            "projectId": "${projectId}",
+            "fromDate": "${fromDate}",
+            "partitionDay": "${partitionDay}",
+            "reportBucket": "${reportBucket}",
+            "customerId": "${customerId}"
+          }
+        }
+      },
+      "taskId": "download_reports_impl",
+      "target": "gcs"
+    },
+    "type": "multiple"
+  },
+  "get_reports_hourly": {
+    "type": "multiple",
+    "next": "load_reports_hourly",
+    "ancestor": "get_reports",
+    "destination": {
+      "taskId": "download_reports_hourly"
+    }
+  },
+  "google_ads_report": {
+    "source": {
+      "config": {
+        "loginCustomerId": "${loginCustomerId}",
+        "customerId": "${customerId}",
+        "developerToken": "${developerToken}",
+        "snakeCase": true
+      },
+      "target": "ADS"
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "type": "report",
+    "destination": {
+      "bucket": "${reportBucket}",
+      "name": "reports/${partitionDay}/reports_${taskConfigId}/${customerId}.ndjson"
+    }
+  },
+  "lego_start": {
+    "next": "trigger_multi_mcc_pipeline",
+    "destination": {
+      "table": {
+        "projectId": "${projectId}",
+        "tableId": "fx_rate$${partitionDay}",
+        "datasetId": "${datasetId}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM `${configDatasetId}.fx_rate_raw`",
+      "external": true
+    }
+  },
+  "lego_start_hourly": {
+    "type": "query",
+    "next": [
+      {
+        "appendedParameters": {
+          "afterExportTask": "get_reports_hourly"
+        },
+        "taskId": "export_active_account"
+      }
+    ],
+    "ancestor": "query_active_account"
+  },
+  "load_account_performance": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "base_account_performance"
+          },
+          "taskId": "load_mcc_report"
+        }
+      ]
+    }
+  },
+  "load_mcc_report": {
+    "type": "load",
+    "destination": {
+      "table": {
+        "tableId": "report_${targetTable}_${mccCid}$${partitionDay}"
+      }
+    },
+    "source": {
+      "file": {
+        "name": "reports/${partitionDay}/reports_${targetTable}/${mccCid}/*"
+      }
+    },
+    "ancestor": "load_task_default"
+  },
+  "load_report": {
+    "destination": {
+      "table": {
+        "tableId": "report_${targetTable}$${partitionDay}"
+      }
+    },
+    "ancestor": "load_task_default",
+    "type": "load",
+    "source": {
+      "file": {
+        "name": "reports/${partitionDay}/reports_${targetTable}/*"
+      }
+    }
+  },
+  "load_reports": {
+    "embedded": {
+      "tasks": [
+        "load_reports_impl"
+      ]
+    },
+    "next": "trigger_snd_query_impl",
+    "type": "knot",
+    "appendedParameters": {
+      "loginCustomerId": "0000000000",
+      "customerId": "0000000000"
+    }
+  },
+  "load_reports_hourly": {
+    "next": "trigger_snd_query_hourly",
+    "appendedParameters": {
+      "loginCustomerId": "0000000000",
+      "customerId": "0000000000"
+    },
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "base_campaign_ads_approval"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "app_disapprovals_ad_group_ad_asset_view"
+          },
+          "taskId": "load_report"
+        }
+      ]
+    }
+  },
+  "load_reports_impl": {
+    "embedded": {
+      "tasks": [
+        "baselite_load_reports",
+        "base_load_reports",
+        "app_load_reports",
+        "nonapp_load_reports"
+      ]
+    },
+    "type": "knot"
+  },
+  "load_task_default": {
+    "source": {
+      "file": {
+        "bucket": "${reportBucket}"
+      }
+    },
+    "type": "load",
+    "options": {
+      "ignoreUnknownValues": true,
+      "autodetect": false,
+      "writeDisposition": "WRITE_TRUNCATE",
+      "sourceFormat": "NEWLINE_DELIMITED_JSON"
+    },
+    "destination": {
+      "table": {
+        "datasetId": "${datasetId}"
+      },
+      "tableSchema": {
+        "timePartitioning": {
+          "expirationMs": "5184000000",
+          "type": "DAY"
+        }
+      },
+      "schemaSource": "${targetTable}"
+    }
+  },
+  "mark_email": {
+    "type": "query",
+    "destination": {
+      "table": {
+        "tableId": "${queryName}_with_label_and_email"
+      }
+    },
+    "source": {
+      "file": {
+        "name": "sql/make_email.sql"
+      }
+    },
+    "ancestor": "query_general"
+  },
+  "mark_label": {
+    "source": {
+      "file": {
+        "name": "sql/make_label.sql"
+      }
+    },
+    "ancestor": "query_general",
+    "type": "query",
+    "destination": {
+      "table": {
+        "tableId": "${queryName}_with_label"
+      }
+    }
+  },
+  "nonapp_campaign_perf_age_range": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "age_range_view",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "ad_group_criterion.age_range.type"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "!=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "nonapp_campaign_perf_all_ad": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "ad_group_ad.ad.id",
+            "ad_group_ad.ad.name",
+            "ad_group_ad.ad.type",
+            "ad_group_ad.status",
+            "ad_group.name",
+            "ad_group_ad.ad_strength",
+            "ad_group_ad.ad.expanded_text_ad.headline_part1",
+            "ad_group_ad.ad.expanded_text_ad.headline_part2",
+            "ad_group_ad.ad.expanded_text_ad.path1",
+            "ad_group_ad.ad.text_ad.headline",
+            "ad_group_ad.ad.responsive_display_ad.headlines",
+            "ad_group_ad.ad.responsive_display_ad.long_headline",
+            "ad_group_ad.ad.responsive_search_ad.headlines",
+            "ad_group_ad.ad.responsive_search_ad.path1",
+            "ad_group_ad.ad.image_ad.image_url"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            }
+          ],
+          "entity": "ad_group_ad",
+          "date_constant": "LAST_30_DAYS"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "nonapp_campaign_perf_all_audience": {
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "ad_group_audience_view",
+          "date_constant": "LAST_30_DAYS",
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign.status",
+            "ad_group_criterion.user_list.user_list"
+          ],
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "!=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report"
+  },
+  "nonapp_campaign_perf_all_feed_item": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value"
+          ],
+          "constraints": [
+            {
+              "val": "SHOPPING",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": 0,
+              "op": ">",
+              "key": "metrics.cost_micros"
+            }
+          ],
+          "segments": [
+            "segments.product_item_id",
+            "segments.product_title"
+          ],
+          "entity": "shopping_performance_view"
+        }
+      }
+    }
+  },
+  "nonapp_campaign_perf_all_time": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.video_views"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type"
+          ],
+          "segments": [
+            "segments.day_of_week",
+            "segments.hour"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            }
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "entity": "campaign"
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "nonapp_campaign_perf_dsa": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "dynamic_search_ads_search_term_view.search_term",
+            "dynamic_search_ads_search_term_view.headline",
+            "dynamic_search_ads_search_term_view.landing_page"
+          ],
+          "entity": "dynamic_search_ads_search_term_view",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": "SEARCH",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ]
+        }
+      }
+    },
+    "type": "report",
+    "ancestor": "google_ads_report"
+  },
+  "nonapp_campaign_perf_gender": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "ad_group_criterion.gender.type"
+          ],
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "!=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ],
+          "entity": "gender_view",
+          "date_constant": "LAST_30_DAYS"
+        }
+      }
+    }
+  },
+  "nonapp_campaign_perf_search_extensions": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "extension_feed_item.sitelink_feed_item.final_mobile_urls",
+            "extension_feed_item.sitelink_feed_item.final_url_suffix",
+            "extension_feed_item.sitelink_feed_item.final_urls",
+            "extension_feed_item.sitelink_feed_item.line1",
+            "extension_feed_item.sitelink_feed_item.line2",
+            "extension_feed_item.sitelink_feed_item.link_text",
+            "extension_feed_item.sitelink_feed_item.tracking_url_template"
+          ],
+          "constraints": [
+            {
+              "val": "SEARCH",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            }
+          ],
+          "entity": "extension_feed_item",
+          "date_constant": "LAST_30_DAYS"
+        }
+      }
+    },
+    "type": "report"
+  },
+  "nonapp_campaign_perf_search_keywords": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group_criterion.keyword.text",
+            "ad_group_criterion.keyword.match_type",
+            "ad_group_criterion.quality_info.quality_score"
+          ],
+          "date_constant": "LAST_7_DAYS",
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "constraints": [
+            {
+              "val": "SEARCH",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": 100,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": [
+                "ENABLED",
+                "PAUSED"
+              ],
+              "op": "IN",
+              "key": "ad_group_criterion.status"
+            }
+          ],
+          "entity": "keyword_view"
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "nonapp_campaign_perf_search_search_term": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "segments": [
+            "segments.search_term_match_type"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "search_term_view.search_term",
+            "search_term_view.status"
+          ],
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value"
+          ],
+          "date_constant": "LAST_30_DAYS",
+          "constraints": [
+            {
+              "val": "SEARCH",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": 100,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.clicks"
+            }
+          ],
+          "entity": "search_term_view"
+        }
+      }
+    },
+    "ancestor": "google_ads_report",
+    "type": "report"
+  },
+  "nonapp_campaign_perf_user_interest": {
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "metrics": [
+            "metrics.cost_micros",
+            "metrics.impressions",
+            "metrics.clicks",
+            "metrics.conversions",
+            "metrics.conversions_value",
+            "metrics.all_conversions",
+            "metrics.all_conversions_value",
+            "metrics.video_views"
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "campaign.status",
+            "ad_group.id",
+            "ad_group.name",
+            "ad_group_criterion.user_interest.user_interest_category",
+            "ad_group_criterion.status"
+          ],
+          "entity": "ad_group_audience_view",
+          "date_constant": "LAST_30_DAYS",
+          "constraints": [
+            {
+              "val": 1,
+              "op": ">=",
+              "key": "metrics.impressions"
+            },
+            {
+              "val": "MULTI_CHANNEL",
+              "op": "!=",
+              "key": "campaign.advertising_channel_type"
+            }
+          ]
+        }
+      }
+    },
+    "ancestor": "google_ads_report"
+  },
+  "nonapp_fourth_query": {
+    "type": "knot",
+    "appendedParameters": {
+      "labelSourceTable": "base_snd_account_label"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_ads_perf"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_age"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_audience"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_dsa"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_feed_item_perf"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_gender"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_placement"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_search_keywords"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_search_term"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_sitelink"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_time"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_user_interest"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_video"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_pmax"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_pmax_conversion"
+          },
+          "taskId": "${markTaskId}"
+        }
+      ]
+    }
+  },
+  "nonapp_load_reports": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_age_range"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_all_ad"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_all_audience"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_all_feed_item"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_all_time"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_dsa"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_gender"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_search_extensions"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_search_keywords"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_search_search_term"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_campaign_perf_user_interest"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_user_interest"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_user_lists"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_pmax_assetgroup"
+          },
+          "taskId": "load_report"
+        },
+        {
+          "appendedParameters": {
+            "targetTable": "nonapp_pmax_conversion"
+          },
+          "taskId": "load_report"
+        }
+      ]
+    }
+  },
+  "nonapp_pmax_assetgroup": {
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "constraints": [
+            {
+              "val": "PERFORMANCE_MAX",
+              "op": "=",
+              "key": "campaign.advertising_channel_type"
+            },
+            {
+              "val": [
+                "PAUSED",
+                "ENABLED"
+              ],
+              "op": "IN",
+              "key": "campaign.status"
+            },
+            {
+              "val": [
+                "PAUSED",
+                "ENABLED"
+              ],
+              "op": "IN",
+              "key": "asset_group.status"
+            }
+          ],
+          "entity": "asset_group_asset",
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "campaign.id",
+            "campaign.name",
+            "campaign.status",
+            "campaign.advertising_channel_type",
+            "campaign.advertising_channel_sub_type",
+            "asset_group.ad_strength",
+            "asset_group.id",
+            "asset_group.name",
+            "asset_group.status",
+            "asset_group_asset.field_type",
+            "asset_group_asset.performance_label",
+            "asset_group_asset.status",
+            "asset_group_asset.policy_summary.approval_status",
+            "asset.id",
+            "asset.name",
+            "asset.source"
+          ]
+        }
+      }
+    },
+    "type": "report"
+  },
+  "nonapp_pmax_conversion": {
+    "type": "report",
+    "ancestor": "google_ads_report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "date_constant": "LAST_30_DAYS",
+          "entity": "conversion_action",
+          "constraints": [
+            {
+              "val": "ENABLED",
+              "op": "=",
+              "key": "conversion_action.status"
+            }
+          ],
+          "attributes": [
+            "customer.id",
+            "customer.currency_code",
+            "customer.descriptive_name",
+            "conversion_action.id",
+            "conversion_action.name",
+            "conversion_action.type",
+            "conversion_action.status",
+            "conversion_action.attribution_model_settings.attribution_model",
+            "conversion_action.attribution_model_settings.data_driven_model_status",
+            "metrics.all_conversions_value"
+          ]
+        }
+      }
+    }
+  },
+  "nonapp_snd_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_snd_account_budget",
+            "tableId": "nonapp_snd_account_budget"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_snd_account_wow",
+            "tableId": "nonapp_snd_account_wow"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_snd_campaign_ads_approval",
+            "tableId": "nonapp_snd_campaign_ads_approval"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_snd_campaign_pacing",
+            "tableId": "nonapp_snd_campaign_pacing"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_snd_campaign_wow",
+            "tableId": "nonapp_snd_campaign_wow"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    }
+  },
+  "nonapp_trd_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_ads_perf",
+            "tableId": "nonapp_trd_ads_perf"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_age",
+            "tableId": "nonapp_trd_age"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_audience",
+            "tableId": "nonapp_trd_audience"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_dsa",
+            "tableId": "nonapp_trd_dsa"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_feed_item_perf",
+            "tableId": "nonapp_trd_feed_item_perf"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_gender",
+            "tableId": "nonapp_trd_gender"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_placement",
+            "tableId": "nonapp_trd_placement"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_search_keywords",
+            "tableId": "nonapp_trd_search_keywords"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_search_term",
+            "tableId": "nonapp_trd_search_term"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_sitelink",
+            "tableId": "nonapp_trd_sitelink"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_time",
+            "tableId": "nonapp_trd_time"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_user_interest",
+            "tableId": "nonapp_trd_user_interest"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_video",
+            "tableId": "nonapp_trd_video"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_pmax",
+            "tableId": "nonapp_trd_pmax"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_pmax_conversion",
+            "tableId": "nonapp_trd_pmax_conversion"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    }
+  },
+  "nonapp_user_interest": {
+    "type": "report",
+    "source": {
+      "config": {
+        "reportQuery": {
+          "attributes": [
+            "user_interest.name",
+            "user_interest.resource_name",
+            "user_interest.taxonomy_type",
+            "user_interest.user_interest_id",
+            "user_interest.user_interest_parent"
+          ],
+          "entity": "user_interest"
+        }
+      }
+    },
+    "ancestor": "google_ads_report"
+  },
+  "nonapp_user_lists": {
+    "source": {
+      "config": {
+        "reportQuery": {
+          "entity": "user_list",
+          "attributes": [
+            "customer.id",
+            "user_list.resource_name",
+            "user_list.id",
+            "user_list.name",
+            "user_list.type"
+          ]
+        }
+      }
+    },
+    "type": "report",
+    "ancestor": "google_ads_report"
+  },
+  "nonapplite_fourth_query": {
+    "appendedParameters": {
+      "labelSourceTable": "base_snd_account_label"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_account"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_ads_approval"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_campaign"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_geo"
+          },
+          "taskId": "${markTaskId}"
+        }
+      ]
+    },
+    "type": "knot"
+  },
+  "nonapplite_trd_query": {
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_account",
+            "tableId": "nonapp_trd_account"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_ads_approval",
+            "tableId": "nonapp_trd_ads_approval"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_campaign",
+            "tableId": "nonapp_trd_campaign"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "nonapp_trd_geo",
+            "tableId": "nonapp_trd_geo"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    }
+  },
+  "prep_user_config": {
+    "destination": {
+      "writeDisposition": "WRITE_TRUNCATE",
+      "table": {
+        "projectId": "${projectId}",
+        "datasetId": "${datasetId}",
+        "tableId": "fx_rate$${partitionDay}"
+      }
+    },
+    "type": "query",
+    "source": {
+      "sql": "SELECT * FROM ${configDatasetId}.${configFxTableId}",
+      "external": true
+    },
+    "next": "trigger_multi_mcc_pipeline"
+  },
+  "query_active_account": {
+    "ancestor": "query_general",
+    "type": "query",
+    "destination": {
+      "table": {
+        "tableId": "active_account$${partitionDay}"
+      }
+    },
+    "next": [
+      {
+        "appendedParameters": {
+          "afterExportTask": "get_reports"
+        },
+        "taskId": "export_active_account"
+      }
+    ],
+    "source": {
+      "file": {
+        "name": "sql/workflow_active_account.sql"
+      }
+    }
+  },
+  "query_general": {
+    "destination": {
+      "table": {
+        "tableId": "${tableId}",
+        "projectId": "${projectId}",
+        "datasetId": "${datasetId}"
+      },
+      "writeDisposition": "WRITE_TRUNCATE"
+    },
+    "type": "query",
+    "source": {
+      "file": {
+        "bucket": "${configBucket}",
+        "name": "sql/${queryName}.sql",
+        "projectId": "${projectId}"
+      }
+    }
+  },
+  "trdpty_load_reports": {
+    "type": "knot",
+    "next": [
+      {
+        "appendedParameters": {
+          "sqlSyntax": "SELECT * FROM ${datasetId}.trdpty_scoreboard_input",
+          "destinationTable": "trdpty_scoreboard"
+        },
+        "taskId": "trdpty_sql_template"
+      }
+    ]
+  },
+  "trdpty_sql_template": {
+    "source": {
+      "external": true,
+      "sql": "${sqlSyntax}"
+    },
+    "destination": {
+      "writeDisposition": "WRITE_TRUNCATE",
+      "table": {
+        "tableId": "${destinationTable}$${partitionDay}",
+        "datasetId": "${datasetId}",
+        "projectId": "${projectId}"
+      }
+    },
+    "type": "query"
+  },
+  "trigger_fourth_query_hourly": {
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_all"
+          },
+          "taskId": "${markTaskId}"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest"
+          },
+          "taskId": "${markTaskId}"
+        }
+      ]
+    },
+    "appendedParameters": {
+      "labelSourceTable": "base_snd_account_label"
+    },
+    "type": "knot"
+  },
+  "trigger_fourth_query_impl": {
+    "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_label"
+    },
+    "next": "trigger_customized_task",
+    "embedded": {
+      "tasks": [
+        "app_fourth_query",
+        "nonapplite_fourth_query",
+        "nonapp_fourth_query"
+      ]
+    }
+  },
+  "trigger_mark_email_impl": {
+    "appendedParameters": {
+      "markTaskId": "mark_email"
+    },
+    "type": "knot",
+    "embedded": {
+      "tasks": [
+        "app_fourth_query",
+        "nonapplite_fourth_query",
+        "nonapp_fourth_query"
+      ]
+    }
+  },
+  "trigger_multi_mcc_pipeline": {
+    "destination": {
+      "target": "pubsub",
+      "taskId": "download_mcc_reports_and_child_accounts",
+      "message": {
+        "fromDate": "${fromDate}",
+        "timezone": "${timezone}",
+        "partitionDay": "${partitionDay}",
+        "namespace": "${namespace}",
+        "reportBucket": "${reportBucket}",
+        "locationId": "${locationId}",
+        "datasetId": "${datasetId}",
+        "mccCid": "${mccCid}",
+        "projectId": "${projectId}",
+        "developerToken": "${developerToken}"
+      },
+      "qps": 1
+    },
+    "errorOptions": {
+      "ignoreError": true
+    },
+    "source": {
+      "csv": {
+        "records": "${mccCids}",
+        "header": "mccCid"
+      }
+    },
+    "multiple": {
+      "dueTime": "240"
+    },
+    "type": "multiple",
+    "next": "query_active_account"
+  },
+  "trigger_snd_query_hourly": {
+    "next": "trigger_trd_query_hourly",
+    "type": "knot"
+  },
+  "trigger_snd_query_impl": {
+    "next": "trigger_trd_query_impl",
+    "embedded": {
+      "tasks": [
+        "base_snd_query",
+        "app_snd_query",
+        "nonapp_snd_query"
+      ]
+    },
+    "type": "knot"
+  },
+  "trigger_trd_query_hourly": {
+    "next": "trigger_fourth_query_hourly",
+    "type": "knot",
+    "appendedParameters": {
+      "markTaskId": "mark_label"
+    },
+    "embedded": {
+      "tasks": [
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_all",
+            "tableId": "app_trd_ads_disapproval_all"
+          },
+          "taskId": "query_general"
+        },
+        {
+          "appendedParameters": {
+            "queryName": "app_trd_ads_disapproval_latest",
+            "tableId": "app_trd_ads_disapproval_latest"
+          },
+          "taskId": "query_general"
+        }
+      ]
+    }
+  },
+  "trigger_trd_query_impl": {
+    "next": "trigger_fourth_query_impl",
+    "embedded": {
+      "tasks": [
+        "app_trd_query",
+        "nonapplite_trd_query",
+        "nonapp_trd_query"
+      ]
+    },
+    "type": "knot"
+  }
+}

@@ -15,6 +15,24 @@
 /** @fileoverview The class stands for LEGO installation on top of Cyborg. */
 
 /**
+ * Checks for the existence of an external table and creates it if it doesn't exist.
+ *
+ * @param {string} sheetsUrl The URL of the Google Sheet to use as the
+ *   data source for the external table. If not provided, the URL of the
+ *   active spreadsheet is used.
+ * @param {Object} resource An object containing information about the resource.
+ * @returns {Object} The result of the `gcloud.checkOrInitializeExternalTable`
+ *   function, which indicates the status of the operation.
+ */
+const checkAndCreateExternalTable = (sheetsUrl, resource) => {
+  return gcloud.checkOrInitializeExternalTable(
+    new FxRateSheet(),
+    sheetsUrl || SpreadsheetApp.getActiveSpreadsheet().getUrl(),
+    resource.attributeValue
+  );
+}
+
+/**
  * Retrieves information from a scheduled job on Google Cloud Scheduler.
  *
  * This function fetches details of a scheduled job with a name based on
@@ -68,10 +86,88 @@ const OPTIONAL_SENTINEL_FEATURE = [
 ];
 
 /**
+ * The LEGO cronjob message template for the daily/hourly Sentinel trigger.
+ */
+const LEGO_CRONJOB_MESSAGE = {
+  projectId: "#projectId#",
+  locationId: "#locationId#",
+  timezone: '#timeZone#',
+  namespace: '#namespace#',
+  datasetId: '#dataset#',
+  configDatasetId: '#configDataset#',
+  reportBucket: '#reportBucket#',
+  configBucket: '#configBucket#',
+  partitionDay: '${today}',
+  fromDate: '${today_sub_30_hyphenated}',
+  developerToken: '#developerToken#',
+  mccCids: '#mccCids#',
+};
+
+/**
+ * The LEGO cronjob message template for the ADH trigger.
+ */
+const LEGO_ADH_CRONJOB_MESSAGE = {
+  projectId: "#projectId#",
+  locationId: "#locationId#",
+  timezone: '#timeZone#',
+  namespace: '#namespace#',
+  datasetId: '#dataset#',
+  legoDatasetId: '#dataset#',
+  configDatasetId: '#configDataset#',
+  reportBucket: '#reportBucket#',
+  configBucket: '#configBucket#',
+  partitionDay: '${today}',
+  fromDate: '${today_sub_30_hyphenated}',
+  developerToken: '#developerToken#',
+  mccCids: '#mccCids#',
+  adhCustomerId: '#adhCid#',
+};
+
+/**
+ * The LEGO cronjob setting for the daily/hourly Sentinel trigger.
+ * NOTE: Backfill cronjob can be done through a trigger for LEGO daily job.
+ */
+const SENTINEL_CRON_JOB = [
+  {
+    enabled: 'TRUE',
+    jobId: '#namespace#-lego_start',
+    description: 'LEGO daily job',
+    schedule: '0 6 * * *',
+    taskId: 'lego_start',
+    message: LEGO_CRONJOB_MESSAGE,
+  },
+  {
+    enabled: 'TRUE',
+    jobId: '#namespace#-lego_start_hourly',
+    description: 'LEGO hourly job',
+    schedule: '0 7-23 * * *',
+    taskId: 'lego_start_hourly',
+    message: LEGO_CRONJOB_MESSAGE,
+  },
+  // The LEGO cronjob setting for the ADH Sentinel trigger.
+  {
+    enabled: 'FALSE',
+    jobId: '#namespace#-adh_lego_start',
+    description: 'LEGO ADH Creative job',
+    schedule: '0 13 * * 1',
+    taskId: 'adh_lego_start',
+    message: LEGO_ADH_CRONJOB_MESSAGE,
+  },
+  {
+    enabled: 'FALSE',
+    jobId: '#namespace#-adh_audience_start',
+    description: 'LEGO ADH Audience job',
+    schedule: '0 15 * * 1',
+    taskId: 'adh_audience_start',
+    message: LEGO_ADH_CRONJOB_MESSAGE,
+  },
+];
+
+/**
  * The LEGO config for Cyborg Mojo solution menu.
  */
 const LEGO_MOJO_CONFIG = {
-  sheetName: 'LEGO - Setting',
+  sheetName: 'Step1 - Setting LEGO Configurations',
   config: [
     // Solution and Google Cloud Project setting
     { template: 'namespace', value: 'lego', },
@@ -97,6 +193,20 @@ const LEGO_MOJO_CONFIG = {
       propertyName: 'developerToken',
       optionalType: OPTIONAL_TYPE.DEFAULT_CHECKED,
       checkFn: getDefaultValueFromScheduledJob,
+    },
+    {
+      template: 'parameter',
+      category: 'Config',
+      resource: 'ADH CID',
+      propertyName: 'adhCid',
+      optionalType: OPTIONAL_TYPE.DEFAULT_UNCHECKED,
+    },
+    {
+      template: 'secretManager',
+      category: 'Config',
+      value: 'lego_main_legacy_token',
+      editType: RESOURCE_EDIT_TYPE.USER_INPUT,
+      optionalType: OPTIONAL_TYPE.DEFAULT_CHECKED,
     },
     // TODO: Check if we need to skip permission check for upgrade.
     { template: 'sentinelPermissions', },
@@ -129,6 +239,32 @@ const LEGO_MOJO_CONFIG = {
       resource: 'BQ Dataset for Config',
       value: 'ads_report_configs',
       propertyName: 'configDataset',
+      attributes: [
+        {
+          attributeName: ATTRIBUTE_NAMES.bigquery.partitionExpiration,
+          attributeValue: '0'
+        }
+      ],
+    },
+    {
+      template: 'bigQueryDataset',
+      category: 'Solution',
+      resource: 'BQ Dataset for ADH Creative',
+      value: 'adh_apps_data',
+      propertyName: 'adhCreativeDatasetId',
+      attributes: [
+        {
+          attributeName: ATTRIBUTE_NAMES.bigquery.partitionExpiration,
+          attributeValue: '0'
+        }
+      ],
+    },
+    {
+      template: 'bigQueryDataset',
+      category: 'Solution',
+      resource: 'BQ Dataset for ADH Audience',
+      value: 'adh_audience',
+      propertyName: 'adhAudienceDatasetId',
       attributes: [
         {
           attributeName: ATTRIBUTE_NAMES.bigquery.partitionExpiration,
@@ -180,6 +316,12 @@ const LEGO_MOJO_CONFIG = {
       category: 'Solution',
       resource: 'Sentinel Functions'
     },
+    {
+      template: 'sentinelCloudFunctions',
+      category: 'Solution',
+      resource: 'Sentinel Functions',
+      value: '${namespace}_report'
+    },
     { template: 'sentinelLogRouter', category: 'Solution' },
     { template: 'sentinelInternJob', category: 'Solution' },
     { template: 'serviceAccountRole', category: 'Solution' },
@@ -200,6 +342,15 @@ const LEGO_MOJO_CONFIG = {
         '${namespace}_api',
       ],
     },
+    {
+      category: 'External Data',
+      template: 'externalTable',
+      resource: 'FX Sheet URL (empty for current Sheets)',
+      attributeName: 'Need Access',
+      attributeValue: 'Editor',
+      checkFn: checkAndCreateExternalTable,
+      editType: RESOURCE_EDIT_TYPE.DEFAULT_VALUE,
+    },
   ],
   oauthScope: [
     OAUTH_API_SCOPE.GAds,
@@ -219,13 +370,30 @@ const LEGO_MOJO_CONFIG = {
  */
 const SOLUTION_MENUS = [
   new MojoSheet(LEGO_MOJO_CONFIG),
-  new FxRateSheet(),
-  new SecretManagerSheet({
-    sheetName: 'Auth - Oauth Token Manager',
-  }),
+  new SecretManagerSheet(),
+  {
+    menuItem: [
+      {
+        name: 'Step2 - Generate an OAuth Token - for LEGO Installation',
+        method: 'showOAuthSidebar',
+      },
+    ],
+  },
   new ApiAccessChecker({
-    sheetName: 'Tool - LEGO',
+    sheetName: 'Step3 - Validate API Access with OAuth Token',
   }),
-  OAUTH_MENUITEM,
+  new FileToStorage({
+    sheetName: 'Step4 - Upload SQL Files',
+    files: DEFAULT_SQL_FILES,
+    filePath: '#configBucket#/sql/',
+  }),
+  new SentinelConfig({
+    sheetName: 'Step5 - Upload Task Config Files',
+    tasks: DEFAULT_TASK_CONFIGS,
+  }),
+  new SentinelCronJob({
+    sheetName: 'Step6 - Set Up Daily/Hourly/ADH Cronjobs',
+    jobs: SENTINEL_CRON_JOB
+  }),
   EXPLICIT_AUTH_MENUITEM,
 ];
