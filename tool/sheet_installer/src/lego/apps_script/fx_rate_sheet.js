@@ -36,7 +36,7 @@ class FxRateSheet extends DataTableSheet {
     ];
   }
 
-  get datasetProprtyName() {
+  get datasetPropertyName() {
     return 'configDataset';
   }
 

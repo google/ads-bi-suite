@@ -773,13 +773,6 @@
             "tableId": "app_snd_campaign_conv_report"
           },
           "taskId": "query_general"
-        },
-        {
-          "appendedParameters": {
-            "tableId": "app_snd_ads_approval_all_danny",
-            "queryName": "app_snd_ads_approval_all_danny"
-          },
-          "taskId": "query_general"
         }
       ]
     }
@@ -3023,7 +3016,7 @@
     },
     "type": "query",
     "source": {
-      "sql": "SELECT * FROM ${configDatasetId}.${configFxTableId}",
+      "sql": "SELECT * FROM `${configDatasetId}.fx_rate_raw`",
       "external": true
     },
     "next": "trigger_multi_mcc_pipeline"
