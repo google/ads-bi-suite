@@ -2,9 +2,9 @@
   "lego": {
     "source": "./src/lego",
     "env": {
-      "dev": {
-        "scriptId": "1_jiXcYYv7U4hOMYGg8qcBwoSlEeG-ZOfGAWGHC-ztNQQ54LfxS1Ypkyi",
-        "parentId": "1IkcwUUdFNQ1GS43WfrZTW2lQtGaM4-ea6_b1jGmTNE8"
+      "prod": {
+        "scriptId": "13Nnji-Fdx61PhZsFcu_RCfIdoi6JwReckr5FVb0-yMIngdzzfdhRFrBF",
+        "parentId": "1sQ1cPGZau5iKjugtIWsoIIOeGdI8BT1FFShxw05kntI"
       }
     }
   }
