@@ -1,6 +1,6 @@
 {
   "name": "lego",
-  "version": "0.0.1",
+  "version": "16.0.1",
   "description": "Google Sheets based installer for LEGO",
   "author": "Google Inc.",
   "license": "Apache-2.0",

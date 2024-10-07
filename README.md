@@ -102,4 +102,4 @@ cd ads-bi-suite; chmod a+x deploy.sh; ./deploy.sh
 ## 3 RoadMap
 | Timeline | Item                          | Notes                                                            |
 | -------- | ----------------------------- | ---------------------------------------------------------------- |
-| Q2"23    | Upgade to Google Ads API v.13 | The top MCC account contains all the Ads accounts for reporting. |
+| Q4"24    | Improve the deployment        | The top MCC account contains all the Ads accounts for reporting. |
