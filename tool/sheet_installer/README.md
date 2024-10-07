@@ -212,6 +212,7 @@ installation. You do not need to edit most of them except:
 
 1. Yellow background fields that need user input or confirm, e.g. `Project Id`.
 1. Tick checkboxes to select `Connectors` that you are going to use.
+![Demo](./images_for_readme/step3.1.png)
 
 ### 3.2. Menu `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations`
 
@@ -234,6 +235,7 @@ new GCP project is involved, including:
 You can always re-run `Check resources` after you fix the problems or after you
 make any changes, e.g. select another version of LEGO. All passed resources
 have the `status` as `OK`
+![Demo](./images_for_readme/step3.2.1.png)
 
 
 #### 3.2.2. `Step 2 - Prepare OAuth Token`
@@ -242,6 +244,7 @@ have the `status` as `OK`
 
 1. Click menu `🤖 Cyborg` -> `Secret Manager`. This will open a
    sidebar titled `Save OAuth token in deployed Cloud Functions to Secret Manager`.
+![Demo](./images_for_readme/3.2.2.1.1.png)
 
 ##### 3.2.2.1.2. (Optional) Generate an OAuth token via OAuth sidebar
 
@@ -257,6 +260,7 @@ have the `status` as `OK`
    `textarea` named `Generated OAuth token`.
 1. Enter a name for this token to be saved in `Secret Manager`.
 1. Click the button `Save` and wait for it to complete.
+![Demo](./images_for_readme/3.2.2.1.2.png)
 
 Now you can use the saved token through the secret name in API configuration.
 
@@ -271,6 +275,7 @@ After you saved the OAuth token in the sidebar, you can list it in the sheet
 After you prepare the OAuth token, switch back to `Step1 - Setting LEGO Configurations` sheet and input your needed `Secret Manager` Name from sheet `Secret Manger` to `Step1 - Setting LEGO Configurations`.
 
 And then click Munu `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations` -> `Check  resources`.
+![Demo](./images_for_readme/3.2.3.png)
 
 
 #### 3.2.4. Submenu item `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations` -> `Apply changes`
@@ -307,21 +312,24 @@ installation. You do not need to edit most of them except:
    1. Resource Id: Your Google Ads MCC CID.
    1. Extra Info: Your Google Ads developer token.
    1. Click menu `🤖 Cyborg` -> `Step3 - Validate API Access with OAuth Token` -> `Check All APIs` to test your OAuth Token is valid for the API or not.
+![Demo](./images_for_readme/3.3.png)
 
 ### 3.4. Sheet `Step 4. Upload SQL Files`
 
 1. Click menu `🤖 Cyborg` -> `Step4 - Upload SQL Files` -> `Check All APIs` -> `Uploads all files`.
 2. (Optional) If you customized LEGO SQL files before and you want to keep what you did, you need to upload the sql files again manually.
+![Demo](./images_for_readme/3.4.png)
 
 ### 3.5. Sheet `Step5 - Upload Task Config Files`
 
 1. (Optional) If you customized LEGO task config before and you want to keep what you did, you need to click `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Append all configs from Firestore to Sheet`.
-1. Click menu `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Check All APIs` -> `Uploads all files`.
-1. Click menu `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Check All APIs` -> `Uploads all files`.
+1. Click menu `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Check All APIs` -> `Uploads all configs to Firestore`.
+![Demo](./images_for_readme/3.5.png)
 
-### 3.5. Sheet `Step6 - Set Up Daily/Hourly/ADH Cronjobs`
+### 3.6. Sheet `Step6 - Set Up Daily/Hourly/ADH Cronjobs`
 
 1. **(Action Required for ADH Creative installation)**: Check the checkbox in `Enabled` column to enable `#namespace#-adh_lego_start` for `LEGO ADH Creative job`.
 1. **(Action Required for ADH Audience installation)**: Check the checkbox in `Enabled` column to enable  `#namespace#-adh_audience_start` for `LEGO ADH Audience job`.
 1. Click menu `🤖 Cyborg` -> `Step6 - Set Up Daily/Hourly/ADH Cronjobs` -> `Uploads all jobs to Cloud Scheduler`.
 2. Entry Google Cloud console to enable and trigger `#namespace#-lego_start` job.
+![Demo](./images_for_readme/3.6.png)
