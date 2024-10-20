@@ -14,7 +14,7 @@
  limitations under the License.
  -->
 
-# Apps Google Ads reporting Automation a.k.a. “LEGO”****
+# Apps Google Ads reporting Automation
 
 ## 1. Disclaimer and Intro
 
@@ -34,24 +34,24 @@ associated with its usage, including with respect to your deployment of any
 portion of this solution in your systems, or usage in connection with your
 business, if at all.
 
-### 1.1 Apps Google Ads reporting Automation a.k.a. “LEGO”
+### 1.1 Apps Google Ads reporting Automation
 
 #### 1.1.1 Brief:
-LEGO is a data pipeline solution that helps clients fetch Google Ads metrics and stores the data in clients' Google Cloud Big Query tables.
+Tool is a data pipeline solution that helps clients fetch Google Ads metrics and stores the data in clients' Google Cloud Big Query tables.
 
 It is a powerful tool that can help businesses track their ad performance and make informed decisions about their campaigns.
 
-The backend of LEGO leverages two Open-source solutions:
+The backend of tool leverages two Open-source solutions:
 - https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/data-tasks-coordinator
 - https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/gmp-googleads-connector
 
 #### 1.1.2 Features:
-LEGO offers a number of features that make it a valuable tool for businesses, including:
+Tool offers a number of features that make it a valuable tool for businesses, including:
 
 - The ability to daily fetch Google Ads metrics
 
 #### 1.1.3 Benefits:
-Lego can help businesses benefit in a number of ways, including:
+Tool can help businesses benefit in a number of ways, including:
 
 - Improved ad performance
 - Increased ROI
@@ -78,20 +78,20 @@ developer token.
 
 [standard access]: https://developers.google.com/adwords/api/docs/access-levels#access_levels
 
-LEGO has a Google Sheets based installation tool (Code name Cyborg). This tool replaces the previous Bash script `deploy.sh` with enhanced features:
+Tool has a Google Sheets based installation tool (Code name Cyborg). This tool replaces the previous Bash script `deploy.sh` with enhanced features:
 
-1. Logs LEGO installation events and keeps a record of all affected GCP resources.
-1. Upgrades to new versions or installs specific versions of the backend Google Cloud Function.
-1. Enables new connectors post-LEGO installation.
-1. Edits and uploads API configurations within the Google Sheet.
-1. Generates and manages OAuth tokens, stored in GCP Secret Manager.
-1. Supports different credentials (OAuth tokens) for various integration configurations.
-1. Tests API configuration accessibility directly within the Sheets.
-1. Tests installed LEGO by sending data from the Sheet to the target Cloud Storage bucket.
+1. Logs installation events and keeps a record of all affected GCP resources.
+2. Upgrades to new versions or installs specific versions of the backend Google Cloud Function.
+3. Enables new connectors post installation.
+4. Edits and uploads API configurations within the Google Sheet.
+5. Generates and manages OAuth tokens, stored in GCP Secret Manager.
+6. Supports different credentials (OAuth tokens) for various integration configurations.
+7. Tests API configuration accessibility directly within the Sheets.
+8. Tests installed result by sending data from the Sheet to the target Cloud Storage bucket.
 
 **Key Differences:**
 
-1. Cannot deploy customized LEGO without additional adaptation. See the developer section for details.
+1. Cannot deploy customized version without additional adaptation. See the developer section for details.
 1. Cannot deploy OAuth token files or service account key files locally:
     * OAuth token files: Store them in Secret Manager or use the tool to create new tokens.
     * Service account key files: Deprecated due to security concerns. Use the Cloud Functions service account (displayed in the Sheet).
@@ -123,10 +123,10 @@ If there is no OAuth consent screen in this Google Cloud project, you need to [c
     1. In a local terminal:
         1. `npm install -g @google/clasp`
         1. `clasp login` (Default credentials saved to: `~/.clasprc.json`)
-1. **Create your customized LEGO on Cyborg:**
-    1. Navigate to `tool/sheet_installer/src/lego/apps_script` folder.
-    1. Initialize: `npm exec cyborg init --solution=lego --target=install`
-    1. Deploy: `npm exec cyborg deploy --solution=lego --target=install`
+1. **Create your customized version on Cyborg:**
+    1. Navigate to `tool/sheet_installer/src/oec/apps_script` folder.
+    1. Initialize: `npm exec cyborg init --solution=oec --target=install`
+    1. Deploy: `npm exec cyborg deploy --solution=oec --target=install`
     1. **Update Google Cloud project number** for the Apps Script (see 1.4).
 
 
@@ -160,9 +160,9 @@ Prefer using 1.4. This is a workaround:
 
 **2.1. Sheets and Menu (`Cyborg`):**
 * **README:** Information sheet
-* Step 1 - Setting LEGO Configurations
+* Step 1 - Setting OEC Configurations
 * Secret Manager
-* Step 2 - Generate an OAuth Token - for LEGO Installation
+* Step 2 - Generate an OAuth Token - for OEC Installation
 * Step 3 - Validate API Access with OAuth Token
 * Step 4 - Upload SQL Files
 * Step 5 - Upload Task Config Files
@@ -187,25 +187,25 @@ Prefer using 1.4. This is a workaround:
         1.  `npm install -g @google/clasp`
         1. `clasp login`
 
-5. **Develop your customized LEGO:**
-    1. Work in the `tool/sheet_installer/src/lego/apps_script` directory.
-    1. Initialize: `npm exec cyborg init --solution=lego --target=customized`
-    1. Debug (local): `npm exec cyborg debug --solution=lego --target=customized`
-    1. Deploy: `npm exec cyborg deploy --solution=lego --target=customized`
+5. **Develop your customized version:**
+    1. Work in the `tool/sheet_installer/src/oec/apps_script` directory.
+    1. Initialize: `npm exec cyborg init --solution=oec --target=customized`
+    1. Debug (local): `npm exec cyborg debug --solution=oec --target=customized`
+    1. Deploy: `npm exec cyborg deploy --solution=oec --target=customized`
     1. Update the Google Cloud **project number** within the generated spreadsheet's Apps Script.
-    1. Test your customized LEGO directly in the generated spreadsheet.
+    1. Test your customized version directly in the generated spreadsheet.
 
 (Steps for developers are also included, but follow a similar pattern to the initial setup.)
 
 
 ## 3. Installation
 
-How to install LEGO: (1) switch to sheet `Step 1 - Setting LEGO Configurations` and input
+How to install OEC: (1) switch to sheet `Step 1 - Setting OEC Configurations` and input
 required information in the sheet; (2) use menu `Check resources` to run
 a check. If an error happened, fix it and retry `Check resources`; (3) after
 all checks passed, use menu `Apply changes` to complete the installation. (4) Uploads needed setting via multiple sheets and menus.
 
-### 3.1. Input required information in the Sheet `Step 1 - Setting LEGO Configurations` and apply the changes
+### 3.1. Input required information in the Sheet `Step 1 - Setting OEC Configurations` and apply the changes
 
 This sheet contains a list of Cloud resources that will be operated during
 installation. You do not need to edit most of them except:
@@ -214,7 +214,7 @@ installation. You do not need to edit most of them except:
 1. Tick checkboxes to select `Connectors` that you are going to use.
 ![Demo](./images_for_readme/step3.1.png)
 
-### 3.2. Menu `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations`
+### 3.2. Menu `🤖 Cyborg` -> `Step1 - Setting OEC Configurations`
 
 When you click items under `🤖 Cyborg` for the first time, a dialog window
 titled `Authorization Required` will pop up to ask for confirmation.
@@ -233,14 +233,14 @@ new GCP project is involved, including:
 1. Ask users to select the mode and location to create a `Firestore` instance
 
 You can always re-run `Check resources` after you fix the problems or after you
-make any changes, e.g. select another version of LEGO. All passed resources
+make any changes, e.g. select another version of OEC. All passed resources
 have the `status` as `OK`
 ![Demo](./images_for_readme/step3.2.1.png)
 
 
 #### 3.2.2. `Step 2 - Prepare OAuth Token`
 
-##### 3.2.2.1.1. Fetch OAuth Token from lagecy LEGO cloud function
+##### 3.2.2.1.1. Fetch OAuth Token from lagecy OEC cloud function
 
 1. Click menu `🤖 Cyborg` -> `Secret Manager`. This will open a
    sidebar titled `Save OAuth token in deployed Cloud Functions to Secret Manager`.
@@ -248,7 +248,7 @@ have the `status` as `OK`
 
 ##### 3.2.2.1.2. (Optional) Generate an OAuth token via OAuth sidebar
 
-1. Click menu `🤖 Cyborg` -> `Step 2 - Generate an OAuth Token - for LEGO Installation`. This will open a
+1. Click menu `🤖 Cyborg` -> `Step 2 - Generate an OAuth Token - for OEC Installation`. This will open a
    sidebar titled `OAuth2 token generator`.
 1. Enter the `OAuth client ID` and `client secret` that you created previously.
 1. Select the API scopes that you want to grant access.
@@ -270,15 +270,15 @@ After you saved the OAuth token in the sidebar, you can list it in the sheet
 `Secret Manager` by click menu `🤖 Cyborg` -> `Secret Manager`
 -> `Refresh secrets`.
 
-#### 3.2.3. Input `Secret Manager` Name to `Step1 - Setting LEGO Configurations` sheet and `Check resources` via Menu `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations` -> `Check resources`.
+#### 3.2.3. Input `Secret Manager` Name to `Step1 - Setting OEC Configurations` sheet and `Check resources` via Menu `🤖 Cyborg` -> `Step1 - Setting OEC Configurations` -> `Check resources`.
 
-After you prepare the OAuth token, switch back to `Step1 - Setting LEGO Configurations` sheet and input your needed `Secret Manager` Name from sheet `Secret Manger` to `Step1 - Setting LEGO Configurations`.
+After you prepare the OAuth token, switch back to `Step1 - Setting OEC Configurations` sheet and input your needed `Secret Manager` Name from sheet `Secret Manger` to `Step1 - Setting OEC Configurations`.
 
-And then click Munu `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations` -> `Check  resources`.
+And then click Munu `🤖 Cyborg` -> `Step1 - Setting OEC Configurations` -> `Check  resources`.
 ![Demo](./images_for_readme/3.2.3.png)
 
 
-#### 3.2.4. Submenu item `🤖 Cyborg` -> `Step1 - Setting LEGO Configurations` -> `Apply changes`
+#### 3.2.4. Submenu item `🤖 Cyborg` -> `Step1 - Setting OEC Configurations` -> `Apply changes`
 
 After all resources have passed the check, some resources have the `status` as
 `TO_APPLY`. These resources are usually major changes and need
@@ -304,7 +304,7 @@ have a forced `Check` everything, you can use this item.
 This sheet contains a list of Cloud resources that will be operated during
 installation. You do not need to edit most of them except:
 
-1. Yellow background fields that need user input or confirm, e.g. `Project Id` in `Step 1 - Setting LEGO Configurations`.
+1. Yellow background fields that need user input or confirm, e.g. `Project Id` in `Step 1 - Setting OEC Configurations`.
 1. Click menu `🤖 Cyborg` -> `Step3 - Validate API Access with OAuth Token` -> `Refresh secret name list`. This will pull the secret managers to sheet `Step3 - Validate API Access with OAuth Token`.
 1. Input your `Secret Manager` name to `Step3 - Validate API Access with OAuth Token` sheet.
    1. Secret Name: Select your used Secret Manager Name. For upgrade, the secret manager should be `lego_main_legacy_token`.
@@ -317,19 +317,19 @@ installation. You do not need to edit most of them except:
 ### 3.4. Sheet `Step 4. Upload SQL Files`
 
 1. Click menu `🤖 Cyborg` -> `Step4 - Upload SQL Files` -> `Check All APIs` -> `Uploads all files`.
-2. (Optional) If you customized LEGO SQL files before and you want to keep what you did, you need to upload the sql files again manually.
+2. (Optional) If you customized OEC SQL files before and you want to keep what you did, you need to upload the sql files again manually.
 ![Demo](./images_for_readme/3.4.png)
 
 ### 3.5. Sheet `Step5 - Upload Task Config Files`
 
-1. (Optional) If you customized LEGO task config before and you want to keep what you did, you need to click `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Append all configs from Firestore to Sheet`.
+1. (Optional) If you customized OEC task config before and you want to keep what you did, you need to click `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Append all configs from Firestore to Sheet`.
 1. Click menu `🤖 Cyborg` -> `Step5 - Upload Task Config Files` -> `Check All APIs` -> `Uploads all configs to Firestore`.
 ![Demo](./images_for_readme/3.5.png)
 
 ### 3.6. Sheet `Step6 - Set Up Daily/Hourly/ADH Cronjobs`
 
-1. **(Action Required for ADH Creative installation)**: Check the checkbox in `Enabled` column to enable `#namespace#-adh_lego_start` for `LEGO ADH Creative job`.
-1. **(Action Required for ADH Audience installation)**: Check the checkbox in `Enabled` column to enable  `#namespace#-adh_audience_start` for `LEGO ADH Audience job`.
+1. **(Action Required for ADH Creative installation)**: Check the checkbox in `Enabled` column to enable `#namespace#-adh_lego_start` for `OEC ADH Creative job`.
+1. **(Action Required for ADH Audience installation)**: Check the checkbox in `Enabled` column to enable  `#namespace#-adh_audience_start` for `OEC ADH Audience job`.
 1. Click menu `🤖 Cyborg` -> `Step6 - Set Up Daily/Hourly/ADH Cronjobs` -> `Uploads all jobs to Cloud Scheduler`.
 2. Entry Google Cloud console to enable and trigger `#namespace#-lego_start` job.
 ![Demo](./images_for_readme/3.6.png)

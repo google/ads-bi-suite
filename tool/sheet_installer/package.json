@@ -1,7 +1,7 @@
 {
-  "name": "lego",
+  "name": "oec",
   "version": "16.0.1",
-  "description": "Google Sheets based installer for LEGO",
+  "description": "Google Sheets based installer for OEC",
   "author": "Google Inc.",
   "license": "Apache-2.0",
   "devDependencies": {

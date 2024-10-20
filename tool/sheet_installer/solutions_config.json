@@ -1,6 +1,6 @@
 {
-  "lego": {
-    "source": "./src/lego",
+  "oec": {
+    "source": "./src/oec",
     "env": {
       "prod": {
         "scriptId": "13Nnji-Fdx61PhZsFcu_RCfIdoi6JwReckr5FVb0-yMIngdzzfdhRFrBF",

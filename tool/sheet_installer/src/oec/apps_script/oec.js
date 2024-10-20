@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** @fileoverview The class stands for LEGO installation on top of Cyborg. */
+/** @fileoverview The class stands for OEC installation on top of Cyborg. */
 
 /**
  * Checks for the existence of an external table and creates it if it doesn't exist.
@@ -20,8 +20,8 @@
  * @param {string} sheetsUrl The URL of the Google Sheet to use as the
  *   data source for the external table. If not provided, the URL of the
  *   active spreadsheet is used.
- * @param {Object} resource An object containing information about the resource.
- * @returns {Object} The result of the `gcloud.checkOrInitializeExternalTable`
+ * @param {Object!} resource An object containing information about the resource.
+ * @return {Object!} The result of the `gcloud.checkOrInitializeExternalTable`
  *   function, which indicates the status of the operation.
  */
 const checkAndCreateExternalTable = (sheetsUrl, resource) => {
@@ -30,7 +30,7 @@ const checkAndCreateExternalTable = (sheetsUrl, resource) => {
     sheetsUrl || SpreadsheetApp.getActiveSpreadsheet().getUrl(),
     resource.attributeValue
   );
-}
+};
 
 /**
  * Retrieves information from a scheduled job on Google Cloud Scheduler.
@@ -57,7 +57,12 @@ function getScheduledJobInfo(propertyName) {
   }
 }
 
-/** Determines a default value for a resource based on a scheduled job. */
+/** Determines a default value for a resource based on a scheduled job.
+ *
+ * @param {string} value The default value name.
+ * @param {Object!} resource An object containing information about the resource.
+ * @return {Object!} The result of the `checkParameter`.
+ */
 function getDefaultValueFromScheduledJob(value, resource) {
   // Determine the value to use, prioritizing the provided 'value'
   const checkedValue =
@@ -73,7 +78,7 @@ function getDefaultValueFromScheduledJob(value, resource) {
 }
 
 /**
- * The LEGO config for infrastructure systems, Tentacles and Sentinel.
+ * The OEC config for infrastructure systems, Tentacles and Sentinel.
  */
 const ENABLED_TENTACLES_CONNECTOR = ['PB'];
 
@@ -86,9 +91,9 @@ const OPTIONAL_SENTINEL_FEATURE = [
 ];
 
 /**
- * The LEGO cronjob message template for the daily/hourly Sentinel trigger.
+ * The OEC cronjob message template for the daily/hourly Sentinel trigger.
  */
-const LEGO_CRONJOB_MESSAGE = {
+const OEC_CRONJOB_MESSAGE = {
   projectId: "#projectId#",
   locationId: "#locationId#",
   timezone: '#timeZone#',
@@ -104,9 +109,9 @@ const LEGO_CRONJOB_MESSAGE = {
 };
 
 /**
- * The LEGO cronjob message template for the ADH trigger.
+ * The OEC cronjob message template for the ADH trigger.
  */
-const LEGO_ADH_CRONJOB_MESSAGE = {
+const OEC_ADH_CRONJOB_MESSAGE = {
   projectId: "#projectId#",
   locationId: "#locationId#",
   timezone: '#timeZone#',
@@ -124,8 +129,8 @@ const LEGO_ADH_CRONJOB_MESSAGE = {
 };
 
 /**
- * The LEGO cronjob setting for the daily/hourly Sentinel trigger.
- * NOTE: Backfill cronjob can be done through a trigger for LEGO daily job.
+ * The OEC cronjob setting for the daily/hourly Sentinel trigger.
+ * NOTE: Backfill cronjob can be done through a trigger for OEC daily job.
  */
 const SENTINEL_CRON_JOB = [
   {
@@ -134,7 +139,7 @@ const SENTINEL_CRON_JOB = [
     description: 'LEGO daily job',
     schedule: '0 6 * * *',
     taskId: 'lego_start',
-    message: LEGO_CRONJOB_MESSAGE,
+    message: OEC_CRONJOB_MESSAGE,
   },
   {
     enabled: 'TRUE',
@@ -142,7 +147,7 @@ const SENTINEL_CRON_JOB = [
     description: 'LEGO hourly job',
     schedule: '0 7-23 * * *',
     taskId: 'lego_start_hourly',
-    message: LEGO_CRONJOB_MESSAGE,
+    message: OEC_CRONJOB_MESSAGE,
   },
   // The LEGO cronjob setting for the ADH Sentinel trigger.
   {
@@ -151,7 +156,7 @@ const SENTINEL_CRON_JOB = [
     description: 'LEGO ADH Creative job',
     schedule: '0 13 * * 1',
     taskId: 'adh_lego_start',
-    message: LEGO_ADH_CRONJOB_MESSAGE,
+    message: OEC_ADH_CRONJOB_MESSAGE,
   },
   {
     enabled: 'FALSE',
@@ -159,15 +164,15 @@ const SENTINEL_CRON_JOB = [
     description: 'LEGO ADH Audience job',
     schedule: '0 15 * * 1',
     taskId: 'adh_audience_start',
-    message: LEGO_ADH_CRONJOB_MESSAGE,
+    message: OEC_ADH_CRONJOB_MESSAGE,
   },
 ];
 
 /**
- * The LEGO config for Cyborg Mojo solution menu.
+ * The OEC config for Cyborg Mojo solution menu.
  */
-const LEGO_MOJO_CONFIG = {
-  sheetName: 'Step1 - Setting LEGO Configurations',
+const OEC_MOJO_CONFIG = {
+  sheetName: 'Step1 - Setting OEC Configurations',
   config: [
     // Solution and Google Cloud Project setting
     { template: 'namespace', value: 'lego', },
@@ -369,12 +374,12 @@ const LEGO_MOJO_CONFIG = {
  * The solution menus.
  */
 const SOLUTION_MENUS = [
-  new MojoSheet(LEGO_MOJO_CONFIG),
+  new MojoSheet(OEC_MOJO_CONFIG),
   new SecretManagerSheet(),
   {
     menuItem: [
       {
-        name: 'Step2 - Generate an OAuth Token - for LEGO Installation',
+        name: 'Step2 - Generate an OAuth Token - for OEC Installation',
         method: 'showOAuthSidebar',
       },
     ],

@@ -14,7 +14,7 @@
  limitations under the License.
  -->
 
-# Apps Google Ads reporting Automation a.k.a. “LEGO”
+# Apps Google Ads reporting Automation
 
 ## 1. Disclaimer and Intro
 
@@ -34,24 +34,24 @@ associated with its usage, including with respect to your deployment of any
 portion of this solution in your systems, or usage in connection with your
 business, if at all.
 
-### 1.1 Apps Google Ads reporting Automation a.k.a. “LEGO”
+### 1.1 Apps Google Ads reporting Automation
 
 #### 1.1.1 Brief:
-LEGO is a data pipeline solution that helps clients fetch Google Ads metrics and stores the data in clients' Google Cloud Big Query tables.
+Tool is a data pipeline solution that helps clients fetch Google Ads metrics and stores the data in clients' Google Cloud Big Query tables.
 
 It is a powerful tool that can help businesses track their ad performance and make informed decisions about their campaigns.
 
-The backend of LEGO leverages two Open-source solutions:
+The backend of Tool leverages two Open-source solutions:
 - https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/data-tasks-coordinator
 - https://github.com/GoogleCloudPlatform/cloud-for-marketing/tree/main/marketing-analytics/activation/gmp-googleads-connector
 
 #### 1.1.2 Features:
-LEGO offers a number of features that make it a valuable tool for businesses, including:
+Tool offers a number of features that make it a valuable tool for businesses, including:
 
 - The ability to daily fetch Google Ads metrics
 
 #### 1.1.3 Benefits:
-Lego can help businesses benefit in a number of ways, including:
+Tool can help businesses benefit in a number of ways, including:
 
 - Improved ad performance
 - Increased ROI

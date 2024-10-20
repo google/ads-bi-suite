@@ -1,4 +1,0 @@
-google-cloud-core==2.3.1
-google-cloud-storage==2.4.0
-google-resumable-media==2.3.3
-google-cloud-functions==1.8.0
