@@ -572,12 +572,6 @@
             "queryName": "app_trd_account"
           },
           "taskId": "${markTaskId}"
-        },
-        {
-          "appendedParameters": {
-            "queryName": "app_trd_redistributed_with_1p_report"
-          },
-          "taskId": "${markTaskId}"
         }
       ]
     },
