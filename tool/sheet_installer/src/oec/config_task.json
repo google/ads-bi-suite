@@ -252,36 +252,7 @@
   "app_ad_group": {
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "ad_group",
-          "segments": [
-            "segments.date",
-            "segments.week",
-            "segments.ad_network_type",
-            "segments.conversion_action_category",
-            "segments.conversion_action_name",
-            "segments.conversion_action",
-            "segments.external_conversion_source"
-          ],
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ],
-          "attributes": [
-            "campaign.advertising_channel_type",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group.status"
-          ],
-          "from_date": "${fromDate}",
-          "metrics": [
-            "metrics.conversions",
-            "metrics.conversions_value"
-          ]
-        }
+        "query": "SELECT campaign.advertising_channel_type, ad_group.id, ad_group.name, ad_group.status, metrics.conversions, metrics.conversions_value, segments.date, segments.week, segments.ad_network_type, segments.conversion_action_category, segments.conversion_action_name, segments.conversion_action, segments.external_conversion_source FROM ad_group WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL' AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "ancestor": "google_ads_report",
@@ -292,62 +263,14 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "segments": [
-            "segments.date",
-            "segments.ad_network_type"
-          ],
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.interactions"
-          ],
-          "from_date": "${fromDate}",
-          "attributes": [
-            "customer.id",
-            "campaign.id",
-            "campaign.advertising_channel_type",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group.status"
-          ],
-          "entity": "ad_group",
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, campaign.id, campaign.advertising_channel_type, ad_group.id, ad_group.name, ad_group.status, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.interactions, segments.date, segments.ad_network_type FROM ad_group WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL' AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     }
   },
   "app_asset_metadata": {
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "ad_group_ad_asset_view",
-          "constraints": [
-            {
-              "val": "YOUTUBE_VIDEO",
-              "op": "=",
-              "key": "asset.type"
-            }
-          ],
-          "attributes": [
-            "asset.type",
-            "asset.youtube_video_asset.youtube_video_id",
-            "asset.youtube_video_asset.youtube_video_title",
-            "asset.mobile_app_asset.start_date",
-            "asset.mobile_app_asset.end_date"
-          ]
-        }
+        "query": "SELECT asset.type, asset.youtube_video_asset.youtube_video_id, asset.youtube_video_asset.youtube_video_title, asset.mobile_app_asset.start_date, asset.mobile_app_asset.end_date FROM ad_group_ad_asset_view WHERE asset.type = 'YOUTUBE_VIDEO'"
       }
     },
     "ancestor": "google_ads_report",
@@ -357,52 +280,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "ad_group_ad_asset_view",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions_value",
-            "metrics.all_conversions",
-            "metrics.biddable_app_install_conversions",
-            "metrics.biddable_app_post_install_conversions"
-          ],
-          "attributes": [
-            "ad_group_ad_asset_view.field_type",
-            "ad_group_ad_asset_view.performance_label",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group.status",
-            "asset.id",
-            "asset.image_asset.full_size.height_pixels",
-            "asset.image_asset.full_size.url",
-            "asset.image_asset.full_size.width_pixels",
-            "asset.name",
-            "asset.text_asset.text",
-            "asset.type",
-            "asset.youtube_video_asset.youtube_video_id",
-            "asset.youtube_video_asset.youtube_video_title",
-            "campaign.advertising_channel_type",
-            "campaign.id",
-            "customer.id"
-          ],
-          "segments": [
-            "segments.date",
-            "segments.week",
-            "segments.ad_network_type"
-          ],
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ],
-          "from_date": "${fromDate}"
-        }
+        "query": "SELECT ad_group_ad_asset_view.field_type, ad_group_ad_asset_view.performance_label, ad_group.id, ad_group.name, ad_group.status, asset.id, asset.image_asset.full_size.height_pixels, asset.image_asset.full_size.url, asset.image_asset.full_size.width_pixels, asset.name, asset.text_asset.text, asset.type, asset.youtube_video_asset.youtube_video_id, asset.youtube_video_asset.youtube_video_title, campaign.advertising_channel_type, campaign.id, customer.id, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions_value, metrics.all_conversions, metrics.biddable_app_install_conversions, metrics.biddable_app_post_install_conversions, segments.date, segments.week, segments.ad_network_type FROM ad_group_ad_asset_view WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL' AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "type": "report"
@@ -412,34 +290,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "conversion_action.app_id",
-            "conversion_action.category",
-            "conversion_action.counting_type",
-            "conversion_action.firebase_settings.event_name",
-            "conversion_action.include_in_conversions_metric",
-            "conversion_action.name",
-            "conversion_action.owner_customer",
-            "conversion_action.resource_name",
-            "conversion_action.status",
-            "conversion_action.third_party_app_analytics_settings.event_name",
-            "conversion_action.type",
-            "customer.id"
-          ],
-          "constraints": [
-            {
-              "val": "ENABLED",
-              "op": "=",
-              "key": "conversion_action.status"
-            }
-          ],
-          "entity": "conversion_action",
-          "metrics": [
-            "metrics.conversion_last_conversion_date",
-            "metrics.conversion_last_received_request_date_time"
-          ]
-        }
+        "query": "SELECT conversion_action.app_id, conversion_action.category, conversion_action.counting_type, conversion_action.firebase_settings.event_name, conversion_action.include_in_conversions_metric, conversion_action.name, conversion_action.owner_customer, conversion_action.resource_name, conversion_action.status, conversion_action.third_party_app_analytics_settings.event_name, conversion_action.type, customer.id, metrics.conversion_last_conversion_date, metrics.conversion_last_received_request_date_time FROM conversion_action WHERE conversion_action.status = 'ENABLED'"
       }
     }
   },
@@ -447,38 +298,7 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": [
-                "PAUSED",
-                "REMOVED"
-              ],
-              "op": "NOT IN",
-              "key": "ad_group_ad.status"
-            }
-          ],
-          "attributes": [
-            "customer.id",
-            "campaign.advertising_channel_type",
-            "campaign.app_campaign_setting.app_id",
-            "campaign.status",
-            "ad_group.id",
-            "ad_group_ad.status",
-            "ad_group_ad.ad.id",
-            "ad_group_ad_asset_view.field_type",
-            "ad_group_ad_asset_view.policy_summary",
-            "asset.id",
-            "asset.name",
-            "asset.type"
-          ],
-          "entity": "ad_group_ad_asset_view"
-        }
+        "query": "SELECT customer.id, campaign.advertising_channel_type, campaign.app_campaign_setting.app_id, campaign.status, ad_group.id, ad_group_ad.status, ad_group_ad.ad.id, ad_group_ad_asset_view.field_type, ad_group_ad_asset_view.policy_summary, asset.id, asset.name, asset.type FROM ad_group_ad_asset_view WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL' AND ad_group_ad.status NOT IN ('PAUSED', 'REMOVED')"
       }
     },
     "ancestor": "google_ads_report"
@@ -581,37 +401,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value"
-          ],
-          "attributes": [
-            "customer.id",
-            "campaign.id",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "geographic_view.country_criterion_id"
-          ],
-          "entity": "geographic_view",
-          "segments": [
-            "segments.week",
-            "segments.ad_network_type",
-            "segments.conversion_action_name",
-            "segments.conversion_action_category"
-          ],
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ],
-          "from_date": "${fromDate}"
-        }
+        "query": "SELECT customer.id, campaign.id, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, geographic_view.country_criterion_id, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, segments.week, segments.ad_network_type, segments.conversion_action_name, segments.conversion_action_category FROM geographic_view WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL' AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "type": "report"
@@ -681,23 +471,7 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "constraints": [
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ],
-          "attributes": [
-            "campaign.id"
-          ],
-          "entity": "campaign",
-          "metrics": [
-            "metrics.optimization_score_uplift",
-            "metrics.optimization_score_url"
-          ]
-        }
+        "query": "SELECT campaign.id, metrics.optimization_score_uplift, metrics.optimization_score_url FROM campaign WHERE campaign.advertising_channel_type = 'MULTI_CHANNEL'"
       }
     },
     "ancestor": "google_ads_report"
@@ -705,25 +479,7 @@
   "app_skan": {
     "source": {
       "config": {
-        "reportQuery": {
-          "date_constant": "LAST_30_DAYS",
-          "entity": "campaign",
-          "attributes": [
-            "campaign.id",
-            "campaign.name"
-          ],
-          "segments": [
-            "segments.date",
-            "segments.sk_ad_network_conversion_value",
-            "segments.sk_ad_network_ad_event_type",
-            "segments.sk_ad_network_source_app.sk_ad_network_source_app_id",
-            "segments.sk_ad_network_user_type",
-            "segments.sk_ad_network_attribution_credit"
-          ],
-          "metrics": [
-            "metrics.sk_ad_network_installs"
-          ]
-        }
+        "query": "SELECT campaign.id, campaign.name, metrics.sk_ad_network_installs, segments.date, segments.sk_ad_network_conversion_value, segments.sk_ad_network_ad_event_type, segments.sk_ad_network_source_app.sk_ad_network_source_app_id, segments.sk_ad_network_user_type, segments.sk_ad_network_attribution_credit FROM campaign WHERE segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report",
@@ -880,26 +636,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "billing_setup.end_date_time",
-            "billing_setup.payments_account_info.payments_account_id",
-            "billing_setup.payments_account_info.payments_profile_id",
-            "billing_setup.payments_account_info.payments_account_name",
-            "account_budget.status",
-            "account_budget.approved_spending_limit_micros",
-            "account_budget.approved_start_date_time",
-            "account_budget.approved_end_date_time",
-            "account_budget.adjusted_spending_limit_micros",
-            "account_budget.amount_served_micros",
-            "account_budget.proposed_spending_limit_type",
-            "account_budget.purchase_order_number"
-          ],
-          "entity": "account_budget"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, billing_setup.end_date_time, billing_setup.payments_account_info.payments_account_id, billing_setup.payments_account_info.payments_profile_id, billing_setup.payments_account_info.payments_account_name, account_budget.status, account_budget.approved_spending_limit_micros, account_budget.approved_start_date_time, account_budget.approved_end_date_time, account_budget.adjusted_spending_limit_micros, account_budget.amount_served_micros, account_budget.proposed_spending_limit_type, account_budget.purchase_order_number FROM account_budget"
       }
     },
     "type": "report"
@@ -908,25 +645,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "change_event",
-          "constraints": [
-            {
-              "val": "LAST_14_DAYS",
-              "op": "DURING",
-              "key": "change_event.change_date_time"
-            }
-          ],
-          "attributes": [
-            "customer.id",
-            "campaign.id",
-            "change_event.change_date_time",
-            "change_event.change_resource_type",
-            "change_event.user_email",
-            "change_event.resource_change_operation"
-          ],
-          "limit": 1000
-        }
+        "query": "SELECT customer.id, campaign.id, change_event.change_date_time, change_event.change_resource_type, change_event.user_email, change_event.resource_change_operation FROM change_event WHERE change_event.change_date_time DURING LAST_14_DAYS LIMIT 1000"
       }
     },
     "type": "report"
@@ -937,37 +656,7 @@
     },
     "source": {
       "config": {
-        "reportQuery": {
-          "constraints": [
-            {
-              "val": "ENABLED",
-              "op": "=",
-              "key": "customer.status"
-            }
-          ],
-          "segments": [
-            "segments.date"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "customer.optimization_score",
-            "customer.optimization_score_weight"
-          ],
-          "entity": "customer",
-          "from_date": "${fromDate}",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, customer.optimization_score, customer.optimization_score_weight, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views, segments.date FROM customer WHERE customer.status = 'ENABLED' AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "type": "report",
@@ -978,75 +667,14 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group.status",
-            "ad_group_ad.ad.id",
-            "ad_group_ad.ad.name",
-            "ad_group_ad.ad.type",
-            "ad_group_ad.policy_summary.approval_status",
-            "ad_group_ad.policy_summary.policy_topic_entries",
-            "ad_group_ad.policy_summary.review_status"
-          ],
-          "constraints": [
-            {
-              "val": [
-                "PAUSED",
-                "REMOVED"
-              ],
-              "op": "NOT IN",
-              "key": "ad_group_ad.status"
-            },
-            {
-              "val": [
-                "PAUSED",
-                "REMOVED"
-              ],
-              "op": "NOT IN",
-              "key": "ad_group.status"
-            }
-          ],
-          "entity": "ad_group_ad"
-        }
+        "query": "SELECT customer.id, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, ad_group.id, ad_group.name, ad_group.status, ad_group_ad.ad.id, ad_group_ad.ad.name, ad_group_ad.ad.type, ad_group_ad.policy_summary.approval_status, ad_group_ad.policy_summary.policy_topic_entries, ad_group_ad.policy_summary.review_status FROM ad_group_ad WHERE ad_group_ad.status NOT IN ('PAUSED', 'REMOVED') AND ad_group.status NOT IN ('PAUSED', 'REMOVED')"
       }
     }
   },
   "base_campaign_conversion": {
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "campaign.id",
-            "campaign.advertising_channel_type"
-          ],
-          "metrics": [
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions_value",
-            "metrics.all_conversions"
-          ],
-          "segments": [
-            "segments.date",
-            "segments.device",
-            "segments.ad_network_type",
-            "segments.conversion_action_category",
-            "segments.conversion_action_name",
-            "segments.conversion_action",
-            "segments.external_conversion_source"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "entity": "campaign"
-        }
+        "query": "SELECT customer.id, campaign.id, campaign.advertising_channel_type, metrics.conversions, metrics.conversions_value, metrics.all_conversions_value, metrics.all_conversions, segments.date, segments.device, segments.ad_network_type, segments.conversion_action_category, segments.conversion_action_name, segments.conversion_action, segments.external_conversion_source FROM campaign WHERE segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report",
@@ -1055,17 +683,7 @@
   "base_campaign_criterion": {
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "campaign.id",
-            "campaign_criterion.location.geo_target_constant",
-            "campaign_criterion.language.language_constant",
-            "campaign_criterion.negative",
-            "campaign.advertising_channel_type"
-          ],
-          "entity": "campaign_criterion"
-        }
+        "query": "SELECT customer.id, campaign.id, campaign_criterion.location.geo_target_constant, campaign_criterion.language.language_constant, campaign_criterion.negative, campaign.advertising_channel_type FROM campaign_criterion"
       }
     },
     "type": "report",
@@ -1074,55 +692,7 @@
   "base_campaign_performance": {
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "campaign.campaign_budget"
-          ],
-          "from_date": "${fromDate}",
-          "entity": "campaign",
-          "segments": [
-            "segments.date",
-            "segments.ad_network_type",
-            "segments.device"
-          ],
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_by_conversion_date",
-            "metrics.conversions_value",
-            "metrics.conversions_value_by_conversion_date",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views",
-            "metrics.search_impression_share",
-            "metrics.view_through_conversions",
-            "metrics.search_budget_lost_impression_share",
-            "metrics.search_rank_lost_impression_share",
-            "metrics.content_budget_lost_impression_share",
-            "metrics.content_rank_lost_impression_share",
-            "metrics.video_quartile_p100_rate",
-            "metrics.video_quartile_p75_rate",
-            "metrics.video_quartile_p50_rate",
-            "metrics.video_quartile_p25_rate"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, campaign.campaign_budget, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_by_conversion_date, metrics.conversions_value, metrics.conversions_value_by_conversion_date, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views, metrics.search_impression_share, metrics.view_through_conversions, metrics.search_budget_lost_impression_share, metrics.search_rank_lost_impression_share, metrics.content_budget_lost_impression_share, metrics.content_rank_lost_impression_share, metrics.video_quartile_p100_rate, metrics.video_quartile_p75_rate, metrics.video_quartile_p50_rate, metrics.video_quartile_p25_rate, segments.date, segments.ad_network_type, segments.device FROM campaign WHERE metrics.impressions >= 1 AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "ancestor": "google_ads_report",
@@ -1133,55 +703,14 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "campaign",
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "campaign_budget.amount_micros",
-            "campaign.status",
-            "campaign.app_campaign_setting.app_id",
-            "campaign.app_campaign_setting.app_store",
-            "campaign.target_cpa.target_cpa_micros",
-            "campaign.app_campaign_setting.bidding_strategy_goal_type",
-            "campaign.optimization_score",
-            "campaign.bidding_strategy",
-            "campaign.bidding_strategy_type",
-            "campaign.target_roas.target_roas",
-            "campaign_budget.has_recommended_budget",
-            "campaign.url_expansion_opt_out",
-            "campaign.shopping_setting.merchant_id"
-          ],
-          "constraints": [
-            {
-              "val": [
-                "PAUSED",
-                "ENABLED"
-              ],
-              "op": "IN",
-              "key": "campaign.status"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, campaign_budget.amount_micros, campaign.status, campaign.app_campaign_setting.app_id, campaign.app_campaign_setting.app_store, campaign.target_cpa.target_cpa_micros, campaign.app_campaign_setting.bidding_strategy_goal_type, campaign.optimization_score, campaign.bidding_strategy, campaign.bidding_strategy_type, campaign.target_roas.target_roas, campaign_budget.has_recommended_budget, campaign.url_expansion_opt_out, campaign.shopping_setting.merchant_id FROM campaign WHERE campaign.status IN ('PAUSED', 'ENABLED')"
       }
     }
   },
   "base_customer_label": {
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "customer_label",
-          "attributes": [
-            "customer.id",
-            "customer.descriptive_name",
-            "customer_label.label"
-          ]
-        }
+        "query": "SELECT customer.id, customer.descriptive_name, customer_label.label FROM customer_label"
       }
     },
     "type": "report",
@@ -1190,62 +719,7 @@
   "base_detail_placement_view": {
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "sort_order": "DESC",
-          "entity": "group_placement_view",
-          "constraints": [
-            {
-              "val": "ENABLED",
-              "op": "=",
-              "key": "campaign.status"
-            },
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.clicks"
-            },
-            {
-              "val": 100,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": [
-                "SEARCH",
-                "SHOPPING"
-              ],
-              "op": "NOT IN",
-              "key": " campaign.advertising_channel_type"
-            }
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "group_placement_view.display_name",
-            "group_placement_view.placement",
-            "group_placement_view.placement_type",
-            "group_placement_view.target_url"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "order_by": "metrics.impressions",
-          "limit": 1000
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, group_placement_view.display_name, group_placement_view.placement, group_placement_view.placement_type, group_placement_view.target_url, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM group_placement_view WHERE campaign.status = 'ENABLED' AND metrics.clicks >= 1 AND metrics.impressions >= 100 AND  campaign.advertising_channel_type NOT IN ('SEARCH', 'SHOPPING') AND segments.date DURING LAST_30_DAYS ORDER BY metrics.impressions DESC LIMIT 1000"
       }
     },
     "ancestor": "google_ads_report",
@@ -1256,60 +730,14 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "geo_target_constant.canonical_name",
-            "geo_target_constant.country_code",
-            "geo_target_constant.id",
-            "geo_target_constant.resource_name",
-            "geo_target_constant.name"
-          ],
-          "entity": "geo_target_constant"
-        }
+        "query": "SELECT geo_target_constant.canonical_name, geo_target_constant.country_code, geo_target_constant.id, geo_target_constant.resource_name, geo_target_constant.name FROM geo_target_constant"
       }
     }
   },
   "base_geographic_view": {
     "source": {
       "config": {
-        "reportQuery": {
-          "segments": [
-            "segments.ad_network_type",
-            "segments.week",
-            "segments.device"
-          ],
-          "entity": "geographic_view",
-          "from_date": "${fromDate}",
-          "attributes": [
-            "campaign.advertising_channel_sub_type",
-            "campaign.advertising_channel_type",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "customer.id",
-            "geographic_view.country_criterion_id"
-          ],
-          "metrics": [
-            "metrics.all_conversions_value",
-            "metrics.clicks",
-            "metrics.conversions_value",
-            "metrics.conversions",
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.interactions",
-            "metrics.all_conversions",
-            "metrics.video_views"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            }
-          ]
-        }
+        "query": "SELECT campaign.advertising_channel_sub_type, campaign.advertising_channel_type, campaign.id, campaign.name, campaign.status, customer.currency_code, customer.descriptive_name, customer.id, geographic_view.country_criterion_id, metrics.all_conversions_value, metrics.clicks, metrics.conversions_value, metrics.conversions, metrics.cost_micros, metrics.impressions, metrics.interactions, metrics.all_conversions, metrics.video_views, segments.ad_network_type, segments.week, segments.device FROM geographic_view WHERE metrics.impressions >= 1 AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     },
     "ancestor": "google_ads_report",
@@ -1319,16 +747,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "label.id",
-            "label.name",
-            "label.resource_name",
-            "label.status"
-          ],
-          "entity": "label"
-        }
+        "query": "SELECT customer.id, label.id, label.name, label.resource_name, label.status FROM label"
       }
     },
     "type": "report"
@@ -1337,15 +756,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "language_constant.code",
-            "language_constant.id",
-            "language_constant.resource_name",
-            "language_constant.name"
-          ],
-          "entity": "language_constant"
-        }
+        "query": "SELECT language_constant.code, language_constant.id, language_constant.resource_name, language_constant.name FROM language_constant"
       }
     },
     "type": "report"
@@ -1409,52 +820,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.view_through_conversions",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.video_views",
-            "metrics.engagements",
-            "metrics.video_quartile_p25_rate",
-            "metrics.video_quartile_p50_rate",
-            "metrics.video_quartile_p75_rate",
-            "metrics.video_quartile_p100_rate",
-            "metrics.cost_micros"
-          ],
-          "from_date": "${fromDate}",
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">",
-              "key": "metrics.impressions"
-            }
-          ],
-          "segments": [
-            "segments.date"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.descriptive_name",
-            "customer.currency_code",
-            "video.id",
-            "video.title",
-            "video.duration_millis",
-            "video.channel_id",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "ad_group.id",
-            "ad_group.name"
-          ],
-          "entity": "video"
-        }
+        "query": "SELECT customer.id, customer.descriptive_name, customer.currency_code, video.id, video.title, video.duration_millis, video.channel_id, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, campaign.id, campaign.name, campaign.status, ad_group.id, ad_group.name, metrics.impressions, metrics.clicks, metrics.all_conversions, metrics.all_conversions_value, metrics.view_through_conversions, metrics.conversions, metrics.conversions_value, metrics.video_views, metrics.engagements, metrics.video_quartile_p25_rate, metrics.video_quartile_p50_rate, metrics.video_quartile_p75_rate, metrics.video_quartile_p100_rate, metrics.cost_micros, segments.date FROM video WHERE metrics.impressions > 1 AND segments.date >= '${startDate}' AND segments.date <= '${endDate}'"
       }
     }
   },
@@ -1668,7 +1034,8 @@
             "projectId": "${projectId}",
             "customerId": "${customer_client.id}",
             "loginCustomerId": "${mccCid}",
-            "fromDate": "${fromDate}"
+            "startDate": "${startDate}",
+            "endDate": "${endDate}"
           }
         }
       },
@@ -1678,16 +1045,7 @@
   "get_child_accounts": {
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "customer_client",
-          "attributes": [
-            "customer_client.id"
-          ],
-          "constraints": {
-            "customer_client.manager": "FALSE",
-            "customer_client.status": "ENABLED"
-          }
-        }
+        "query": "SELECT customer_client.id FROM customer_client WHERE customer_client.manager = 'FALSE' AND customer_client.status = 'ENABLED'"
       }
     },
     "type": "report",
@@ -1716,10 +1074,11 @@
             "developerToken": "${developerToken}",
             "loginCustomerId": "${loginCustomerId}",
             "projectId": "${projectId}",
-            "fromDate": "${fromDate}",
             "partitionDay": "${partitionDay}",
             "reportBucket": "${reportBucket}",
-            "customerId": "${customerId}"
+            "customerId": "${customerId}",
+            "startDate": "${startDate}",
+            "endDate": "${endDate}"
           }
         }
       },
@@ -1931,43 +1290,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "age_range_view",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "ad_group_criterion.age_range.type"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "!=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, ad_group_criterion.age_range.type, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM age_range_view WHERE metrics.impressions >= 1 AND campaign.advertising_channel_type != 'MULTI_CHANNEL' AND segments.date DURING LAST_30_DAYS"
       }
     }
   },
@@ -1975,52 +1298,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "ad_group_ad.ad.id",
-            "ad_group_ad.ad.name",
-            "ad_group_ad.ad.type",
-            "ad_group_ad.status",
-            "ad_group.name",
-            "ad_group_ad.ad_strength",
-            "ad_group_ad.ad.expanded_text_ad.headline_part1",
-            "ad_group_ad.ad.expanded_text_ad.headline_part2",
-            "ad_group_ad.ad.expanded_text_ad.path1",
-            "ad_group_ad.ad.text_ad.headline",
-            "ad_group_ad.ad.responsive_display_ad.headlines",
-            "ad_group_ad.ad.responsive_display_ad.long_headline",
-            "ad_group_ad.ad.responsive_search_ad.headlines",
-            "ad_group_ad.ad.responsive_search_ad.path1",
-            "ad_group_ad.ad.image_ad.image_url"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            }
-          ],
-          "entity": "ad_group_ad",
-          "date_constant": "LAST_30_DAYS"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, ad_group_ad.ad.id, ad_group_ad.ad.name, ad_group_ad.ad.type, ad_group_ad.status, ad_group.name, ad_group_ad.ad_strength, ad_group_ad.ad.expanded_text_ad.headline_part1, ad_group_ad.ad.expanded_text_ad.headline_part2, ad_group_ad.ad.expanded_text_ad.path1, ad_group_ad.ad.text_ad.headline, ad_group_ad.ad.responsive_display_ad.headlines, ad_group_ad.ad.responsive_display_ad.long_headline, ad_group_ad.ad.responsive_search_ad.headlines, ad_group_ad.ad.responsive_search_ad.path1, ad_group_ad.ad.image_ad.image_url, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM ad_group_ad WHERE metrics.impressions >= 1 AND segments.date DURING LAST_30_DAYS"
       }
     },
     "type": "report"
@@ -2029,43 +1307,7 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "ad_group_audience_view",
-          "date_constant": "LAST_30_DAYS",
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "campaign.status",
-            "ad_group_criterion.user_list.user_list"
-          ],
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "!=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, campaign.status, ad_group_criterion.user_list.user_list, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM ad_group_audience_view WHERE metrics.impressions >= 1 AND campaign.advertising_channel_type != 'MULTI_CHANNEL' AND segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report"
@@ -2075,84 +1317,14 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value"
-          ],
-          "constraints": [
-            {
-              "val": "SHOPPING",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": 0,
-              "op": ">",
-              "key": "metrics.cost_micros"
-            }
-          ],
-          "segments": [
-            "segments.product_item_id",
-            "segments.product_title"
-          ],
-          "entity": "shopping_performance_view"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, segments.product_item_id, segments.product_title FROM shopping_performance_view WHERE campaign.advertising_channel_type = 'SHOPPING' AND metrics.cost_micros > 0 AND segments.date DURING LAST_30_DAYS"
       }
     }
   },
   "nonapp_campaign_perf_all_time": {
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.video_views"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type"
-          ],
-          "segments": [
-            "segments.day_of_week",
-            "segments.hour"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            }
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "entity": "campaign"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.video_views, segments.day_of_week, segments.hour FROM campaign WHERE metrics.impressions >= 1 AND segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report",
@@ -2161,44 +1333,7 @@
   "nonapp_campaign_perf_dsa": {
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "dynamic_search_ads_search_term_view.search_term",
-            "dynamic_search_ads_search_term_view.headline",
-            "dynamic_search_ads_search_term_view.landing_page"
-          ],
-          "entity": "dynamic_search_ads_search_term_view",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": "SEARCH",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, dynamic_search_ads_search_term_view.search_term, dynamic_search_ads_search_term_view.headline, dynamic_search_ads_search_term_view.landing_page, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value FROM dynamic_search_ads_search_term_view WHERE metrics.impressions >= 1 AND campaign.advertising_channel_type = 'SEARCH' AND segments.date DURING LAST_30_DAYS"
       }
     },
     "type": "report",
@@ -2209,43 +1344,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "ad_group_criterion.gender.type"
-          ],
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "!=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ],
-          "entity": "gender_view",
-          "date_constant": "LAST_30_DAYS"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, ad_group_criterion.gender.type, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM gender_view WHERE metrics.impressions >= 1 AND campaign.advertising_channel_type != 'MULTI_CHANNEL' AND segments.date DURING LAST_30_DAYS"
       }
     }
   },
@@ -2253,48 +1352,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "extension_feed_item.sitelink_feed_item.final_mobile_urls",
-            "extension_feed_item.sitelink_feed_item.final_url_suffix",
-            "extension_feed_item.sitelink_feed_item.final_urls",
-            "extension_feed_item.sitelink_feed_item.line1",
-            "extension_feed_item.sitelink_feed_item.line2",
-            "extension_feed_item.sitelink_feed_item.link_text",
-            "extension_feed_item.sitelink_feed_item.tracking_url_template"
-          ],
-          "constraints": [
-            {
-              "val": "SEARCH",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            }
-          ],
-          "entity": "extension_feed_item",
-          "date_constant": "LAST_30_DAYS"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, extension_feed_item.sitelink_feed_item.final_mobile_urls, extension_feed_item.sitelink_feed_item.final_url_suffix, extension_feed_item.sitelink_feed_item.final_urls, extension_feed_item.sitelink_feed_item.line1, extension_feed_item.sitelink_feed_item.line2, extension_feed_item.sitelink_feed_item.link_text, extension_feed_item.sitelink_feed_item.tracking_url_template, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value FROM extension_feed_item WHERE campaign.advertising_channel_type = 'SEARCH' AND metrics.impressions >= 1 AND segments.date DURING LAST_30_DAYS"
       }
     },
     "type": "report"
@@ -2302,55 +1360,7 @@
   "nonapp_campaign_perf_search_keywords": {
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group_criterion.keyword.text",
-            "ad_group_criterion.keyword.match_type",
-            "ad_group_criterion.quality_info.quality_score"
-          ],
-          "date_constant": "LAST_7_DAYS",
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "constraints": [
-            {
-              "val": "SEARCH",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": 100,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": [
-                "ENABLED",
-                "PAUSED"
-              ],
-              "op": "IN",
-              "key": "ad_group_criterion.status"
-            }
-          ],
-          "entity": "keyword_view"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, ad_group.id, ad_group.name, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.quality_info.quality_score, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM keyword_view WHERE campaign.advertising_channel_type = 'SEARCH' AND metrics.impressions >= 100 AND ad_group_criterion.status IN ('ENABLED', 'PAUSED') AND segments.date DURING LAST_7_DAYS"
       }
     },
     "ancestor": "google_ads_report",
@@ -2359,51 +1369,7 @@
   "nonapp_campaign_perf_search_search_term": {
     "source": {
       "config": {
-        "reportQuery": {
-          "segments": [
-            "segments.search_term_match_type"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "search_term_view.search_term",
-            "search_term_view.status"
-          ],
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value"
-          ],
-          "date_constant": "LAST_30_DAYS",
-          "constraints": [
-            {
-              "val": "SEARCH",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": 100,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.clicks"
-            }
-          ],
-          "entity": "search_term_view"
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, search_term_view.search_term, search_term_view.status, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, segments.search_term_match_type FROM search_term_view WHERE campaign.advertising_channel_type = 'SEARCH' AND metrics.impressions >= 100 AND metrics.clicks >= 1 AND segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report",
@@ -2413,46 +1379,7 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "metrics": [
-            "metrics.cost_micros",
-            "metrics.impressions",
-            "metrics.clicks",
-            "metrics.conversions",
-            "metrics.conversions_value",
-            "metrics.all_conversions",
-            "metrics.all_conversions_value",
-            "metrics.video_views"
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "campaign.status",
-            "ad_group.id",
-            "ad_group.name",
-            "ad_group_criterion.user_interest.user_interest_category",
-            "ad_group_criterion.status"
-          ],
-          "entity": "ad_group_audience_view",
-          "date_constant": "LAST_30_DAYS",
-          "constraints": [
-            {
-              "val": 1,
-              "op": ">=",
-              "key": "metrics.impressions"
-            },
-            {
-              "val": "MULTI_CHANNEL",
-              "op": "!=",
-              "key": "campaign.advertising_channel_type"
-            }
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, campaign.status, ad_group.id, ad_group.name, ad_group_criterion.user_interest.user_interest_category, ad_group_criterion.status, metrics.cost_micros, metrics.impressions, metrics.clicks, metrics.conversions, metrics.conversions_value, metrics.all_conversions, metrics.all_conversions_value, metrics.video_views FROM ad_group_audience_view WHERE metrics.impressions >= 1 AND campaign.advertising_channel_type != 'MULTI_CHANNEL' AND segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report"
@@ -2658,53 +1585,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "constraints": [
-            {
-              "val": "PERFORMANCE_MAX",
-              "op": "=",
-              "key": "campaign.advertising_channel_type"
-            },
-            {
-              "val": [
-                "PAUSED",
-                "ENABLED"
-              ],
-              "op": "IN",
-              "key": "campaign.status"
-            },
-            {
-              "val": [
-                "PAUSED",
-                "ENABLED"
-              ],
-              "op": "IN",
-              "key": "asset_group.status"
-            }
-          ],
-          "entity": "asset_group_asset",
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "campaign.id",
-            "campaign.name",
-            "campaign.status",
-            "campaign.advertising_channel_type",
-            "campaign.advertising_channel_sub_type",
-            "asset_group.ad_strength",
-            "asset_group.id",
-            "asset_group.name",
-            "asset_group.status",
-            "asset_group_asset.field_type",
-            "asset_group_asset.performance_label",
-            "asset_group_asset.status",
-            "asset_group_asset.policy_summary.approval_status",
-            "asset.id",
-            "asset.name",
-            "asset.source"
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.advertising_channel_sub_type, asset_group.ad_strength, asset_group.id, asset_group.name, asset_group.status, asset_group_asset.field_type, asset_group_asset.performance_label, asset_group_asset.status, asset_group_asset.policy_summary.approval_status, asset.id, asset.name, asset.source FROM asset_group_asset WHERE campaign.advertising_channel_type = 'PERFORMANCE_MAX' AND campaign.status IN ('PAUSED', 'ENABLED') AND asset_group.status IN ('PAUSED', 'ENABLED')"
       }
     },
     "type": "report"
@@ -2714,29 +1595,7 @@
     "ancestor": "google_ads_report",
     "source": {
       "config": {
-        "reportQuery": {
-          "date_constant": "LAST_30_DAYS",
-          "entity": "conversion_action",
-          "constraints": [
-            {
-              "val": "ENABLED",
-              "op": "=",
-              "key": "conversion_action.status"
-            }
-          ],
-          "attributes": [
-            "customer.id",
-            "customer.currency_code",
-            "customer.descriptive_name",
-            "conversion_action.id",
-            "conversion_action.name",
-            "conversion_action.type",
-            "conversion_action.status",
-            "conversion_action.attribution_model_settings.attribution_model",
-            "conversion_action.attribution_model_settings.data_driven_model_status",
-            "metrics.all_conversions_value"
-          ]
-        }
+        "query": "SELECT customer.id, customer.currency_code, customer.descriptive_name, conversion_action.id, conversion_action.name, conversion_action.type, conversion_action.status, conversion_action.attribution_model_settings.attribution_model, conversion_action.attribution_model_settings.data_driven_model_status, metrics.all_conversions_value FROM conversion_action WHERE conversion_action.status = 'ENABLED' AND segments.date DURING LAST_30_DAYS"
       }
     }
   },
@@ -2898,16 +1757,7 @@
     "type": "report",
     "source": {
       "config": {
-        "reportQuery": {
-          "attributes": [
-            "user_interest.name",
-            "user_interest.resource_name",
-            "user_interest.taxonomy_type",
-            "user_interest.user_interest_id",
-            "user_interest.user_interest_parent"
-          ],
-          "entity": "user_interest"
-        }
+        "query": "SELECT user_interest.name, user_interest.resource_name, user_interest.taxonomy_type, user_interest.user_interest_id, user_interest.user_interest_parent FROM user_interest"
       }
     },
     "ancestor": "google_ads_report"
@@ -2915,16 +1765,7 @@
   "nonapp_user_lists": {
     "source": {
       "config": {
-        "reportQuery": {
-          "entity": "user_list",
-          "attributes": [
-            "customer.id",
-            "user_list.resource_name",
-            "user_list.id",
-            "user_list.name",
-            "user_list.type"
-          ]
-        }
+        "query": "SELECT customer.id, user_list.resource_name, user_list.id, user_list.name, user_list.type FROM user_list"
       }
     },
     "type": "report",
@@ -3136,7 +1977,6 @@
       "target": "pubsub",
       "taskId": "download_mcc_reports_and_child_accounts",
       "message": {
-        "fromDate": "${fromDate}",
         "timezone": "${timezone}",
         "partitionDay": "${partitionDay}",
         "namespace": "${namespace}",
@@ -3145,7 +1985,9 @@
         "datasetId": "${datasetId}",
         "mccCid": "${mccCid}",
         "projectId": "${projectId}",
-        "developerToken": "${developerToken}"
+        "developerToken": "${developerToken}",
+        "startDate": "${startDate}",
+        "endDate": "${endDate}"
       },
       "qps": 1
     },
