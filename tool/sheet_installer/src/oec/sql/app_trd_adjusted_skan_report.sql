@@ -136,7 +136,7 @@ WITH
     SELECT
       campaign.id AS campaign_id,
       segments.date AS segments_date,
-      segments.sk_ad_network_conversion_value AS skan_cv,
+      segments.sk_ad_network_fine_conversion_value AS skan_cv,
       segments.sk_ad_network_ad_event_type AS skan_event_type,
       segments.sk_ad_network_source_app.sk_ad_network_source_app_id AS skan_source_app_id,
       segments.sk_ad_network_user_type AS skan_user_type,
