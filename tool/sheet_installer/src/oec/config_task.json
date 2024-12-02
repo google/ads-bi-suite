@@ -479,7 +479,7 @@
   "app_skan": {
     "source": {
       "config": {
-        "query": "SELECT campaign.id, campaign.name, metrics.sk_ad_network_installs, segments.date, segments.sk_ad_network_conversion_value, segments.sk_ad_network_ad_event_type, segments.sk_ad_network_source_app.sk_ad_network_source_app_id, segments.sk_ad_network_user_type, segments.sk_ad_network_attribution_credit FROM campaign WHERE segments.date DURING LAST_30_DAYS"
+        "query": "SELECT campaign.id, campaign.name, metrics.sk_ad_network_installs, segments.date, segments.sk_ad_network_fine_conversion_value, segments.sk_ad_network_ad_event_type, segments.sk_ad_network_source_app.sk_ad_network_source_app_id, segments.sk_ad_network_user_type, segments.sk_ad_network_attribution_credit FROM campaign WHERE segments.date DURING LAST_30_DAYS"
       }
     },
     "ancestor": "google_ads_report",
